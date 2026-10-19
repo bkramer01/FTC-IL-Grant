@@ -15,7 +15,7 @@ export function YesNoSelect({
   return (
     <select
       aria-label={label}
-      className="cell-input"
+      className="cell-input !w-[4.5rem] !min-w-0"
       value={value ?? ""}
       onChange={(e) => onChange((e.target.value || null) as YesNo | null)}
     >

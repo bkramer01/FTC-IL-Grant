@@ -182,6 +182,12 @@ select.form-control {
   background: var(--color-manual);
   border-bottom-color: var(--color-warning);
 }
+/* Narrow Yes/No columns: let the heading wrap so the column fits the dropdown. */
+.data-table thead th.yn {
+  white-space: normal;
+  width: 6.5rem;
+  min-width: 6.5rem;
+}
 .data-table .num {
   text-align: right;
   white-space: nowrap;

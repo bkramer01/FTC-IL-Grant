@@ -109,18 +109,18 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 <th>Team Name</th>
                 <th>Coach 1</th>
                 <th>Rookie/Veteran Status Provided</th>
-                <th className="manual">Team Approved for Grant</th>
+                <th className="manual yn">Grant Approved</th>
                 <th className="manual">Approval Notes</th>
                 <th>Calculated Team Age</th>
                 <th>Rookie/Veteran Status for Grant</th>
-                <th className="manual">School Title 1 Status</th>
-                <th className="manual">Matching Grant Letter Received?</th>
-                <th className="manual">Event Volunteering?</th>
+                <th className="manual yn">School Title 1 Status</th>
+                <th className="manual yn">Matching Grant Letter Received?</th>
+                <th className="manual yn">Event Volunteering?</th>
                 <th>List of Volunteers</th>
                 <th>Fully Registered? (from Team)</th>
-                <th className="manual">Qualified Purchase?</th>
+                <th className="manual yn">Qualified Purchase?</th>
                 <th>End of Season Survey Completed?</th>
-                <th className="manual">VRS 6 Lesson Challenge Completed?</th>
+                <th className="manual yn">VRS 6 Lesson Challenge Completed?</th>
                 <th>Additional Info Email Sent</th>
               </tr>
               <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
@@ -150,7 +150,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         </span>
                       )}
                     </td>
-                    <td className="min-w-36">{a.teamName ?? <span className="badge badge-danger">not in BioBuzz</span>}</td>
+                    <td className="min-w-36">{a.teamName ?? <span className="badge badge-danger" title="Team number not found in the BioBuzz team list">not found</span>}</td>
                     <td className="min-w-32">
                       {a.coach}
                       <div className="text-xs">
