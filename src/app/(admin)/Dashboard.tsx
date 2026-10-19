@@ -9,7 +9,14 @@ import { buildApplications, computeTotals, type Application, type GrantData, typ
 import { money, shortDate } from "@/lib/format";
 import { AGE_CUTOFFS, TOTALS_CATEGORIES, type GrantCategory } from "@/lib/grant";
 
-type SortKey = "team" | "approved" | "category";
+type SortKey =
+  | "team"
+  | "approved"
+  | "category"
+  | "checkAmount"
+  | "checkNumber"
+  | "checkMailed"
+  | "awardEmail";
 type Sort = { key: SortKey; dir: 1 | -1 };
 type Tab = "fundraising" | "checks";
 
@@ -20,14 +27,35 @@ function categoryRank(c: GrantCategory) {
   return i === -1 ? TOTALS_CATEGORIES.length : i;
 }
 
-function compare(a: Application, b: Application, key: SortKey) {
-  if (key === "approved") {
-    const ra = a.review.approved ? APPROVED_ORDER[a.review.approved] : 2;
-    const rb = b.review.approved ? APPROVED_ORDER[b.review.approved] : 2;
-    return ra - rb;
+/** The value a column sorts by; null (blank) always sorts last. */
+function sortValue(a: Application, key: SortKey): number | string | null {
+  switch (key) {
+    case "approved":
+      return a.review.approved ? APPROVED_ORDER[a.review.approved] : 2;
+    case "category":
+      return categoryRank(a.category);
+    case "checkAmount":
+      return a.review.checkAmount;
+    case "checkNumber": {
+      const n = a.review.checkNumber?.trim();
+      if (!n) return null;
+      return /^\d+$/.test(n) ? Number(n) : n;
+    }
+    case "checkMailed":
+      return a.review.checkMailedOn;
+    case "awardEmail":
+      return a.awardEmailOn;
+    default:
+      return a.teamNumber;
   }
-  if (key === "category") return categoryRank(a.category) - categoryRank(b.category);
-  return a.teamNumber - b.teamNumber;
+}
+
+function compare(a: Application, b: Application, { key, dir }: Sort) {
+  const va = sortValue(a, key);
+  const vb = sortValue(b, key);
+  if (va === null || vb === null) return va === vb ? 0 : va === null ? 1 : -1;
+  if (typeof va === "number" && typeof vb === "number") return dir * (va - vb);
+  return dir * String(va).localeCompare(String(vb), undefined, { numeric: true });
 }
 
 /** Column header that sorts the table when clicked. */
@@ -36,19 +64,23 @@ function SortHeader({
   sortKey,
   sort,
   onSort,
+  className = "",
 }: {
   label: ReactNode;
   sortKey: SortKey;
   sort: Sort;
   onSort: (k: SortKey) => void;
+  className?: string;
 }) {
   const active = sort.key === sortKey;
   return (
-    <th aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+    <th className={className} aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
       <button
         type="button"
         onClick={() => onSort(sortKey)}
-        className="flex cursor-pointer items-end gap-1 text-left font-[inherit] hover:text-link"
+        className={`flex cursor-pointer items-end gap-1 text-left font-[inherit] hover:text-link ${
+          className.includes("num") ? "ml-auto" : ""
+        }`}
       >
         <span>{label}</span>
         <span aria-hidden className={active ? "" : "text-muted/50"}>
@@ -79,7 +111,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     .filter((a) => !approvedOnly || a.review.approved === "Yes")
     .sort(
       (a, b) =>
-        sort.dir * compare(a, b, sort.key) || a.teamNumber - b.teamNumber || a.submittedAt - b.submittedAt,
+        compare(a, b, sort) || a.teamNumber - b.teamNumber || a.submittedAt - b.submittedAt,
     );
 
   const teamCell = (a: Application) => (
@@ -216,49 +248,15 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
               <thead>
                 {tab === "fundraising" ? (
                   <tr>
-                    {teamHeader}
-                    <th>
-                      Team
-                      <br />
-                      Name
-                    </th>
-                    <th>
-                      Coach
-                      <br />1
-                    </th>
+                    <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} />
+                    <th>Team Name</th>
+                    <th>Coach 1</th>
                     <SortHeader label="Approved" sortKey="approved" sort={sort} onSort={onSort} />
-                    <SortHeader
-                      label={
-                        <>
-                          Rookie/Veteran
-                          <br />
-                          Status
-                        </>
-                      }
-                      sortKey="category"
-                      sort={sort}
-                      onSort={onSort}
-                    />
-                    <th className="num">
-                      Possible
-                      <br />
-                      Grant Award
-                    </th>
-                    <th className="manual num">
-                      How Much
-                      <br />
-                      Raised by Team
-                    </th>
-                    <th className="num">
-                      Unused
-                      <br />
-                      Grant Match
-                    </th>
-                    <th>
-                      Date of Last
-                      <br />
-                      Fundraising Update
-                    </th>
+                    <SortHeader label="Rookie/Veteran Status" sortKey="category" sort={sort} onSort={onSort} />
+                    <th className="num">Possible Grant Award</th>
+                    <th className="manual num">Raised by Team</th>
+                    <th className="num">Unused Grant Match</th>
+                    <th>Last Update</th>
                   </tr>
                 ) : (
                   <tr>
@@ -283,25 +281,22 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <br />
                       Zip
                     </th>
-                    <th className="manual num">
-                      Amount
-                      <br />
-                      of Check
-                    </th>
-                    <th className="manual">
-                      Check
-                      <br />#
-                    </th>
-                    <th className="manual">
-                      Date Check
-                      <br />
-                      Mailed
-                    </th>
-                    <th>
-                      Grant Award
-                      <br />
-                      Email Sent
-                    </th>
+                    <SortHeader
+                      label={<>Amount<br />of Check</>}
+                      sortKey="checkAmount"
+                      sort={sort}
+                      onSort={onSort}
+                      className="manual num"
+                    />
+                    <SortHeader label={<>Check<br />#</>} sortKey="checkNumber" sort={sort} onSort={onSort} className="manual" />
+                    <SortHeader
+                      label={<>Date Check<br />Mailed</>}
+                      sortKey="checkMailed"
+                      sort={sort}
+                      onSort={onSort}
+                      className="manual"
+                    />
+                    <SortHeader label={<>Grant Award<br />Email Sent</>} sortKey="awardEmail" sort={sort} onSort={onSort} />
                   </tr>
                 )}
               </thead>
