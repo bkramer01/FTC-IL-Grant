@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { loadClientGrantData } from "@/lib/data";
 import { todayCentral } from "@/lib/format";
-import { TotalsAndFundraising } from "./TotalsAndFundraising";
+import { Dashboard } from "./Dashboard";
 
-export const metadata: Metadata = { title: "Totals & Fundraising" };
+export const metadata: Metadata = { title: "Dashboard" };
 
-export default function TotalsPage() {
-  return <TotalsAndFundraising data={loadClientGrantData()} today={todayCentral()} />;
+export default function DashboardPage() {
+  return <Dashboard data={loadClientGrantData()} today={todayCentral()} />;
 }

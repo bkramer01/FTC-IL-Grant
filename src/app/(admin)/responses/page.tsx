@@ -36,7 +36,7 @@ export default function ResponsesPage() {
       <p className="mb-4 text-muted">
         Read-only view of the grant form&apos;s Google Sheet (&ldquo;Form Responses 1&rdquo;) as of{" "}
         <strong className="text-ink">{centralDateTime(refreshedAt)}</strong>. Use <strong>Refresh Data</strong> on{" "}
-        <Link href="/">Totals &amp; Fundraising</Link> to pull new responses. Hover a column heading for the full question.
+        the <Link href="/">Dashboard</Link> to pull new responses. Hover a column heading for the full question.
       </p>
       <Card title={`Responses (${responses.rows.length})`}>
         <div className="overflow-x-auto">
