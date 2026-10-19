@@ -144,7 +144,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
           <table className="data-table wrap-head">
             <thead>
               <tr>
-                <th>Rookie/Veteran Status</th>
+                <th>
+                  Rookie/Veteran Status
+                  <a href="#grant-rules" className="no-underline" title="How Rookie/Veteran Status is worked out: see Grant Rules at the bottom of the page">
+                    *
+                  </a>
+                </th>
                 <th
                   className="num cursor-help"
                   title="Teams Applied counts every team that sent the form (each team once). Every other column counts only teams with Team Approved for Grant = Yes."
@@ -371,10 +376,16 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         </div>
       </Card>
 
-      <Card title="Grant Rules">
+      <Card id="grant-rules" title="Grant Rules">
+        <p className="mb-4">
+          <strong>*</strong> <strong>How Rookie/Veteran Status is worked out:</strong> each team&apos;s age comes from its
+          team number (Team Age Thresholds), then the age is combined with the School Title 1 Status to give the
+          Rookie/Veteran Status used for the grant (Grant Category Lookup). Until Title 1 is entered, the status shows
+          &ldquo;Title 1 status needed&rdquo;.
+        </p>
         <div className="grid gap-6 md:grid-cols-2">
           <div>
-            <h3 className="mb-2 text-lg">Team Age Thresholds</h3>
+            <h3 className="mb-2 text-lg">* Team Age Thresholds</h3>
             <p className="mb-2 text-sm text-muted">Team numbers are issued in order, so lower numbers are older teams.</p>
             <table className="data-table">
               <thead>
@@ -402,7 +413,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
             </table>
           </div>
           <div>
-            <h3 className="mb-2 text-lg">Grant Category Lookup</h3>
+            <h3 className="mb-2 text-lg">* Grant Category Lookup</h3>
             <p className="mb-2 text-sm text-muted">Team age combined with the School Title 1 Status.</p>
             <table className="data-table">
               <thead>

@@ -7,7 +7,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 ## Grant Matching Totals
 
 - **Refresh Data** (top right) pulls the latest grant form responses and the BioBuzz team list, and shows when data was last refreshed. *Mockup: it only updates the time.*
-- One row per category, plus a Total row. Hover the **Teams Applied ⓘ** heading for how teams are counted.
+- One row per category, plus a Total row. Hover the **Teams Applied ⓘ** heading for how teams are counted. The asterisk (*) on **Rookie/Veteran Status** links to the explanation in Grant Rules.
 
 | Column | How it's worked out |
 |---|---|
@@ -34,7 +34,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 ## Grant Rules
 
-**Team Age Thresholds** and the **Grant Category Lookup**:
+A starred (*) note explains how Rookie/Veteran Status is worked out: team age from the team number (**Team Age Thresholds**), combined with School Title 1 Status (**Grant Category Lookup**). Category settings:
 
 | Category | Multiplier | Max fundraising | Grantor match |
 |---|---|---|---|
@@ -47,6 +47,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 ## Change history
 
+- **Oct 19, 2026:** Asterisk on Rookie/Veteran Status in Grant Matching Totals, linking to a starred explanation in Grant Rules.
 - **Oct 19, 2026:** Check Status columns Amount of Check, Check #, Date Check Mailed and Grant Award Email Sent are sortable.
 - **Oct 19, 2026:** "Date of Last Fundraising Update" renamed to "Last Update" and "How Much Raised by Team" to "Raised by Team"; Fundraising Status headings on one line.
 - **Oct 19, 2026:** Renamed from Totals & Fundraising to Dashboard with a new page title. Teams Applied explanation moved to a hover note. Fundraising Status split into Fundraising Status and Check Status tabs, with two-line headings, sorting by Team #, Approved and Rookie/Veteran Status, and a row count. Grant rules moved to the bottom.
