@@ -108,11 +108,19 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 <th>Team #</th>
                 <th>Team Name</th>
                 <th>Coach 1</th>
-                <th>Rookie/Veteran Status Provided</th>
+                <th>
+                  Rookie/Veteran
+                  <br />
+                  Status Provided
+                </th>
                 <th className="manual yn">Grant Approved</th>
                 <th className="manual">Approval Notes</th>
                 <th>Calculated Team Age</th>
-                <th>Rookie/Veteran Status for Grant</th>
+                <th>
+                  Rookie/Veteran
+                  <br />
+                  Status for Grant
+                </th>
                 <th className="manual yn">School Title 1 Status</th>
                 <th className="manual yn">Matching Grant Letter Received?</th>
                 <th className="manual yn">Event Volunteering?</th>
@@ -146,7 +154,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       {a.teamNumber}
                       {a.duplicateCount > 1 && (
                         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
-                          duplicate ×{a.duplicateCount}
+                          Dup ×{a.duplicateCount}
                         </span>
                       )}
                     </td>
@@ -157,7 +165,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         <a href={`mailto:${a.email}`}>{a.email}</a>
                       </div>
                     </td>
-                    <td className="min-w-40">{a.categoryProvided}</td>
+                    <td className="min-w-52">{a.categoryProvided}</td>
                     <td>
                       <YesNoSelect
                         label={`Team ${a.teamNumber} approved for grant`}

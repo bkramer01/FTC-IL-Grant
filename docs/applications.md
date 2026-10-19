@@ -12,7 +12,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 
 ## Flags
 
-- **duplicate ×2**: the team sent the form more than once. Both rows stay.
+- **Dup ×2**: the team sent the form more than once. Both rows stay.
 - **not found** (in Team Name): the team number isn't on the BioBuzz list, so there's no team name.
 - **form says …**: the team age the coach picked on the form doesn't match the team number.
 - **Title 1 status needed**: the category can't be worked out until School Title 1 Status is entered.
@@ -35,6 +35,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 19, 2026:** "duplicate ×2" flag shortened to "Dup ×2". Rookie/Veteran Status Provided and Rookie/Veteran Status for Grant headings split onto two lines; Status Provided column widened so answers fit in two lines.
 - **Oct 19, 2026:** "Team Approved for Grant" renamed "Grant Approved"; "not in BioBuzz" flag renamed "not found". Yes/No columns (Grant Approved, School Title 1 Status, Matching Grant Letter Received?, Event Volunteering?, Qualified Purchase?, VRS 6 Lesson Challenge Completed?) use narrow dropdowns with wrapped headings.
 - **Oct 19, 2026:** Team Approved for Grant (now Grant Approved) and Approval Notes moved next to Rookie/Veteran Status Provided. Timestamp shows the date, with date and time on hover. Added a scrollbar under the column headings. Removed the summary line under the page title. Text columns use the same font size.
 - **Oct 19, 2026:** Page created (mockup).
