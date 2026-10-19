@@ -172,7 +172,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
           </label>
         }
       >
-        <div role="tablist" aria-label="Fundraising views" className="mb-3 flex border-b border-line">
+        <div role="tablist" aria-label="Fundraising views" className="mb-3 flex gap-1 border-b-2 border-first-blue">
           {(
             [
               ["fundraising", "Fundraising Status"],
@@ -187,10 +187,10 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
               aria-selected={tab === value}
               aria-controls="fund-panel"
               onClick={() => setTab(value)}
-              className={`-mb-px rounded-t-md border px-4 py-2 text-sm font-medium ${
+              className={`cursor-pointer rounded-t-md border border-b-0 px-4 py-2 text-sm font-semibold ${
                 tab === value
-                  ? "border-line border-b-white bg-white text-ink"
-                  : "border-transparent text-link hover:text-link-hover"
+                  ? "border-first-blue bg-first-blue text-white"
+                  : "border-line bg-panel text-ink/75 hover:bg-[#e9ecef] hover:text-ink"
               }`}
             >
               {label}
