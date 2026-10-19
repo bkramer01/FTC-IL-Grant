@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { HeaderScrollbar } from "@/components/HeaderScrollbar";
 import { FileLink, YesNoBadge, YesNoSelect } from "@/components/inputs";
 import { Card, ManualKey } from "@/components/SiteChrome";
 import { buildApplications, type Application, type GrantData, type Review } from "@/lib/applications";
-import { shortDate } from "@/lib/format";
+import { formDate, formDateTime, shortDate } from "@/lib/format";
 import { TITLE1_NEEDED, type TeamAge } from "@/lib/grant";
 
 export type AppFilter = "all" | "pending" | "approved" | "notApproved" | "duplicates" | "title1";
@@ -48,6 +49,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
   const [reviews, setReviews] = useState(data.reviews);
   const [filter, setFilter] = useState<AppFilter>(initialFilter);
   const [search, setSearch] = useState("");
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
 
   function update(timestamp: string, patch: Partial<Review>) {
@@ -59,21 +61,10 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
     .filter((a) => matchesFilter(a, filter))
     .filter((a) => !q || `${a.teamNumber} ${a.teamName ?? ""} ${a.coach}`.toLowerCase().includes(q))
     .sort((a, b) => b.submittedAt - a.submittedAt);
-  const dupTeams = new Set(apps.filter((a) => a.duplicateCount > 1).map((a) => a.teamNumber)).size;
 
   return (
     <>
-      <h1 className="mb-1 text-3xl">Grant Application Status</h1>
-      <p className="mb-4 text-muted">
-        One row per grant form response, newest first. {apps.length} applications from{" "}
-        {new Set(apps.map((a) => a.teamNumber)).size} teams
-        {dupTeams > 0 && (
-          <>
-            {" "}
-            · <span className="badge badge-warning">{dupTeams} team{dupTeams === 1 ? "" : "s"} submitted more than once</span>
-          </>
-        )}
-      </p>
+      <h1 className="mb-4 text-3xl">Grant Application Status</h1>
 
       <Card
         title="Applications"
@@ -109,15 +100,17 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
         }
       >
         <ManualKey />
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" ref={scrollerRef}>
           <table className="data-table">
             <thead>
               <tr>
-                <th>Application Timestamp</th>
+                <th>Timestamp</th>
                 <th>Team #</th>
                 <th>Team Name</th>
                 <th>Coach 1</th>
                 <th>Rookie/Veteran Status Provided</th>
+                <th className="manual">Team Approved for Grant</th>
+                <th className="manual">Approval Notes</th>
                 <th>Calculated Team Age</th>
                 <th>Rookie/Veteran Status for Grant</th>
                 <th className="manual">School Title 1 Status</th>
@@ -129,9 +122,8 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 <th>End of Season Survey Completed?</th>
                 <th className="manual">VRS 6 Lesson Challenge Completed?</th>
                 <th>Additional Info Email Sent</th>
-                <th className="manual">Team Approved for Grant</th>
-                <th className="manual">Approval Notes</th>
               </tr>
+              <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
             </thead>
             <tbody>
               {shown.length === 0 && (
@@ -145,7 +137,11 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 const formAge = ageFromForm(a.categoryProvided);
                 return (
                   <tr key={a.timestamp}>
-                    <td className="whitespace-nowrap">{a.timestamp}</td>
+                    <td className="whitespace-nowrap">
+                      <span className="cursor-help" title={formDateTime(a.submittedAt)}>
+                        {formDate(a.submittedAt)}
+                      </span>
+                    </td>
                     <td className="whitespace-nowrap">
                       {a.teamNumber}
                       {a.duplicateCount > 1 && (
@@ -161,7 +157,23 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         <a href={`mailto:${a.email}`}>{a.email}</a>
                       </div>
                     </td>
-                    <td className="min-w-40 text-xs">{a.categoryProvided}</td>
+                    <td className="min-w-40">{a.categoryProvided}</td>
+                    <td>
+                      <YesNoSelect
+                        label={`Team ${a.teamNumber} approved for grant`}
+                        value={a.review.approved}
+                        onChange={(v) => update(a.timestamp, { approved: v })}
+                      />
+                    </td>
+                    <td className="min-w-56">
+                      <textarea
+                        aria-label={`Approval notes for team ${a.teamNumber}`}
+                        rows={2}
+                        className="cell-input"
+                        value={a.review.notes}
+                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
+                      />
+                    </td>
                     <td className="whitespace-nowrap">
                       {a.age}
                       {formAge && formAge !== a.age && (
@@ -199,7 +211,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         onChange={(v) => update(a.timestamp, { volunteering: v })}
                       />
                     </td>
-                    <td className="min-w-48 text-xs">{a.volunteers}</td>
+                    <td className="min-w-48">{a.volunteers}</td>
                     <td>
                       <YesNoBadge value={a.fullyRegistered} />
                     </td>
@@ -224,22 +236,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       </div>
                     </td>
                     <td className="whitespace-nowrap">{shortDate(a.additionalInfoEmailOn)}</td>
-                    <td>
-                      <YesNoSelect
-                        label={`Team ${a.teamNumber} approved for grant`}
-                        value={a.review.approved}
-                        onChange={(v) => update(a.timestamp, { approved: v })}
-                      />
-                    </td>
-                    <td className="min-w-56">
-                      <textarea
-                        aria-label={`Approval notes for team ${a.teamNumber}`}
-                        rows={2}
-                        className="cell-input"
-                        value={a.review.notes}
-                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
-                      />
-                    </td>
                   </tr>
                 );
               })}
