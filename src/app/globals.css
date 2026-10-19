@@ -12,6 +12,8 @@
   --color-band: #9a989a;
   --color-brand-tile: #cbcbcb;
   --color-first-blue: #0066b3;
+  --color-first-blue-dark: #004f8a;
+  --color-manual: #fff8e1;
   --color-first-red: #ed1c24;
   --color-ftc: #f57e25;
   --color-ftc-dark: #d9661a;
@@ -166,5 +168,62 @@ select.form-control {
 }
 .data-table tbody tr:nth-child(odd) {
   background: rgb(0 0 0 / 0.03);
+}
+.data-table.wrap-head thead th {
+  white-space: normal;
+  vertical-align: bottom;
+}
+.data-table tfoot td {
+  border-top: 2px solid var(--color-ink);
+  font-weight: 600;
+}
+/* Columns the Grant Administrator fills in. */
+.data-table thead th.manual {
+  background: var(--color-manual);
+  border-bottom-color: var(--color-warning);
+}
+.data-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Compact inputs inside table cells. */
+.cell-input {
+  width: 100%;
+  min-width: 4.5rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.85rem;
+  border: 1px solid var(--color-line);
+  border-radius: 0.25rem;
+  background: #fff;
+}
+.cell-input:focus {
+  outline: 0;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgb(13 110 253 / 0.25);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+}
+.badge-warning {
+  background: var(--color-warning-bg);
+  color: #664d03;
+  border: 1px solid rgb(255 193 7 / 0.6);
+}
+.badge-danger {
+  background: var(--color-danger-bg);
+  color: #58151c;
+  border: 1px solid rgb(220 53 69 / 0.4);
+}
+.badge-success {
+  background: var(--color-success-bg);
+  color: #0a3622;
+  border: 1px solid rgb(25 135 84 / 0.4);
 }
 }
