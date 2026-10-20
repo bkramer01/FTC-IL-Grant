@@ -84,8 +84,9 @@ const COL = {
   letterUrl: 11,
   checkPayee: 12,
   street: 14,
-  cityStateZip: 15,
+  cityState: 15,
   vrsUrl: 16,
+  zip: 18, // added to the form Oct 2026, after the VRS columns
 };
 
 export type Application = {
@@ -105,7 +106,8 @@ export type Application = {
   vrsUrl: string;
   checkPayee: string;
   street: string;
-  cityStateZip: string;
+  cityState: string;
+  zip: string;
   duplicateCount: number;
   additionalInfoEmailOn: string | null;
   awardEmailOn: string | null;
@@ -171,7 +173,8 @@ export function buildApplications(data: GrantData): Application[] {
       vrsUrl: r[COL.vrsUrl],
       checkPayee: r[COL.checkPayee],
       street: r[COL.street],
-      cityStateZip: r[COL.cityStateZip],
+      cityState: r[COL.cityState],
+      zip: r[COL.zip] ?? "",
       duplicateCount: counts.get(teamNumber) ?? 1,
       additionalInfoEmailOn: latestEmail(data.emails, teamNumber, "Additional Info Needed"),
       awardEmailOn: latestEmail(data.emails, teamNumber, "Grant Award"),

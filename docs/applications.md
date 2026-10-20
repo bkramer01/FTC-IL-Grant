@@ -17,7 +17,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 
 - **Dup ×2**: the team sent the form more than once. Both rows stay.
 - **not found** (in Team Name): the team number isn't on the BioBuzz list, so there's no team name.
-- **form says …**: the team age the coach picked on the form doesn't match the team number.
+- **form says …**: the team age the coach picked on the form doesn't match the team number. Hover the Calculated Team Age heading (ⓘ) for a reminder of this check.
 - **Title 1 status needed**: the category can't be worked out until School Title 1 Status is entered.
 
 ## Columns
@@ -40,6 +40,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 20, 2026:** Calculated Team Age heading has a hover note: "Checks the team age calculated by team number against what is reported on the grant form."
 - **Oct 19, 2026:** Timestamp, Team #, Calculated Team Age and Grant Approved columns are sortable.
 - **Oct 19, 2026:** Grant Approved's empty choice, its Show filter option, the counts box and the export now read "Not reviewed".
 - **Oct 19, 2026:** Show filter limited to All applications and the Grant Approved statuses (Duplicate submissions and Title 1 status needed filters removed).

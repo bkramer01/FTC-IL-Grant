@@ -105,6 +105,17 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         compare(a, b, sort) || a.teamNumber - b.teamNumber || a.submittedAt - b.submittedAt,
     );
 
+  // Totals of the rows shown (blanks count as $0).
+  const fundTotals = { maxGrant: 0, target: 0, raised: 0, possible: 0, unused: 0, checks: 0 };
+  for (const a of fundRows) {
+    fundTotals.maxGrant += maxGrantAward(a.category) ?? 0;
+    fundTotals.target += maxFundraisingTarget(a.category) ?? 0;
+    fundTotals.raised += a.review.raised ?? 0;
+    fundTotals.possible += a.possibleAward ?? 0;
+    fundTotals.unused += a.unusedMatch ?? 0;
+    fundTotals.checks += a.review.checkAmount ?? 0;
+  }
+
   const teamCell = (a: Application) => (
     <td className="whitespace-nowrap">
       {a.teamNumber}
@@ -147,7 +158,11 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   className="num cursor-help"
                   title="Teams Applied counts every team that sent the form (each team once). Every other column counts only teams with Team Approved for Grant = Yes."
                 >
-                  Teams Applied <span className="text-muted">ⓘ</span>
+                  Teams
+                  <br />
+                  <span className="whitespace-nowrap">
+                    Applied <span className="text-muted">ⓘ</span>
+                  </span>
                 </th>
                 <th className="num">Teams Awarded Grants</th>
                 <th className="num">Matching Multiplier</th>
@@ -155,18 +170,22 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 <th className="num">Total Possible Grant Amount</th>
                 <th className="num">Max Fundraising Target</th>
                 <th className="num cursor-help" title={GREEN_NOTE}>
-                  Fundraising as of {shortDate(today)} <span className="text-muted">ⓘ</span>
+                  Total Team
+                  <br />
+                  <span className="whitespace-nowrap">Fundraising as of</span>
+                  <br />
+                  <span className="whitespace-nowrap">
+                    {shortDate(today)} <span className="text-muted">ⓘ</span>
+                  </span>
                 </th>
-                <th className="num cursor-help" title={GREEN_NOTE}>
-                  Qualified Grants from Fundraising <span className="text-muted">ⓘ</span>
-                </th>
+                <th className="num">Qualified Grants from Fundraising</th>
                 <th className="num">Grants Distributed to Teams</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
                 <tr key={r.category}>
-                  <td className="font-medium">{r.category}</td>
+                  <td className="whitespace-nowrap font-medium">{r.category}</td>
                   <td className="num">{r.applied}</td>
                   <td className="num">{r.awarded}</td>
                   <td className="num">{r.multiplier ? `1 to ${r.multiplier}` : "—"}</td>
@@ -176,9 +195,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   <td className={`num ${r.maxedOut ? "bg-success-bg" : ""}`} title={r.maxedOut ? MAXED_OUT : undefined}>
                     {money(r.raised)}
                   </td>
-                  <td className={`num ${r.maxedOut ? "bg-success-bg" : ""}`} title={r.maxedOut ? MAXED_OUT : undefined}>
-                    {money(r.qualified)}
-                  </td>
+                  <td className="num">{money(r.qualified)}</td>
                   <td className="num">{money(r.distributed)}</td>
                 </tr>
               ))}
@@ -336,10 +353,11 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       Address
                     </th>
                     <th>
-                      City, State,
+                      City,
                       <br />
-                      Zip
+                      State
                     </th>
+                    <th className="num">Zip</th>
                     <SortHeader
                       label={<>Amount<br />of Check</>}
                       sortKey="checkAmount"
@@ -395,7 +413,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       {nameCell(a)}
                       <td className="min-w-48">{a.checkPayee}</td>
                       <td className="min-w-36">{a.street}</td>
-                      <td className="whitespace-nowrap">{a.cityStateZip}</td>
+                      <td className="whitespace-nowrap">{a.cityState}</td>
+                      <td className="num whitespace-nowrap">{a.zip}</td>
                       <td className="w-28">
                         <MoneyInput
                           label={`Check amount for team ${a.teamNumber}`}
@@ -425,6 +444,27 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   ),
                 )}
               </tbody>
+              {fundRows.length > 0 && (
+                <tfoot>
+                  {tab === "fundraising" ? (
+                    <tr>
+                      <td colSpan={6}>Total</td>
+                      <td className="num">{money(fundTotals.maxGrant)}</td>
+                      <td className="num">{money(fundTotals.target)}</td>
+                      <td className="num">{money(fundTotals.raised)}</td>
+                      <td className="num">{money(fundTotals.possible)}</td>
+                      <td className="num">{money(fundTotals.unused)}</td>
+                      <td />
+                    </tr>
+                  ) : (
+                    <tr>
+                      <td colSpan={6}>Total</td>
+                      <td className="num">{money(fundTotals.checks)}</td>
+                      <td colSpan={3} />
+                    </tr>
+                  )}
+                </tfoot>
+              )}
             </table>
           </div>
           <p className="mt-2 text-sm text-muted" aria-live="polite">

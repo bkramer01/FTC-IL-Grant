@@ -155,9 +155,10 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                     <>
                       Calculated
                       <br />
-                      Team Age
+                      Team Age <span className="text-muted">ⓘ</span>
                     </>
                   }
+                  title="Checks the team age calculated by team number against what is reported on the grant form."
                   sortKey="age"
                   sort={sort}
                   onSort={onSort}

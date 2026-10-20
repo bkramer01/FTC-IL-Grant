@@ -57,6 +57,15 @@ test("parses Google Forms timestamps", () => {
 describe("sample data", () => {
   const apps = buildApplications(data);
 
+  test("reads City State and Zip separately", () => {
+    // Sample-only row: zip moved out of City State into Zip.
+    const sample = apps.find((a) => a.teamNumber === 99999)!;
+    expect([sample.cityState, sample.zip]).toEqual(["Springfield, IL", "62701"]);
+    // Real response from before the form gained a Zip column: shown as entered, Zip blank.
+    const real = apps.find((a) => a.teamNumber === 8648)!;
+    expect([real.cityState, real.zip]).toEqual(["Peoria, IL 61601", ""]);
+  });
+
   test("looks up team names and flags duplicates", () => {
     expect(apps.find((a) => a.teamNumber === 8648)?.teamName).toBe("Manual High School RoboRams");
     expect(apps.find((a) => a.teamNumber === 99999)?.teamName).toBeNull();

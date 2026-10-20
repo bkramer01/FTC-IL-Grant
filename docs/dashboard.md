@@ -15,11 +15,11 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 | Teams Awarded Grants | Teams with Team Approved for Grant = Yes. |
 | Matching Multiplier / Grantor Match per Team / Max Fundraising Target | Category settings (see Grant Rules). |
 | Total Possible Grant Amount | Teams Awarded × Grantor Match per Team. |
-| Fundraising as of today | Sum of Raised by Team for approved teams. |
+| Total Team Fundraising as of today | Sum of Raised by Team for approved teams: 100% of what they raised, not capped at the max fundraising target. |
 | Qualified Grants from Fundraising | Sum of Possible Grant Award for approved teams. |
 | Grants Distributed to Teams | Sum of Amount of Check for approved teams. |
 
-- When every approved team in a category has raised at least that category's Max Fundraising Target, its **Fundraising as of** and **Qualified Grants from Fundraising** cells turn light green. Hover either heading (ⓘ) or a green cell for an explanation. That is the same as Qualified Grants reaching Total Possible Grant Amount: one team raising extra can't make up for another team that is short. Categories with no awarded teams never turn green.
+- When every approved team in a category has raised at least that category's Max Fundraising Target, its **Total Team Fundraising** cell turns light green. Hover the heading (ⓘ) or a green cell for an explanation. One team raising extra can't make up for another team that is short, and categories with no awarded teams never turn green.
 
 - Under the title, a small yellow note reads "XX applications not fully reviewed/complete.": XX counts every submission whose Grant Approved is blank or Under Review. The count links to Applications filtered to those rows. Teams still missing a School Title 1 Status are left out of the table.
 
@@ -28,9 +28,10 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 - Approved teams by default; untick **Approved teams only** to see every application.
 - Two tabs, each starting with Team # and Team Name:
   - **Fundraising Status:** Coach Name, Approved, Rookie/Veteran Status, Matching Multiplier, Max Grant Award (max fundraising target × multiplier, the grantor match per team; blank until Title 1 is entered), Team Target (the category's Max Fundraising Target: the most of a team's fundraising that gets matched, from the category settings), **Raised by Team**, Possible Grant Award, Unused Grant Match, Last Update (date the amount raised was last changed).
-  - **Check Status:** Check Addressee, Street Address, City/State/Zip, **Amount of Check**, **Check #**, **Date Check Mailed**, Grant Award Email Sent.
+  - **Check Status:** Check Addressee, Street Address, City, State, Zip (from the form's new Zip column; responses sent before it was added show the zip inside City, State and a blank Zip), **Amount of Check**, **Check #**, **Date Check Mailed**, Grant Award Email Sent.
 - Click a heading with ↕ to sort; click again to reverse. Approved sorts Yes, Under Review, No, then blank. Fundraising Status sorts by **Team #**, **Approved**, **Rookie/Veteran Status**, **Raised by Team** and **Unused Grant Match**; Check Status sorts by **Team #**, **Amount of Check**, **Check #**, **Date Check Mailed** and **Grant Award Email Sent**. Blank values always sort last. The sort carries over between tabs.
 - The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down.
+- A **Total** row at the bottom adds up the rows shown: Max Grant Award, Team Target, Raised by Team, Possible Grant Award and Unused Grant Match on Fundraising Status, and Amount of Check on Check Status. Blanks count as $0. With **Approved teams only** ticked, the Raised, Possible and Check totals match the Grant Matching Totals table.
 - The row count is shown under the table.
 - Raised by Team and Amount of Check show dollars like the rest of the site (e.g. $1,050). Click a box to type a plain number; "$" and commas typed by hand are ignored. Numeric columns are centered.
 - **Export** (top right) downloads the rows shown, in their current order, as a CSV file for Excel named `grant-fundraising-YYYY-MM-DD.csv`. It has the columns of both tabs, Fundraising Status then Check Status. With **Approved teams only** ticked it has just approved teams; untick it to export every application. Unsaved changes on the page are included.
@@ -52,6 +53,10 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 20, 2026:** Grant Matching Totals category names stay on one line; "Teams Applied" heading on two lines and "Total Team Fundraising as of" on three.
+- **Oct 20, 2026:** Total row on both Fundraising Status tabs.
+- **Oct 20, 2026:** "Fundraising as of" renamed "Total Team Fundraising as of". Only that cell turns light green now (not Qualified Grants from Fundraising); the green rule is unchanged.
+- **Oct 20, 2026:** Check Status "City, State, Zip" split into **City, State** and a new **Zip** column, following the form's new Zip question (also in the export).
 - **Oct 19, 2026:** Raised by Team and Amount of Check show dollar formatting. Numeric columns (and their headings) are centered on both tabs.
 - **Oct 19, 2026:** Removed the explanation lines above the Fundraising Status and Check Status tables (the yellow-header key stays). Column headings now stay frozen while scrolling.
 - **Oct 19, 2026:** "Max Fundraising Target" column on Fundraising Status renamed "Team Target" (also in the export).

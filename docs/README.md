@@ -22,6 +22,18 @@ This folder documents every page of the grant site: what each page does, what us
 - **Grant Administrator entries** (yellow column headers): Title 1 status, checklist answers, approval, notes, amount raised, and check details.
 - **Calculated**: team age from the team number, grant category from age + Title 1, possible award, unused match, totals.
 
+## Data sources (Google Sheets)
+
+| Sheet | Tab | What the site uses |
+|---|---|---|
+| [Apply for an FTC IL Matching Grant … (Responses)](https://docs.google.com/spreadsheets/d/1b7nY9zdAcAE2zjmlmY_qk7wl69xO2UfHdN7yLbEr8MA/edit?gid=370691157) | "Form Responses 1" (tab ID 370691157) | Every grant form response. |
+| [2026/2027 BioBuzz Team Registration Parsing](https://docs.google.com/spreadsheets/d/1ydZLnPGo8iGmWBToRH0Qa6lMbiWpNrz3oZW3__-tt7c/edit?gid=1750695360) | "biobuzz - including unpaid - 10/20" (tab ID 1750695360) | Team names by team number. |
+
+**Changes noted Oct 20, 2026:**
+
+- The form sheet's column P is now **City State**, and a new **Zip** column was added at the end (column S, after the VRS columns). Responses submitted before the change still have the zip inside City State and a blank Zip. The site shows those as entered (it doesn't split them); only the sample rows that aren't in the Google Sheet had their zip moved into Zip.
+- The BioBuzz columns are unchanged (it already had TeamZipCode), but its tab names now end in a date ("- 10/20"). When Refresh Data is built, it should find tabs by tab ID, not by name.
+
 ## Key rules
 
 | Term | Meaning |

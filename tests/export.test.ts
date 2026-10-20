@@ -31,7 +31,7 @@ test("fundraising export has both tabs' columns for the rows given", () => {
   const lines = fundraisingCsv(approved).trimEnd().split("\r\n");
   expect(lines[0]).toBe(
     "Team #,Team Name,Coach Name,Approved,Rookie/Veteran Status,Matching Multiplier,Max Grant Award,Team Target,Raised by Team,Possible Grant Award,Unused Grant Match," +
-      "Last Update,Check Addressee,Street Address,\"City, State, Zip\",Amount of Check,Check #,Date Check Mailed,Grant Award Email Sent",
+      "Last Update,Check Addressee,Street Address,\"City, State\",Zip,Amount of Check,Check #,Date Check Mailed,Grant Award Email Sent",
   );
   expect(lines).toHaveLength(approved.length + 1);
   const team3640 = lines.find((l) => l.startsWith("3640,"));

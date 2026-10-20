@@ -23,9 +23,10 @@ const SHORT_HEADERS = [
   "Make the check out to",
   "School or community team",
   "Street Address",
-  "City State-zip",
+  "City State",
   "VRS screenshot",
   "The VRS 6 Challenges",
+  "Zip",
 ];
 
 /** Read-only copy of the "Form Responses 1" tab, as last pulled by Refresh Data. */

@@ -23,16 +23,19 @@ export function SortHeader<K extends string>({
   sort,
   onSort,
   className = "",
+  title,
 }: {
   label: ReactNode;
   sortKey: K;
   sort: Sort<K>;
   onSort: (k: K) => void;
   className?: string;
+  /** Hover note for the heading. */
+  title?: string;
 }) {
   const active = sort.key === sortKey;
   return (
-    <th className={className} aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+    <th className={`${className} ${title ? "cursor-help" : ""}`} title={title} aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
       <button
         type="button"
         onClick={() => onSort(sortKey)}
