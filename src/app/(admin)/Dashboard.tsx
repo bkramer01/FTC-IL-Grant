@@ -1,26 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, type ReactNode } from "react";
-import { NumberInput } from "@/components/inputs";
+import { useMemo, useState } from "react";
+import { MoneyInput } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
-import { buildApplications, computeTotals, type Application, type GrantData, type Review } from "@/lib/applications";
+import { compareValues, nextSort, SortHeader, type Sort as SortState } from "@/components/SortHeader";
+import {
+  buildApplications,
+  computeTotals,
+  EMPTY_REVIEW,
+  type Application,
+  type GrantData,
+  type Review,
+} from "@/lib/applications";
+import { downloadCsv, fundraisingCsv } from "@/lib/export";
 import { money, shortDate } from "@/lib/format";
-import { AGE_CUTOFFS, TOTALS_CATEGORIES, type GrantCategory } from "@/lib/grant";
+import {
+  AGE_CUTOFFS,
+  maxFundraisingTarget,
+  maxGrantAward,
+  multiplierLabel,
+  TOTALS_CATEGORIES,
+  type GrantCategory,
+} from "@/lib/grant";
 
 type SortKey =
   | "team"
   | "approved"
+  | "raised"
+  | "unused"
   | "category"
   | "checkAmount"
   | "checkNumber"
   | "checkMailed"
   | "awardEmail";
-type Sort = { key: SortKey; dir: 1 | -1 };
+type Sort = SortState<SortKey>;
 type Tab = "fundraising" | "checks";
 
-const APPROVED_ORDER = { Yes: 0, No: 1 } as const;
+const GREEN_NOTE =
+  "Shows green if all teams in this Rookie/Veteran Status have achieved the maximum matching fundraising amounts.";
+const MAXED_OUT ="Every approved team in this category raised the max fundraising target";
+
+const APPROVED_ORDER = { Yes: 0, "Under Review": 1, No: 2 } as const;
 
 function categoryRank(c: GrantCategory) {
   const i = TOTALS_CATEGORIES.indexOf(c as (typeof TOTALS_CATEGORIES)[number]);
@@ -31,9 +53,13 @@ function categoryRank(c: GrantCategory) {
 function sortValue(a: Application, key: SortKey): number | string | null {
   switch (key) {
     case "approved":
-      return a.review.approved ? APPROVED_ORDER[a.review.approved] : 2;
+      return a.review.approved ? APPROVED_ORDER[a.review.approved] : 3;
     case "category":
       return categoryRank(a.category);
+    case "raised":
+      return a.review.raised;
+    case "unused":
+      return a.unusedMatch;
     case "checkAmount":
       return a.review.checkAmount;
     case "checkNumber": {
@@ -51,44 +77,7 @@ function sortValue(a: Application, key: SortKey): number | string | null {
 }
 
 function compare(a: Application, b: Application, { key, dir }: Sort) {
-  const va = sortValue(a, key);
-  const vb = sortValue(b, key);
-  if (va === null || vb === null) return va === vb ? 0 : va === null ? 1 : -1;
-  if (typeof va === "number" && typeof vb === "number") return dir * (va - vb);
-  return dir * String(va).localeCompare(String(vb), undefined, { numeric: true });
-}
-
-/** Column header that sorts the table when clicked. */
-function SortHeader({
-  label,
-  sortKey,
-  sort,
-  onSort,
-  className = "",
-}: {
-  label: ReactNode;
-  sortKey: SortKey;
-  sort: Sort;
-  onSort: (k: SortKey) => void;
-  className?: string;
-}) {
-  const active = sort.key === sortKey;
-  return (
-    <th className={className} aria-sort={active ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
-      <button
-        type="button"
-        onClick={() => onSort(sortKey)}
-        className={`flex cursor-pointer items-end gap-1 text-left font-[inherit] hover:text-link ${
-          className.includes("num") ? "ml-auto" : ""
-        }`}
-      >
-        <span>{label}</span>
-        <span aria-hidden className={active ? "" : "text-muted/50"}>
-          {active ? (sort.dir === 1 ? "▲" : "▼") : "↕"}
-        </span>
-      </button>
-    </th>
-  );
+  return compareValues(sortValue(a, key), sortValue(b, key), dir);
 }
 
 export function Dashboard({ data, today }: { data: GrantData; today: string }) {
@@ -97,14 +86,16 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const [sort, setSort] = useState<Sort>({ key: "team", dir: 1 });
   const [tab, setTab] = useState<Tab>("fundraising");
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
-  const { rows, total, title1Needed } = useMemo(() => computeTotals(apps), [apps]);
+  const { rows, total } = useMemo(() => computeTotals(apps), [apps]);
+  // Every submission whose Grant Approved is still blank or Under Review.
+  const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
   function update(timestamp: string, patch: Partial<Review>) {
-    setReviews((r) => ({ ...r, [timestamp]: { ...r[timestamp], ...patch } }));
+    setReviews((r) => ({ ...r, [timestamp]: { ...(r[timestamp] ?? EMPTY_REVIEW), ...patch } }));
   }
 
   function onSort(key: SortKey) {
-    setSort((s) => (s.key === key ? { key, dir: s.dir === 1 ? -1 : 1 } : { key, dir: 1 }));
+    setSort((s) => nextSort(s, key));
   }
 
   const fundRows = apps
@@ -134,14 +125,16 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       <h1 className="mb-4 text-3xl">FTC Illinois Matching Grants, 2026–27 season</h1>
 
       <Card title="Grant Matching Totals" actions={<RefreshButton initialRefreshedAt={data.refreshedAt} />}>
-        {title1Needed > 0 && (
-          <Alert tone="warning">
-            {title1Needed} application{title1Needed === 1 ? " still needs" : "s still need"} a School Title 1 Status and{" "}
-            {title1Needed === 1 ? "is" : "are"} not counted below. <Link href="/applications?title1=needed">Fill it in on Applications</Link>.
+        {notReviewed > 0 && (
+          <Alert tone="warning" compact>
+            <Link href="/applications?show=notReviewed">
+              {notReviewed} application{notReviewed === 1 ? "" : "s"}
+            </Link>{" "}
+            not fully reviewed/complete.
           </Alert>
         )}
         <div className="overflow-x-auto">
-          <table className="data-table wrap-head">
+          <table className="data-table wrap-head center-head">
             <thead>
               <tr>
                 <th>
@@ -161,8 +154,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 <th className="num">Grantor Match per Team</th>
                 <th className="num">Total Possible Grant Amount</th>
                 <th className="num">Max Fundraising Target</th>
-                <th className="num">Fundraising as of {shortDate(today)}</th>
-                <th className="num">Qualified Grants from Fundraising</th>
+                <th className="num cursor-help" title={GREEN_NOTE}>
+                  Fundraising as of {shortDate(today)} <span className="text-muted">ⓘ</span>
+                </th>
+                <th className="num cursor-help" title={GREEN_NOTE}>
+                  Qualified Grants from Fundraising <span className="text-muted">ⓘ</span>
+                </th>
                 <th className="num">Grants Distributed to Teams</th>
               </tr>
             </thead>
@@ -176,8 +173,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   <td className="num">{money(r.grantorMatch)}</td>
                   <td className="num">{money(r.totalPossible)}</td>
                   <td className="num">{money(r.maxFundraising)}</td>
-                  <td className="num">{money(r.raised)}</td>
-                  <td className="num">{money(r.qualified)}</td>
+                  <td className={`num ${r.maxedOut ? "bg-success-bg" : ""}`} title={r.maxedOut ? MAXED_OUT : undefined}>
+                    {money(r.raised)}
+                  </td>
+                  <td className={`num ${r.maxedOut ? "bg-success-bg" : ""}`} title={r.maxedOut ? MAXED_OUT : undefined}>
+                    {money(r.qualified)}
+                  </td>
                   <td className="num">{money(r.distributed)}</td>
                 </tr>
               ))}
@@ -203,10 +204,20 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       <Card
         title="Fundraising Status"
         actions={
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={approvedOnly} onChange={(e) => setApprovedOnly(e.target.checked)} />
-            Approved teams only
-          </label>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={approvedOnly} onChange={(e) => setApprovedOnly(e.target.checked)} />
+              Approved teams only
+            </label>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => downloadCsv(`grant-fundraising-${today}.csv`, fundraisingCsv(fundRows))}
+              title="Download the rows shown, with the columns of both tabs, as a CSV file for Excel"
+            >
+              ⤓ Export
+            </button>
+          </div>
         }
       >
         <div role="tablist" aria-label="Fundraising views" className="mb-3 flex gap-1 border-b-2 border-first-blue">
@@ -236,32 +247,75 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         </div>
 
         <div id="fund-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
-          {tab === "fundraising" ? (
-            <p className="mb-2 text-sm text-muted">
-              Possible Grant Award = amount raised, capped at the category&apos;s max fundraising target, × the matching
-              multiplier. Unused Grant Match = Possible Grant Award less amount raised. The update date fills in when you
-              change the amount raised.
-            </p>
-          ) : (
-            <p className="mb-2 text-sm text-muted">
-              Where each grant check goes (from the form) and whether it has been sent.
-            </p>
-          )}
           <ManualKey />
-          <div className="overflow-x-auto">
-            <table className="data-table">
+          <div className="max-h-[calc(100vh-7rem)] overflow-auto">
+            <table className="data-table compact sticky-head center-num">
               <thead>
                 {tab === "fundraising" ? (
                   <tr>
                     <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} />
                     <th>Team Name</th>
-                    <th>Coach 1</th>
+                    <th>Coach Name</th>
                     <SortHeader label="Approved" sortKey="approved" sort={sort} onSort={onSort} />
-                    <SortHeader label="Rookie/Veteran Status" sortKey="category" sort={sort} onSort={onSort} />
-                    <th className="num">Possible Grant Award</th>
-                    <th className="manual num">Raised by Team</th>
-                    <th className="num">Unused Grant Match</th>
-                    <th>Last Update</th>
+                    <SortHeader
+                      label={
+                        <>
+                          Rookie/Veteran
+                          <br />
+                          Status
+                        </>
+                      }
+                      sortKey="category"
+                      sort={sort}
+                      onSort={onSort}
+                    />
+                    <th className="num">
+                      Matching
+                      <br />
+                      Multiplier
+                    </th>
+                    <th className="num" title="Max fundraising target × matching multiplier (the grantor match per team)">
+                      Max Grant
+                      <br />
+                      Award
+                    </th>
+                    <th className="num">Team Target</th>
+                    <SortHeader
+                      label={
+                        <>
+                          Raised by
+                          <br />
+                          Team
+                        </>
+                      }
+                      sortKey="raised"
+                      sort={sort}
+                      onSort={onSort}
+                      className="manual num"
+                    />
+                    <th className="num">
+                      Possible
+                      <br />
+                      Grant Award
+                    </th>
+                    <SortHeader
+                      label={
+                        <>
+                          Unused
+                          <br />
+                          Grant Match
+                        </>
+                      }
+                      sortKey="unused"
+                      sort={sort}
+                      onSort={onSort}
+                      className="num"
+                    />
+                    <th>
+                      Last
+                      <br />
+                      Update
+                    </th>
                   </tr>
                 ) : (
                   <tr>
@@ -293,7 +347,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       onSort={onSort}
                       className="manual num"
                     />
-                    <SortHeader label={<>Check<br />#</>} sortKey="checkNumber" sort={sort} onSort={onSort} className="manual" />
+                    <SortHeader label={<>Check<br />#</>} sortKey="checkNumber" sort={sort} onSort={onSort} className="manual num" />
                     <SortHeader
                       label={<>Date Check<br />Mailed</>}
                       sortKey="checkMailed"
@@ -308,7 +362,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
               <tbody>
                 {fundRows.length === 0 && (
                   <tr>
-                    <td colSpan={9} className="text-muted">
+                    <td colSpan={12} className="text-muted">
                       No approved teams yet.
                     </td>
                   </tr>
@@ -321,14 +375,17 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="min-w-28">{a.coach}</td>
                       <td>{a.review.approved ?? "—"}</td>
                       <td className="whitespace-nowrap">{a.category}</td>
-                      <td className="num">{money(a.possibleAward)}</td>
+                      <td className="num">{multiplierLabel(a.category)}</td>
+                      <td className="num">{money(maxGrantAward(a.category))}</td>
+                      <td className="num">{money(maxFundraisingTarget(a.category))}</td>
                       <td className="w-28">
-                        <NumberInput
+                        <MoneyInput
                           label={`Amount raised by team ${a.teamNumber}`}
                           value={a.review.raised}
                           onChange={(v) => update(a.timestamp, { raised: v, raisedUpdatedOn: today })}
                         />
                       </td>
+                      <td className="num">{money(a.possibleAward)}</td>
                       <td className="num">{money(a.unusedMatch)}</td>
                       <td className="whitespace-nowrap">{shortDate(a.review.raisedUpdatedOn)}</td>
                     </tr>
@@ -340,7 +397,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="min-w-36">{a.street}</td>
                       <td className="whitespace-nowrap">{a.cityStateZip}</td>
                       <td className="w-28">
-                        <NumberInput
+                        <MoneyInput
                           label={`Check amount for team ${a.teamNumber}`}
                           value={a.review.checkAmount}
                           onChange={(v) => update(a.timestamp, { checkAmount: v })}
@@ -349,7 +406,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="w-24">
                         <input
                           aria-label={`Check number for team ${a.teamNumber}`}
-                          className="cell-input"
+                          className="cell-input text-center"
                           value={a.review.checkNumber ?? ""}
                           onChange={(e) => update(a.timestamp, { checkNumber: e.target.value || null })}
                         />

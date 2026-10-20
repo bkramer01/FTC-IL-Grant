@@ -37,6 +37,23 @@ export function grantorMatch(category: TotalsCategory) {
   return r.multiplier * r.maxFundraising;
 }
 
+/** "1 to 3" style label for a category's multiplier; "—" when it has none or isn't known yet. */
+export function multiplierLabel(category: GrantCategory) {
+  if (category === TITLE1_NEEDED) return "—";
+  const m = CATEGORY_RULES[category].multiplier;
+  return m ? `1 to ${m}` : "—";
+}
+
+/** Largest grant a team in this category can get (= grantor match per team); null until Title 1 is known. */
+export function maxGrantAward(category: GrantCategory): number | null {
+  return category === TITLE1_NEEDED ? null : grantorMatch(category);
+}
+
+/** Most of a team's fundraising that gets matched in this category; null until Title 1 is known. */
+export function maxFundraisingTarget(category: GrantCategory): number | null {
+  return category === TITLE1_NEEDED ? null : CATEGORY_RULES[category].maxFundraising;
+}
+
 export function teamAge(teamNumber: number): TeamAge {
   if (teamNumber >= AGE_CUTOFFS.rookieFrom) return "Rookie";
   if (teamNumber >= AGE_CUTOFFS.secondYearFrom) return "Second Year";
@@ -60,7 +77,12 @@ export function possibleAward(category: GrantCategory, raised: number | null): n
   return Math.min(raised, r.maxFundraising) * r.multiplier;
 }
 
-/** Possible grant less how much the team raised (Goals tab, Fundraising Status). */
-export function unusedMatch(possible: number | null, raised: number | null): number | null {
-  return possible === null || raised === null ? null : possible - raised;
+/**
+ * Grant dollars the team could still unlock by raising more: the category's grantor match
+ * less the Possible Grant Award. $0 once the team reaches the max; never negative, since
+ * raising more than the max doesn't add grant dollars.
+ */
+export function unusedMatch(category: GrantCategory, possible: number | null): number | null {
+  if (possible === null || category === TITLE1_NEEDED) return null;
+  return Math.max(grantorMatch(category) - possible, 0);
 }

@@ -2,39 +2,22 @@
 
 import { useMemo, useRef, useState } from "react";
 import { HeaderScrollbar } from "@/components/HeaderScrollbar";
-import { FileLink, YesNoBadge, YesNoSelect } from "@/components/inputs";
-import { Card, ManualKey } from "@/components/SiteChrome";
-import { buildApplications, type Application, type GrantData, type Review } from "@/lib/applications";
-import { formDate, formDateTime, shortDate } from "@/lib/format";
+import { ChoiceSelect, FileLink, YesNoBadge, YesNoSelect } from "@/components/inputs";
+import { Alert, Card, ManualKey } from "@/components/SiteChrome";
+import { compareValues, nextSort, SortHeader, type Sort } from "@/components/SortHeader";
+import { APP_FILTERS, LINK_FILTERS, matchesFilter, type AppFilter } from "@/lib/app-filters";
+import {
+  APPROVAL_OPTIONS,
+  buildApplications,
+  EMPTY_REVIEW,
+  VRS_OPTIONS,
+  type Application,
+  type GrantData,
+  type Review,
+} from "@/lib/applications";
+import { applicationsCsv, downloadCsv } from "@/lib/export";
+import { formDate, formDateTime, shortDate, todayCentral } from "@/lib/format";
 import { TITLE1_NEEDED, type TeamAge } from "@/lib/grant";
-
-export type AppFilter = "all" | "pending" | "approved" | "notApproved" | "duplicates" | "title1";
-
-const FILTERS: { value: AppFilter; label: string }[] = [
-  { value: "all", label: "All applications" },
-  { value: "pending", label: "Not yet decided" },
-  { value: "approved", label: "Approved" },
-  { value: "notApproved", label: "Not approved" },
-  { value: "duplicates", label: "Duplicate submissions" },
-  { value: "title1", label: "Title 1 status needed" },
-];
-
-function matchesFilter(a: Application, f: AppFilter) {
-  switch (f) {
-    case "pending":
-      return a.review.approved === null;
-    case "approved":
-      return a.review.approved === "Yes";
-    case "notApproved":
-      return a.review.approved === "No";
-    case "duplicates":
-      return a.duplicateCount > 1;
-    case "title1":
-      return a.category === TITLE1_NEEDED;
-    default:
-      return true;
-  }
-}
 
 /** The team age the coach picked on the form, if it names one. */
 function ageFromForm(provided: string): TeamAge | null {
@@ -45,22 +28,64 @@ function ageFromForm(provided: string): TeamAge | null {
   return null;
 }
 
+type SortKey = "timestamp" | "team" | "age" | "approved";
+
+const AGE_ORDER: Record<TeamAge, number> = { Rookie: 0, "Second Year": 1, Veteran: 2 };
+const APPROVED_ORDER = { Yes: 0, "Under Review": 1, No: 2 } as const;
+
+function sortValue(a: Application, key: SortKey): number {
+  switch (key) {
+    case "team":
+      return a.teamNumber;
+    case "age":
+      return AGE_ORDER[a.age];
+    case "approved":
+      // Not reviewed (blank) comes after No.
+      return a.review.approved ? APPROVED_ORDER[a.review.approved] : 3;
+    default:
+      return a.submittedAt;
+  }
+}
+
+/** Downloads every application, including unsaved edits on the page, as a CSV file. */
+function exportCsv(apps: Application[]) {
+  downloadCsv(`grant-applications-${todayCentral()}.csv`, applicationsCsv(apps));
+}
+
 export function ApplicationsTable({ data, initialFilter }: { data: GrantData; initialFilter: AppFilter }) {
   const [reviews, setReviews] = useState(data.reviews);
   const [filter, setFilter] = useState<AppFilter>(initialFilter);
   const [search, setSearch] = useState("");
   const scrollerRef = useRef<HTMLDivElement>(null);
+  // Newest first until a heading is clicked.
+  const [sort, setSort] = useState<Sort<SortKey>>({ key: "timestamp", dir: -1 });
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
 
   function update(timestamp: string, patch: Partial<Review>) {
-    setReviews((r) => ({ ...r, [timestamp]: { ...r[timestamp], ...patch } }));
+    setReviews((r) => ({ ...r, [timestamp]: { ...(r[timestamp] ?? EMPTY_REVIEW), ...patch } }));
   }
 
   const q = search.trim().toLowerCase();
+  // Grant Approved answers across all applications (search and filter don't change these).
+  const counts = { approved: 0, rejected: 0, notReviewed: 0, underReview: 0 };
+  for (const a of apps) {
+    if (a.review.approved === "Yes") counts.approved++;
+    else if (a.review.approved === "No") counts.rejected++;
+    else if (a.review.approved === "Under Review") counts.underReview++;
+    else counts.notReviewed++;
+  }
+
   const shown = apps
     .filter((a) => matchesFilter(a, filter))
     .filter((a) => !q || `${a.teamNumber} ${a.teamName ?? ""} ${a.coach}`.toLowerCase().includes(q))
-    .sort((a, b) => b.submittedAt - a.submittedAt);
+    .sort(
+      (a, b) =>
+        compareValues(sortValue(a, sort.key), sortValue(b, sort.key), sort.dir) || b.submittedAt - a.submittedAt,
+    );
+
+  function onSort(key: SortKey) {
+    setSort((s) => nextSort(s, key));
+  }
 
   return (
     <>
@@ -90,46 +115,81 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
               value={filter}
               onChange={(e) => setFilter(e.target.value as AppFilter)}
             >
-              {FILTERS.map((f) => (
+              {[...APP_FILTERS, ...LINK_FILTERS.filter((f) => f.value === filter)].map((f) => (
                 <option key={f.value} value={f.value}>
                   {f.label}
                 </option>
               ))}
             </select>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => exportCsv(apps)}
+              title="Download every application (all rows, ignoring search and filter) as a CSV file for Excel"
+            >
+              ⤓ Export
+            </button>
           </div>
         }
       >
         <ManualKey />
-        <div className="overflow-x-auto" ref={scrollerRef}>
-          <table className="data-table">
+        <Alert tone="warning" compact>
+          <strong>Total applications</strong> = {apps.length} · <strong>Grants approved</strong> = {counts.approved} · <strong>Rejected</strong> = {counts.rejected} ·{" "}
+          <strong>Not reviewed</strong> = {counts.notReviewed} · <strong>Under review</strong> = {counts.underReview}
+        </Alert>
+        <div className="max-h-[calc(100vh-7rem)] overflow-auto" ref={scrollerRef}>
+          <table className="data-table sticky-head">
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Team #</th>
+                <SortHeader label="Timestamp" sortKey="timestamp" sort={sort} onSort={onSort} />
+                <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} />
                 <th>Team Name</th>
-                <th>Coach 1</th>
+                <th>Coach Name</th>
                 <th>
                   Rookie/Veteran
                   <br />
                   Status Provided
                 </th>
-                <th className="manual yn">Grant Approved</th>
-                <th className="manual">Approval Notes</th>
-                <th>Calculated Team Age</th>
+                <SortHeader
+                  label={
+                    <>
+                      Calculated
+                      <br />
+                      Team Age
+                    </>
+                  }
+                  sortKey="age"
+                  sort={sort}
+                  onSort={onSort}
+                />
+                <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
+                <th className="manual">Review Notes</th>
                 <th>
                   Rookie/Veteran
                   <br />
                   Status for Grant
                 </th>
                 <th className="manual yn">School Title 1 Status</th>
-                <th className="manual yn">Matching Grant Letter Received?</th>
+                <th className="manual yn">Fundraising Letter Rec&apos;d</th>
                 <th className="manual yn">Event Volunteering?</th>
                 <th>List of Volunteers</th>
-                <th>Fully Registered? (from Team)</th>
+                <th>
+                  Fully Registered?
+                  <br />
+                  (from Team)
+                </th>
                 <th className="manual yn">Qualified Purchase?</th>
-                <th>End of Season Survey Completed?</th>
-                <th className="manual yn">VRS 6 Lesson Challenge Completed?</th>
-                <th>Additional Info Email Sent</th>
+                <th>
+                  End of Season
+                  <br />
+                  Survey Completed?
+                </th>
+                <th className="manual yn">VRS Task Completed</th>
+                <th>
+                  Add&apos;l Info
+                  <br />
+                  Email Sent
+                </th>
               </tr>
               <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
             </thead>
@@ -166,22 +226,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       </div>
                     </td>
                     <td className="min-w-52">{a.categoryProvided}</td>
-                    <td>
-                      <YesNoSelect
-                        label={`Team ${a.teamNumber} approved for grant`}
-                        value={a.review.approved}
-                        onChange={(v) => update(a.timestamp, { approved: v })}
-                      />
-                    </td>
-                    <td className="min-w-56">
-                      <textarea
-                        aria-label={`Approval notes for team ${a.teamNumber}`}
-                        rows={2}
-                        className="cell-input"
-                        value={a.review.notes}
-                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
-                      />
-                    </td>
                     <td className="whitespace-nowrap">
                       {a.age}
                       {formAge && formAge !== a.age && (
@@ -191,6 +235,25 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                           </span>
                         </div>
                       )}
+                    </td>
+                    <td>
+                      <ChoiceSelect
+                        options={APPROVAL_OPTIONS}
+                        blankLabel="Not reviewed"
+                        width="7.25rem"
+                        label={`Team ${a.teamNumber} approved for grant`}
+                        value={a.review.approved}
+                        onChange={(v) => update(a.timestamp, { approved: v })}
+                      />
+                    </td>
+                    <td className="min-w-56">
+                      <textarea
+                        aria-label={`Review notes for team ${a.teamNumber}`}
+                        rows={2}
+                        className="cell-input"
+                        value={a.review.notes}
+                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
+                      />
                     </td>
                     <td className="whitespace-nowrap">
                       {a.category === TITLE1_NEEDED ? <span className="badge badge-warning">{a.category}</span> : a.category}
@@ -204,7 +267,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                     </td>
                     <td>
                       <YesNoSelect
-                        label={`Matching grant letter received from team ${a.teamNumber}`}
+                        label={`Fundraising letter received from team ${a.teamNumber}`}
                         value={a.review.letterReceived}
                         onChange={(v) => update(a.timestamp, { letterReceived: v })}
                       />
@@ -219,7 +282,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         onChange={(v) => update(a.timestamp, { volunteering: v })}
                       />
                     </td>
-                    <td className="min-w-48">{a.volunteers}</td>
+                    <td className="w-48 min-w-48 [overflow-wrap:anywhere]">{a.volunteers}</td>
                     <td>
                       <YesNoBadge value={a.fullyRegistered} />
                     </td>
@@ -234,7 +297,9 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       <YesNoBadge value={a.surveyCompleted} />
                     </td>
                     <td>
-                      <YesNoSelect
+                      <ChoiceSelect
+                        options={VRS_OPTIONS}
+                        width="6.75rem"
                         label={`VRS challenge completed by team ${a.teamNumber}`}
                         value={a.review.vrsCompleted}
                         onChange={(v) => update(a.timestamp, { vrsCompleted: v })}

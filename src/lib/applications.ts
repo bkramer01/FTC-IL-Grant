@@ -17,14 +17,19 @@ import {
 
 export type SheetTable = { headers: string[]; rows: string[][] };
 
+export const APPROVAL_OPTIONS = ["Yes", "Under Review", "No"] as const;
+export type Approval = (typeof APPROVAL_OPTIONS)[number];
+export const VRS_OPTIONS = ["Yes", "In Progress", "No"] as const;
+export type VrsStatus = (typeof VRS_OPTIONS)[number];
+
 /** Everything the Grant Administrator fills in for one application (keyed by its timestamp). */
 export type Review = {
   title1: YesNo | null;
   letterReceived: YesNo | null;
   volunteering: YesNo | null;
   qualifiedPurchase: YesNo | null;
-  vrsCompleted: YesNo | null;
-  approved: YesNo | null;
+  vrsCompleted: VrsStatus | null;
+  approved: Approval | null;
   notes: string;
   raised: number | null;
   raisedUpdatedOn: string | null;
@@ -35,6 +40,12 @@ export type Review = {
 
 export const EMAIL_PURPOSES = ["Additional Info Needed", "Grant Award", "Other"] as const;
 export type EmailPurpose = (typeof EMAIL_PURPOSES)[number];
+/** Shorter wording shown in the Email purpose dropdown; the saved purpose keeps the full name. */
+export const EMAIL_PURPOSE_LABELS: Record<EmailPurpose, string> = {
+  "Additional Info Needed": "Add'l Info Needed",
+  "Grant Award": "Grant Award",
+  Other: "Other",
+};
 export type EmailEntry = { date: string; teamNumber: number; recipient: string; purpose: string; notes: string };
 
 export type GrantData = {
@@ -165,7 +176,7 @@ export function buildApplications(data: GrantData): Application[] {
       additionalInfoEmailOn: latestEmail(data.emails, teamNumber, "Additional Info Needed"),
       awardEmailOn: latestEmail(data.emails, teamNumber, "Grant Award"),
       possibleAward: possible,
-      unusedMatch: unusedMatch(possible, review.raised),
+      unusedMatch: unusedMatch(category, possible),
       review,
     };
   });
@@ -182,6 +193,8 @@ export type TotalsRow = {
   raised: number;
   qualified: number;
   distributed: number;
+  /** Every awarded team raised at least the max fundraising target (so Qualified = Total Possible). */
+  maxedOut: boolean;
 };
 
 /**
@@ -211,6 +224,7 @@ export function computeTotals(apps: Application[]) {
     raised: 0,
     qualified: 0,
     distributed: 0,
+    maxedOut: false,
   }));
   let title1Needed = 0;
   for (const a of byTeam.values()) {
@@ -226,7 +240,12 @@ export function computeTotals(apps: Application[]) {
     row.qualified += a.possibleAward ?? 0;
     row.distributed += a.review.checkAmount ?? 0;
   }
-  for (const row of rows) row.totalPossible = row.awarded * row.grantorMatch;
+  for (const row of rows) {
+    row.totalPossible = row.awarded * row.grantorMatch;
+    // Each team's qualified grant is capped at the grantor match, so the sum only reaches
+    // Total Possible when every awarded team raised the max.
+    row.maxedOut = row.awarded > 0 && row.grantorMatch > 0 && row.qualified >= row.totalPossible;
+  }
   const total = {
     applied: sum(rows, "applied"),
     awarded: sum(rows, "awarded"),

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FrozenTable } from "@/components/FrozenTable";
 import { Card } from "@/components/SiteChrome";
 import { loadGrantData } from "@/lib/data";
 import { centralDateTime } from "@/lib/format";
@@ -39,36 +40,35 @@ export default function ResponsesPage() {
         the <Link href="/">Dashboard</Link> to pull new responses. Hover a column heading for the full question.
       </p>
       <Card title={`Responses (${responses.rows.length})`}>
-        <div className="overflow-x-auto">
-          <table className="data-table text-xs">
-            <thead>
-              <tr>
-                {responses.headers.map((h, i) => (
-                  <th key={i} title={h} className="!whitespace-normal min-w-28">
-                    {SHORT_HEADERS[i] ?? h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {responses.rows.map((r) => (
-                <tr key={r[0]}>
-                  {r.map((v, i) => (
-                    <td key={i} className={i === 0 ? "whitespace-nowrap" : ""}>
-                      {/^https?:\/\//.test(v) ? (
-                        <a href={v} target="_blank" rel="noopener noreferrer">
-                          Open file ↗
-                        </a>
-                      ) : (
-                        v
-                      )}
-                    </td>
-                  ))}
-                </tr>
+        <FrozenTable
+          className="text-xs"
+          colSpan={responses.headers.length}
+          head={
+            <tr>
+              {responses.headers.map((h, i) => (
+                <th key={i} title={h} className="!whitespace-normal min-w-28">
+                  {SHORT_HEADERS[i] ?? h}
+                </th>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </tr>
+          }
+        >
+          {responses.rows.map((r) => (
+            <tr key={r[0]}>
+              {r.map((v, i) => (
+                <td key={i} className={i === 0 ? "whitespace-nowrap" : ""}>
+                  {/^https?:\/\//.test(v) ? (
+                    <a href={v} target="_blank" rel="noopener noreferrer">
+                      Open file ↗
+                    </a>
+                  ) : (
+                    v
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </FrozenTable>
       </Card>
     </>
   );

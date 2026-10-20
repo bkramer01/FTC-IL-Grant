@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Card } from "@/components/SiteChrome";
-import { EMAIL_PURPOSES, type EmailEntry } from "@/lib/applications";
+import { EMAIL_PURPOSE_LABELS, EMAIL_PURPOSES, type EmailEntry, type EmailPurpose } from "@/lib/applications";
 import { shortDate } from "@/lib/format";
 
 type Team = { teamNumber: number; teamName: string | null; coach: string; email: string };
@@ -39,8 +39,9 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
     <>
       <h1 className="mb-1 text-3xl">Grant Email Log</h1>
       <p className="mb-4 text-muted">
-        Every grant email sent to a coach, entered by hand for now. The <strong>Additional Info Needed</strong> and{" "}
-        <strong>Grant Award</strong> entries fill in the &ldquo;email sent&rdquo; columns on Applications and Fundraising.
+        This page captures emails sent to grantees, categorized by additional info needed, grant award, or other. Using
+        the additional info needed and grant award entries will fill in the email sent columns on the application and
+        fundraising pages.
       </p>
 
       <Card title="Log an email">
@@ -77,7 +78,9 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
             </label>
             <select id="em-purpose" className="form-control" value={purpose} onChange={(e) => setPurpose(e.target.value)}>
               {EMAIL_PURPOSES.map((p) => (
-                <option key={p}>{p}</option>
+                <option key={p} value={p}>
+                  {EMAIL_PURPOSE_LABELS[p]}
+                </option>
               ))}
             </select>
           </div>
@@ -85,7 +88,13 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
             <label htmlFor="em-notes" className="mb-1 block text-sm font-medium">
               Notes
             </label>
-            <input id="em-notes" className="form-control" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <textarea
+              id="em-notes"
+              rows={5}
+              className="form-control resize-y"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
           </div>
           <div className="flex items-end">
             <button type="submit" className="btn btn-primary w-full">
@@ -124,8 +133,8 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
                   <td>{e.teamNumber}</td>
                   <td>{teamName(e.teamNumber)}</td>
                   <td>{e.recipient}</td>
-                  <td className="whitespace-nowrap">{e.purpose}</td>
-                  <td>{e.notes}</td>
+                  <td className="whitespace-nowrap">{EMAIL_PURPOSE_LABELS[e.purpose as EmailPurpose] ?? e.purpose}</td>
+                  <td className="whitespace-pre-line">{e.notes}</td>
                   <td>
                     <button
                       type="button"

@@ -79,14 +79,24 @@ export function Card({
   );
 }
 
-export function Alert({ tone, children }: { tone: "success" | "danger" | "warning" | "info"; children: ReactNode }) {
+export function Alert({
+  tone,
+  children,
+  compact = false,
+}: {
+  tone: "success" | "danger" | "warning" | "info";
+  children: ReactNode;
+  /** A small inline box with smaller text, for low-key notes. */
+  compact?: boolean;
+}) {
   const cls = {
     success: "bg-success-bg border-success/40 text-[#0a3622]",
     danger: "bg-danger-bg border-danger/40 text-[#58151c]",
     warning: "bg-warning-bg border-warning/60 text-[#664d03]",
     info: "bg-[#cff4fc] border-info/60 text-[#055160]",
   }[tone];
-  return <div className={`mb-4 rounded-md border px-4 py-3 ${cls}`}>{children}</div>;
+  const size = compact ? "inline-block px-2.5 py-1 text-sm" : "px-4 py-3";
+  return <div className={`mb-4 rounded-md border ${size} ${cls}`}>{children}</div>;
 }
 
 /** Explains the yellow column headers. */
@@ -94,7 +104,7 @@ export function ManualKey() {
   return (
     <p className="mb-3 text-sm text-muted">
       <span className="mr-1 inline-block h-3 w-3 border border-warning bg-manual align-middle" /> Yellow headers are
-      columns the Grant Administrator fills in; the rest come from the form, BioBuzz or are calculated.
+      columns the Grant Administrator fills in; the rest come from the form, the BioBuzz data sheet or are calculated.
     </p>
   );
 }

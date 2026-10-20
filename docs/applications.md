@@ -7,8 +7,11 @@ One row per grant form response, newest first. This is where the Grant Administr
 ## Finding applications
 
 - Search by team number, team name or coach.
-- **Show** filter: All, Not yet decided, Approved, Not approved, Duplicate submissions, Title 1 status needed.
-- The table is wider than the screen. Scroll sideways with the scrollbar just under the column headings, or the one at the bottom of the table.
+- A small yellow box above the table shows **Total applications** and counts the Grant Approved answers across all applications: **Grants approved** (Yes), **Rejected** (No), **Not reviewed** (blank) and **Under review**. It updates as answers change and ignores search and filter.
+- Click the **Timestamp**, **Team #**, **Calculated Team Age** or **Grant Approved** heading to sort; click again to reverse. The table starts newest first. Team age sorts Rookie, Second Year, Veteran; Grant Approved sorts Yes, Under Review, No, Not reviewed.
+- **Show** filter: All applications, or one Grant Approved status (Yes, Under Review, No, Not reviewed). The Dashboard's "not fully reviewed/complete" link opens the page filtered to Not reviewed or Under Review; that choice appears in the list only while it's active.
+- The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down. Scroll sideways with the scrollbar just under the headings or the one at the bottom of the box.
+- **Export** downloads every application (all rows, ignoring search and filter) as a CSV file that opens in Excel, named `grant-applications-YYYY-MM-DD.csv`. It has the table's columns plus Coach Email, the letter and VRS screenshot links, and how many times the team submitted. It includes changes made on the page that haven't been saved. Applications with no Grant Approved decision export as "Not reviewed".
 
 ## Flags
 
@@ -19,22 +22,41 @@ One row per grant form response, newest first. This is where the Grant Administr
 
 ## Columns
 
-In order: Timestamp, Team #, Team Name, Coach 1, Rookie/Veteran Status Provided, **Grant Approved**, **Approval Notes**, Calculated Team Age, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Matching Grant Letter Received?**, **Event Volunteering?**, List of Volunteers, Fully Registered?, **Qualified Purchase?**, End of Season Survey Completed?, **VRS 6 Lesson Challenge Completed?**, Additional Info Email Sent. Columns in bold have yellow headings: the Grant Administrator fills them in.
+In order: Timestamp, Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calculated Team Age, **Grant Approved**, **Review Notes**, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Fundraising Letter Rec'd**, **Event Volunteering?**, List of Volunteers, Fully Registered?, **Qualified Purchase?**, End of Season Survey Completed?, **VRS Task Completed**, Add'l Info Email Sent. Columns in bold have yellow headings: the Grant Administrator fills them in.
 
 | Column | Source |
 |---|---|
 | Timestamp | Form. Shows the date; hover it for the date and time. |
-| Coach 1 (+ email), Rookie/Veteran Status Provided, List of Volunteers | Form |
+| Coach Name (+ email), Rookie/Veteran Status Provided, List of Volunteers | Form |
 | Team Name | BioBuzz, by team number |
 | Calculated Team Age, Rookie/Veteran Status for Grant | Calculated |
 | Fully Registered? | Form ("Team is in the green") |
 | End of Season Survey Completed? | Form question 2 ("rookie Biobuzz" shows as N/A) |
-| Additional Info Email Sent | Latest "Additional Info Needed" entry in the Email Log |
+| Add'l Info Email Sent | Latest "Additional Info Needed" entry in the Email Log |
+| Grant Approved | Grant Administrator: Yes, Under Review or No ("Not reviewed" until one is picked) |
+| VRS Task Completed | Grant Administrator: Yes, In Progress or No |
 
 The **Letter ↗** and **Screenshot ↗** links open the files the coach uploaded with the form.
 
 ## Change history
 
+- **Oct 19, 2026:** Timestamp, Team #, Calculated Team Age and Grant Approved columns are sortable.
+- **Oct 19, 2026:** Grant Approved's empty choice, its Show filter option, the counts box and the export now read "Not reviewed".
+- **Oct 19, 2026:** Show filter limited to All applications and the Grant Approved statuses (Duplicate submissions and Title 1 status needed filters removed).
+- **Oct 19, 2026:** Counts box starts with Total applications.
+- **Oct 19, 2026:** "Approval Notes" renamed "Review Notes" (also in the export).
+- **Oct 19, 2026:** Added the Grant Approved counts above the table, in a small yellow box like the Dashboard note.
+- **Oct 19, 2026:** New "Not fully reviewed" filter; the page can open with a filter picked (`?show=notReviewed`), used by the Dashboard notice.
+- **Oct 19, 2026:** "Coach 1" renamed "Coach Name" (also in the export).
+- **Oct 19, 2026:** Grant Approved adds an "Under Review" choice and VRS Task Completed adds "In Progress" (both between Yes and No). New "Under review" filter; "Not yet decided" renamed "Not yet reviewed". Scrollbar under the headings restored.
+- **Oct 19, 2026:** Added Export (CSV). Removed the extra scrollbar under the headings. Column key now says "BioBuzz data sheet".
+- **Oct 19, 2026:** Column headings frozen: the table scrolls in its own window-height box.
+- **Oct 19, 2026:** Fully Registered? narrowed: an answer other than Yes/No is cut short, with the full text on hover. List of Volunteers slightly narrower.
+- **Oct 19, 2026:** Calculated Team Age moved before Grant Approved, with its heading on two lines.
+- **Oct 19, 2026:** "Additional Info Email Sent" renamed "Add'l Info Email Sent".
+- **Oct 19, 2026:** Fully Registered? (from Team), End of Season Survey Completed? and Additional Info Email Sent headings split onto two lines.
+- **Oct 19, 2026:** "VRS 6 Lesson Challenge Completed?" renamed "VRS Task Completed".
+- **Oct 19, 2026:** "Matching Grant Letter Received?" renamed "Fundraising Letter Rec'd".
 - **Oct 19, 2026:** "duplicate ×2" flag shortened to "Dup ×2". Rookie/Veteran Status Provided and Rookie/Veteran Status for Grant headings split onto two lines; Status Provided column widened so answers fit in two lines.
 - **Oct 19, 2026:** "Team Approved for Grant" renamed "Grant Approved"; "not in BioBuzz" flag renamed "not found". Yes/No columns (Grant Approved, School Title 1 Status, Matching Grant Letter Received?, Event Volunteering?, Qualified Purchase?, VRS 6 Lesson Challenge Completed?) use narrow dropdowns with wrapped headings.
 - **Oct 19, 2026:** Team Approved for Grant (now Grant Approved) and Approval Notes moved next to Rookie/Veteran Status Provided. Timestamp shows the date, with date and time on hover. Added a scrollbar under the column headings. Removed the summary line under the page title. Text columns use the same font size.
