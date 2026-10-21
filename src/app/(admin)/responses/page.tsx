@@ -36,9 +36,17 @@ export default async function ResponsesPage() {
     <>
       <h1 className="mb-1 text-3xl">Form Responses</h1>
       <p className="mb-4 text-muted">
-        Read-only view of the grant form&apos;s Google Sheet (&ldquo;Form Responses 1&rdquo;) as of{" "}
-        <strong className="text-ink">{centralDateTime(refreshedAt)}</strong>. Use <strong>Refresh Data</strong> on{" "}
-        the <Link href="/">Dashboard</Link> to pull new responses. Hover a column heading for the full question.
+        Read-only view of the grant form&apos;s Google Sheet (&ldquo;Form Responses 1&rdquo;)
+        {refreshedAt ? (
+          <>
+            {" "}
+            as of <strong className="text-ink">{centralDateTime(refreshedAt)}</strong>
+          </>
+        ) : (
+          <> (not refreshed yet)</>
+        )}
+        . Use <strong>Refresh Data</strong> on the <Link href="/">Dashboard</Link> to pull new responses. Hover a column
+        heading for the full question.
       </p>
       <Card title={`Responses (${responses.rows.length})`}>
         <FrozenTable

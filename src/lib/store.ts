@@ -2,8 +2,8 @@
 // Server-side only: callers pass the database from getDb() (or a test database).
 import { asc, desc, eq, sql } from "drizzle-orm";
 import type { Db } from "@/db";
-import { applicationReviews, emailLog, grantAsks } from "@/db/schema";
-import type { EmailEntry, GrantAsk, Review } from "./applications";
+import { applicationReviews, emailLog, grantAsks, sheetSnapshots } from "@/db/schema";
+import type { EmailEntry, GrantAsk, Review, SheetTable } from "./applications";
 
 type ReviewRow = typeof applicationReviews.$inferSelect;
 
@@ -94,4 +94,31 @@ export async function updateAsk(db: Db, id: number, patch: Partial<Omit<GrantAsk
 
 export async function removeAsk(db: Db, id: number) {
   await db.delete(grantAsks).where(eq(grantAsks.id, id));
+}
+
+/** Replaces both sheet snapshots together (one transaction) and returns the refresh time. */
+export async function saveSnapshots(db: Db, tables: Record<"responses" | "biobuzz", SheetTable>, now = new Date()) {
+  await db.transaction(async (tx) => {
+    for (const source of ["responses", "biobuzz"] as const) {
+      const { headers, rows } = tables[source];
+      await tx
+        .insert(sheetSnapshots)
+        .values({ source, headers, rows, refreshedAt: now })
+        .onConflictDoUpdate({ target: sheetSnapshots.source, set: { headers, rows, refreshedAt: now } });
+    }
+  });
+  return now;
+}
+
+/** The saved sheet snapshots; empty tables (and no refresh time) before the first refresh. */
+export async function loadSnapshots(db: Db) {
+  const rows = await db.select().from(sheetSnapshots);
+  const empty: SheetTable = { headers: [], rows: [] };
+  const by = Object.fromEntries(rows.map((r) => [r.source, r]));
+  const times = rows.map((r) => r.refreshedAt.getTime());
+  return {
+    responses: by.responses ? { headers: by.responses.headers, rows: by.responses.rows } : empty,
+    biobuzz: by.biobuzz ? { headers: by.biobuzz.headers, rows: by.biobuzz.rows } : empty,
+    refreshedAt: times.length === 2 ? new Date(Math.min(...times)).toISOString() : null,
+  };
 }

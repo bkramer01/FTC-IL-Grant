@@ -66,7 +66,8 @@ export type GrantAsk = {
 };
 
 export type GrantData = {
-  refreshedAt: string;
+  /** When Refresh Data last read the Google Sheets; null before the first refresh. */
+  refreshedAt: string | null;
   responses: SheetTable;
   biobuzz: SheetTable;
   reviews: Record<string, Review>;

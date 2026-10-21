@@ -4,7 +4,7 @@
 
 This folder documents every page of the grant site: what each page does, what users see, and which settings control it. There is one document per page.
 
-> **Current stage:** form responses and team names come from a snapshot of the Google Sheets (`src/mock/sample-data.json`); Refresh Data doesn't contact Google yet. Everything typed or picked on the pages is saved to the database (Supabase in production) as you go; each page shows "Saving… / All changes saved".
+> **Data:** form responses and team names are the copy saved by the last **Refresh Data** (Dashboard), which reads both Google Sheets. Everything typed or picked on the pages is saved to the database (Supabase) as you go; each page shows "Saving… / All changes saved".
 
 ## The pages
 
@@ -18,7 +18,7 @@ This folder documents every page of the grant site: what each page does, what us
 
 ## How the site fits together
 
-- **Data sources** (pulled by Refresh Data): the grant form's Google Sheet ("Form Responses 1") and the BioBuzz team list ("biobuzz - including unpaid"), which supplies team names.
+- **Data sources** (pulled by Refresh Data with the Google service account `ftc-grant-sheets-reader@project-115d3a43-e62e-443b-8d5.iam.gserviceaccount.com`, which must have Viewer access to both sheets): the grant form's Google Sheet ("Form Responses 1") and the BioBuzz team list ("biobuzz - including unpaid"), which supplies team names.
 - **Grant Administrator entries** (yellow column headers): Title 1 status, checklist answers, approval, notes, amount raised, and check details.
 - **Calculated**: team age from the team number, grant category from age + Title 1, possible award, unused match, totals.
 

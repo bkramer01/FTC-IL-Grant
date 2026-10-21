@@ -6,7 +6,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 ## Grant Matching Totals
 
-- **Refresh Data** (top right) pulls the latest grant form responses and the BioBuzz team list, and shows when data was last refreshed. *Mockup: it only updates the time.*
+- **Refresh Data** (top right) reads the latest grant form responses and the BioBuzz team list from Google Sheets, saves them, and reloads the page. It shows when data was last refreshed ("never" before the first refresh). Responses deleted from the sheet disappear on the next refresh; the administrator's entries stay linked to each response by its timestamp. If a sheet can't be read (not shared with the service account, or a key column moved), nothing changes and the reason appears under the button.
 - One row per category, plus a Total row. Hover the **Teams Applied ⓘ** heading for how teams are counted. The asterisk (*) on **Rookie/Veteran Status** links to the explanation in Grant Rules.
 
 | Column | How it's worked out |
@@ -69,6 +69,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 21, 2026:** Refresh Data now reads both Google Sheets. Mockup banner and sample data removed.
 - **Oct 20, 2026:** Changes are now saved to the database as you go ("Saving… / All changes saved" shows near the page title).
 - **Oct 20, 2026:** Added the Grant Matching Report (Excel) button next to Refresh Data.
 - **Oct 20, 2026:** Grant Ask Tracker heading shortened to "Cumulative Qualified Grants as of End Date".

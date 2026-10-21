@@ -4,6 +4,7 @@ import { z } from "zod";
 import { getDb } from "@/db";
 import { APPROVAL_OPTIONS, EMAIL_PURPOSES, VRS_OPTIONS } from "@/lib/applications";
 import { requireAdmin } from "@/lib/auth";
+import { fetchSheets } from "@/lib/sheets";
 import * as store from "@/lib/store";
 
 // Server actions behind every edit on the admin pages. Each one checks the admin session
@@ -79,4 +80,20 @@ export async function updateAskAction(id: number, patch: unknown) {
 export async function removeAskAction(id: number) {
   await requireAdmin();
   await store.removeAsk(getDb(), z.number().int().positive().parse(id));
+}
+
+/**
+ * Refresh Data: reads both Google Sheets and replaces the saved copies. If either sheet
+ * can't be read, nothing is changed and the reason comes back for the page to show.
+ */
+export async function refreshSheetsAction(): Promise<{ ok: true; refreshedAt: string } | { ok: false; error: string }> {
+  await requireAdmin();
+  try {
+    const tables = await fetchSheets();
+    const at = await store.saveSnapshots(getDb(), tables);
+    return { ok: true, refreshedAt: at.toISOString() };
+  } catch (err) {
+    console.error(err);
+    return { ok: false, error: err instanceof Error ? err.message : "Refresh failed." };
+  }
 }

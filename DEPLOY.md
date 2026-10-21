@@ -49,6 +49,7 @@ full email address. Check SPF/DKIM in hPanel → Emails → DNS settings.
    DATABASE_URL=<Supabase session pooler URI>   # required: the site loads and saves entries here
    DATABASE_SSL=true
    SESSION_SECRET=<64 random hex chars>
+   GOOGLE_SERVICE_ACCOUNT_KEY=<service account key, base64; see below>
    EMAIL_TRANSPORT=smtp
    SMTP_HOST=smtp.hostinger.com
    SMTP_PORT=465
@@ -65,3 +66,19 @@ full email address. Check SPF/DKIM in hPanel → Emails → DNS settings.
 
 - Schema changes: edit `src/db/schema.ts`, run `npm run db:generate`, commit the new file in
   `drizzle/`, and run `npm run db:migrate` against Supabase **before** deploying the new code.
+
+## Google Sheets access (Refresh Data)
+
+Refresh Data reads both Google Sheets as the service account
+`ftc-grant-sheets-reader@project-115d3a43-e62e-443b-8d5.iam.gserviceaccount.com` (Google Cloud project
+`project-115d3a43-e62e-443b-8d5`, Google Sheets API enabled). Both sheets must be shared with that
+email as **Viewer**.
+
+The key file `google-service-account.json` lives only in the project folder (git-ignored). For
+Hostinger, copy it as one line of base64 and paste it as `GOOGLE_SERVICE_ACCOUNT_KEY`:
+
+```bash
+node -e "process.stdout.write(Buffer.from(require('fs').readFileSync('google-service-account.json')).toString('base64'))" | clip
+```
+
+(`clip` copies to the Windows clipboard; on a Mac use `pbcopy`.)

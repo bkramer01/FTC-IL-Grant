@@ -2,7 +2,17 @@ import { sql } from "drizzle-orm";
 import { afterAll, beforeEach, describe, expect, test } from "vitest";
 import { inject } from "vitest";
 import { createDb, createPool } from "@/db";
-import { addAsk, addEmail, deleteEmail, loadAdminEntries, removeAsk, saveReview, updateAsk } from "@/lib/store";
+import {
+  addAsk,
+  addEmail,
+  deleteEmail,
+  loadAdminEntries,
+  loadSnapshots,
+  removeAsk,
+  saveReview,
+  saveSnapshots,
+  updateAsk,
+} from "@/lib/store";
 import { seed } from "../scripts/seed";
 
 const pool = createPool(inject("databaseUrl"), 2);
@@ -10,14 +20,16 @@ const db = createDb(pool);
 afterAll(() => pool.end());
 
 beforeEach(async () => {
-  await db.execute(sql`truncate application_reviews, email_log, grant_asks restart identity`);
+  await db.execute(sql`truncate application_reviews, email_log, grant_asks, sheet_snapshots restart identity`);
 });
 
 describe("seed", () => {
   test("loads the sample entries once", async () => {
-    expect(await seed(db)).toEqual({ reviews: 36, emails: 3, asks: 2 });
+    expect(await seed(db)).toEqual({ sheets: 2, reviews: 36, emails: 3, asks: 2 });
     // Re-running leaves filled tables alone.
-    expect(await seed(db)).toEqual({ reviews: 0, emails: 0, asks: 0 });
+    expect(await seed(db)).toEqual({ sheets: 0, reviews: 0, emails: 0, asks: 0 });
+    const sheets = await loadSnapshots(db);
+    expect([sheets.responses.rows.length, sheets.biobuzz.rows.length]).toEqual([36, 186]);
     const { reviews, emails, asks } = await loadAdminEntries(db);
     expect(Object.keys(reviews)).toHaveLength(36);
     expect(reviews["9/28/2026 19:07:48"]).toMatchObject({ approved: "Yes", raised: 500, checkAmount: 1050, raisedUpdatedOn: "2026-10-11" });
@@ -71,5 +83,23 @@ describe("grant asks", () => {
     await removeAsk(db, a1.id!);
     ({ asks } = await loadAdminEntries(db));
     expect(asks.map((a) => a.name)).toEqual(["Ask 2"]);
+  });
+});
+
+describe("sheet snapshots", () => {
+  test("nothing before the first refresh; a refresh replaces both tabs", async () => {
+    expect(await loadSnapshots(db)).toEqual({
+      responses: { headers: [], rows: [] },
+      biobuzz: { headers: [], rows: [] },
+      refreshedAt: null,
+    });
+    const at = new Date("2026-10-21T15:00:00Z");
+    await saveSnapshots(db, { responses: { headers: ["Timestamp"], rows: [["10/1/2026 9:00:00"]] }, biobuzz: { headers: ["TeamNumber", "TeamName"], rows: [["1", "A"]] } }, at);
+    await saveSnapshots(db, { responses: { headers: ["Timestamp"], rows: [] }, biobuzz: { headers: ["TeamNumber", "TeamName"], rows: [["2", "B"]] } }, at);
+    expect(await loadSnapshots(db)).toEqual({
+      responses: { headers: ["Timestamp"], rows: [] },
+      biobuzz: { headers: ["TeamNumber", "TeamName"], rows: [["2", "B"]] },
+      refreshedAt: at.toISOString(),
+    });
   });
 });

@@ -26,17 +26,6 @@ export function ProgramBar({ children }: { children?: ReactNode }) {
   );
 }
 
-export function MockupBanner() {
-  return (
-    <div role="status" className="bg-warning text-ink">
-      <div className="mx-auto max-w-7xl px-4 py-2 text-sm font-semibold">
-        ⚠ MOCKUP: form responses and team names are a snapshot of the Google Sheets (Refresh Data isn&apos;t connected
-        yet). Your entries and changes are saved.
-      </div>
-    </div>
-  );
-}
-
 export function SiteFooter() {
   return (
     <footer className="mt-12 border-t border-line py-10 text-sm">

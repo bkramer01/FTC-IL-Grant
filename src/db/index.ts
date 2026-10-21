@@ -6,10 +6,13 @@ export type Db = NodePgDatabase<typeof schema>;
 
 export function createPool(connectionString = process.env.DATABASE_URL, max = 10) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
+  // SSL for Supabase (DATABASE_SSL=true), never for a database on this computer (local
+  // development and the tests' throwaway Postgres don't speak SSL).
+  const local = /@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(connectionString);
   return new Pool({
     connectionString,
     max,
-    ssl: process.env.DATABASE_SSL === "true" ? { rejectUnauthorized: false } : undefined,
+    ssl: process.env.DATABASE_SSL === "true" && !local ? { rejectUnauthorized: false } : undefined,
   });
 }
 

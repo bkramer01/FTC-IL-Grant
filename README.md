@@ -25,11 +25,12 @@ npm run dev                       # http://localhost:3010
 Sign in at http://localhost:3010 as **FTCAdmin** with the `ADMIN_PASSWORD` from `.env.local`.
 The pages are described in [docs/README.md](docs/README.md).
 
-**Current stage.** Form responses and BioBuzz team names come from a snapshot in
-`src/mock/sample-data.json` (Refresh Data doesn't contact Google yet). Everything the Grant
-Administrator enters (reviews, fundraising and checks, the email log, grant asks) is saved to Postgres
+**How data flows.** **Refresh Data** (Dashboard) reads the grant form responses and the BioBuzz team
+list from Google Sheets with a service account (`GOOGLE_SERVICE_ACCOUNT_KEY`, see `src/lib/sheets.ts`)
+and saves them in the `sheet_snapshots` table. Everything the Grant Administrator enters (reviews, fundraising and checks, the email log, grant asks) is saved to Postgres
 through server actions (`src/app/(admin)/actions.ts` → `src/lib/store.ts`). After `npm run db:migrate`,
-run `npm run db:seed` to load the sample entries (`-- --reset` to start over). The grant rules live in
+`npm run db:seed` loads `src/mock/sample-data.json` (a sample snapshot plus sample entries) for local
+development only (`-- --reset` to start over); never run it against production. The grant rules live in
 `src/lib/grant.ts` and `src/lib/applications.ts`.
 
 Ports 3010 and 54339 are chosen so this site can run alongside the Event Registration site

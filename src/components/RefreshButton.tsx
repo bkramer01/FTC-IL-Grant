@@ -1,32 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { refreshSheetsAction } from "@/app/(admin)/actions";
 import { centralDateTime } from "@/lib/format";
 
 /**
- * MOCKUP: pretends to pull both Google Sheets ("Form Responses 1" and
- * "biobuzz - including unpaid") and updates the last-refreshed time.
+ * Refresh Data: reads the grant form responses and the BioBuzz team list from Google
+ * Sheets, saves them, and reloads the page's data. Shows when it last ran.
  */
-export function RefreshButton({ initialRefreshedAt }: { initialRefreshedAt: string }) {
+export function RefreshButton({ initialRefreshedAt }: { initialRefreshedAt: string | null }) {
+  const router = useRouter();
   const [refreshedAt, setRefreshedAt] = useState(initialRefreshedAt);
   const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
-  function refresh() {
+  async function refresh() {
     setBusy(true);
-    setDone(false);
-    setTimeout(() => {
-      setRefreshedAt(new Date().toISOString());
-      setBusy(false);
-      setDone(true);
-    }, 900);
+    setError(null);
+    const result = await refreshSheetsAction();
+    setBusy(false);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRefreshedAt(result.refreshedAt);
+    startTransition(() => router.refresh());
   }
 
   return (
     <div className="flex flex-wrap items-center gap-3 text-sm">
       <span className="text-muted" aria-live="polite">
-        Last refreshed: <strong className="text-ink">{centralDateTime(refreshedAt)}</strong>
-        {done && <span className="ml-2 text-success">✓ Mockup refresh. The real button pulls both Google Sheets.</span>}
+        Last refreshed:{" "}
+        <strong className="text-ink">{refreshedAt ? centralDateTime(refreshedAt) : "never"}</strong>
       </span>
       <button type="button" className="btn btn-primary btn-sm" onClick={refresh} disabled={busy}>
         <span aria-hidden className={busy ? "inline-block animate-spin" : ""}>
@@ -34,6 +41,11 @@ export function RefreshButton({ initialRefreshedAt }: { initialRefreshedAt: stri
         </span>
         {busy ? "Refreshing…" : "Refresh Data"}
       </button>
+      {error && (
+        <span role="alert" className="basis-full text-danger">
+          {error}
+        </span>
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, date, index, integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, check, date, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 // Grant site tables. Edit here, run `npm run db:generate`, and commit the new file in
 // drizzle/. Every table has row-level security on with no policies (added in the
@@ -81,4 +81,20 @@ export const grantAsks = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [check("grant_asks_amounts_check", sql`${t.cumulative} >= 0 and ${t.ask} >= 0`)],
+);
+
+/**
+ * The latest copy of each Google Sheet tab the site reads, replaced by Refresh Data:
+ * "responses" (grant form, Form Responses 1) and "biobuzz" (team list). Cells are the
+ * sheet's formatted values, one array per row, padded to the header length.
+ */
+export const sheetSnapshots = pgTable(
+  "sheet_snapshots",
+  {
+    source: text("source").primaryKey(),
+    headers: jsonb("headers").$type<string[]>().notNull(),
+    rows: jsonb("rows").$type<string[][]>().notNull(),
+    refreshedAt: timestamp("refreshed_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [check("sheet_snapshots_source_check", sql`${t.source} in ('responses', 'biobuzz')`)],
 );

@@ -1,18 +1,16 @@
 import "server-only";
 import { getDb } from "@/db";
-import sample from "@/mock/sample-data.json";
 import type { GrantData } from "./applications";
-import { loadAdminEntries } from "./store";
+import { loadAdminEntries, loadSnapshots } from "./store";
 
 /**
- * The site's data: form responses and BioBuzz team names from the sheet snapshot in
- * src/mock/sample-data.json (until Refresh Data reads the Google Sheets), plus the Grant
- * Administrator's saved entries from the database.
+ * Everything the pages show, from the database: the latest copies of the Google Sheets
+ * (saved by Refresh Data) and the Grant Administrator's entries.
  */
 export async function loadGrantData(): Promise<GrantData> {
-  const snapshot = sample as GrantData;
-  const saved = await loadAdminEntries(getDb());
-  return { ...snapshot, ...saved };
+  const db = getDb();
+  const [sheets, saved] = await Promise.all([loadSnapshots(db), loadAdminEntries(db)]);
+  return { ...sheets, ...saved };
 }
 
 /** The data a page sends to the browser: BioBuzz trimmed to team number and name. */
