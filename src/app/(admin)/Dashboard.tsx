@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { MoneyInput } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
+import { ReportButton } from "@/components/ReportButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
 import { compareValues, nextSort, SortHeader, type Sort as SortState } from "@/components/SortHeader";
 import {
@@ -24,6 +25,7 @@ import {
   TOTALS_CATEGORIES,
   type GrantCategory,
 } from "@/lib/grant";
+import { GrantAskTracker } from "./GrantAskTracker";
 
 type SortKey =
   | "team"
@@ -86,7 +88,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const [sort, setSort] = useState<Sort>({ key: "team", dir: 1 });
   const [tab, setTab] = useState<Tab>("fundraising");
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
-  const { rows, total } = useMemo(() => computeTotals(apps), [apps]);
+  const totals = useMemo(() => computeTotals(apps), [apps]);
+  const { rows, total } = totals;
   // Every submission whose Grant Approved is still blank or Under Review.
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
@@ -135,7 +138,15 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     <>
       <h1 className="mb-4 text-3xl">FTC Illinois Matching Grants, 2026–27 season</h1>
 
-      <Card title="Grant Matching Totals" actions={<RefreshButton initialRefreshedAt={data.refreshedAt} />}>
+      <Card
+        title="Grant Matching Totals"
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <RefreshButton initialRefreshedAt={data.refreshedAt} />
+            <ReportButton totals={totals} />
+          </div>
+        }
+      >
         {notReviewed > 0 && (
           <Alert tone="warning" compact>
             <Link href="/applications?show=notReviewed">
@@ -217,6 +228,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
           </table>
         </div>
       </Card>
+
+      <GrantAskTracker initialAsks={data.asks} currentQualified={total.qualified} />
 
       <Card
         title="Fundraising Status"

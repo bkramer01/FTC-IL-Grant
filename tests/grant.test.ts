@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildApplications, computeTotals, parseTimestamp, type GrantData } from "@/lib/applications";
+import { askTotals, buildApplications, computeTotals, parseTimestamp, type GrantData } from "@/lib/applications";
 import { grantCategory, maxFundraisingTarget, maxGrantAward, multiplierLabel, possibleAward, teamAge, unusedMatch } from "@/lib/grant";
 import sample from "@/mock/sample-data.json";
 
@@ -56,6 +56,16 @@ test("parses Google Forms timestamps", () => {
 
 describe("sample data", () => {
   const apps = buildApplications(data);
+
+  test("grant ask totals: latest cumulative and sum of asks", () => {
+    expect(askTotals(data.asks)).toEqual({ cumulative: 40700, ask: 40700 });
+    // A blank later row doesn't wipe out the latest cumulative.
+    expect(askTotals([...data.asks, { name: "Ask 3", start: null, end: null, cumulative: null, ask: null }])).toEqual({
+      cumulative: 40700,
+      ask: 40700,
+    });
+    expect(askTotals([])).toEqual({ cumulative: null, ask: 0 });
+  });
 
   test("reads City State and Zip separately", () => {
     // Sample-only row: zip moved out of City State into Zip.

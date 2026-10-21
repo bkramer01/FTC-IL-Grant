@@ -11,7 +11,7 @@ This folder documents every page of the grant site: what each page does, what us
 | Page | Address | What it's for |
 |---|---|---|
 | [Sign In](sign-in.md) | `/login` | Shared `FTCAdmin` login. Every other page requires it. |
-| [Dashboard](dashboard.md) | `/` | Grant totals by category, Refresh Data, Fundraising and Check Status tabs, and the grant rules. |
+| [Dashboard](dashboard.md) | `/` | Grant totals by category, Refresh Data, the Grant Ask Tracker, Fundraising and Check Status tabs, and the grant rules. |
 | [Applications](applications.md) | `/applications` | One row per grant form response, with the Grant Administrator's review columns. |
 | [Email Log](email-log.md) | `/emails` | Emails sent to coaches, entered by hand. |
 | [Form Responses](form-responses.md) | `/responses` | Read-only copy of the form's Google Sheet. |

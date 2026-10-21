@@ -81,7 +81,11 @@ export function fundraisingCsv(rows: Application[]): string {
 
 /** Saves CSV text as a file in the browser. The byte-order mark tells Excel the file is UTF-8. */
 export function downloadCsv(filename: string, csv: string) {
-  const blob = new Blob(["﻿", csv], { type: "text/csv;charset=utf-8" });
+  downloadBlob(filename, new Blob(["﻿", csv], { type: "text/csv;charset=utf-8" }));
+}
+
+/** Saves any file contents in the browser. */
+export function downloadBlob(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;

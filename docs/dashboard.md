@@ -2,7 +2,7 @@
 
 > **Address:** `/` · **Last updated:** October 19, 2026
 
-The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has three sections: Grant Matching Totals, Fundraising Status (with a Check Status tab) and Grant Rules.
+The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has four sections: Grant Matching Totals, Grant Ask Tracker, Fundraising Status (with a Check Status tab) and Grant Rules.
 
 ## Grant Matching Totals
 
@@ -21,7 +21,23 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 - When every approved team in a category has raised at least that category's Max Fundraising Target, its **Total Team Fundraising** cell turns light green. Hover the heading (ⓘ) or a green cell for an explanation. One team raising extra can't make up for another team that is short, and categories with no awarded teams never turn green.
 
+- **⤓ Grant Matching Report** (top right, next to Refresh Data) downloads the table as an Excel file, `grant-matching-report-YYYY-MM-DD.xlsx`: a "Grant Matching Report - as of" title row with the date and time, then the same columns, category rows and Total row. Headings and the Total row are bold, amounts are real numbers with dollar formatting, the heading row stays frozen when scrolling, and Total Team Fundraising has the same light green fill as the page. The note, Grant Rules and other sections aren't included. Unsaved edits on the page are included.
 - Under the title, a small yellow note reads "XX applications not fully reviewed/complete.": XX counts every submission whose Grant Approved is blank or Under Review. The count links to Applications filtered to those rows. Teams still missing a School Title 1 Status are left out of the table.
+
+## Grant Ask Tracker
+
+Filled out by the Grant Administrator to track requests for funds from the Donor Fund during the season. One row per ask:
+
+| Column | What goes in it |
+|---|---|
+| Name | Defaults to "Ask 1", "Ask 2", …; can be renamed. |
+| Start Date / End Date | The period the ask covers. A row whose end date is before its start date is flagged. |
+| Cumulative Qualified Grants as of End Date | Typed in: the season's Qualified Grants from Fundraising as of the ask's end date. **Use current** copies today's Qualified Grants from Fundraising total from Grant Matching Totals. |
+| Total Ask Amount from Donor Fund | Typed in. |
+
+- **+ Add ask** adds a row; **Remove** deletes one. There's no limit on the number of asks.
+- **Total Ask for Year**: the most recent ask's cumulative amount, and the sum of all ask amounts.
+- *Mockup: starts with the two asks from the spreadsheet's Goals tab; changes are not saved.*
 
 ## Fundraising Status
 
@@ -53,6 +69,10 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 20, 2026:** Added the Grant Matching Report (Excel) button next to Refresh Data.
+- **Oct 20, 2026:** Grant Ask Tracker heading shortened to "Cumulative Qualified Grants as of End Date".
+- **Oct 20, 2026:** Grant Ask Tracker made more compact: columns sized to their contents and all boxes in a row lined up. Use current and Remove are small gray pills so the dates and amounts stand out.
+- **Oct 20, 2026:** Added the Grant Ask Tracker between Grant Matching Totals and Fundraising Status.
 - **Oct 20, 2026:** Grant Matching Totals category names stay on one line; "Teams Applied" heading on two lines and "Total Team Fundraising as of" on three.
 - **Oct 20, 2026:** Total row on both Fundraising Status tabs.
 - **Oct 20, 2026:** "Fundraising as of" renamed "Total Team Fundraising as of". Only that cell turns light green now (not Qualified Grants from Fundraising); the green rule is unchanged.

@@ -48,13 +48,42 @@ export const EMAIL_PURPOSE_LABELS: Record<EmailPurpose, string> = {
 };
 export type EmailEntry = { date: string; teamNumber: number; recipient: string; purpose: string; notes: string };
 
+/**
+ * One request for money from the Donor Fund (Grant Ask Tracker). All fields are typed by the
+ * Grant Administrator; dates are "YYYY-MM-DD".
+ */
+export type GrantAsk = {
+  name: string;
+  start: string | null;
+  end: string | null;
+  /** Cumulative Qualified Grants from Fundraising as of the ask's end date. */
+  cumulative: number | null;
+  /** Total ask amount from the Donor Fund. */
+  ask: number | null;
+};
+
 export type GrantData = {
   refreshedAt: string;
   responses: SheetTable;
   biobuzz: SheetTable;
   reviews: Record<string, Review>;
   emails: EmailEntry[];
+  asks: GrantAsk[];
 };
+
+/**
+ * Total row of the Grant Ask Tracker: the latest ask's cumulative amount (the last row that
+ * has one) and the sum of all asks for the year.
+ */
+export function askTotals(asks: GrantAsk[]) {
+  let cumulative: number | null = null;
+  let ask = 0;
+  for (const a of asks) {
+    if (a.cumulative !== null) cumulative = a.cumulative;
+    ask += a.ask ?? 0;
+  }
+  return { cumulative, ask };
+}
 
 export const EMPTY_REVIEW: Review = {
   title1: null,

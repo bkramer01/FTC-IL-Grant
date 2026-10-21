@@ -6175,5 +6175,21 @@
    "purpose": "Additional Info Needed",
    "notes": "Missing matching grant letter upload"
   }
+ ],
+ "asks": [
+  {
+   "name": "Ask 1",
+   "start": "2026-09-01",
+   "end": "2026-10-20",
+   "cumulative": 20700,
+   "ask": 20700
+  },
+  {
+   "name": "Ask 2",
+   "start": "2026-10-21",
+   "end": "2026-11-20",
+   "cumulative": 40700,
+   "ask": 20000
+  }
  ]
 }
