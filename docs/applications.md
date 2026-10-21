@@ -40,6 +40,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 20, 2026:** Changes are now saved to the database as you go ("Saving… / All changes saved" shows near the page title).
 - **Oct 20, 2026:** Calculated Team Age heading has a hover note: "Checks the team age calculated by team number against what is reported on the grant form."
 - **Oct 19, 2026:** Timestamp, Team #, Calculated Team Age and Grant Approved columns are sortable.
 - **Oct 19, 2026:** Grant Approved's empty choice, its Show filter option, the counts box and the export now read "Not reviewed".

@@ -6,8 +6,8 @@ but with its **own** Supabase project, mailbox and Hostinger website.
 
 ## 1. Create the Supabase project
 
-1. https://supabase.com → **New project** (e.g. `ftc-il-grant`). Pick a region near Illinois, set a
-   strong database password and save it in your password manager.
+1. The project is **FTC IL Grant Project** (ref `uyyighbxmkhoussrleug`, us-west-2), separate from Event
+   Registration's. Keep its database password in your password manager.
 2. **Project Settings → Database → Connection string → URI.** Use the **Session pooler** string
    (port 5432; works over IPv4).
 3. From this project folder, point a temporary env at Supabase and create the tables:
@@ -18,7 +18,11 @@ but with its **own** Supabase project, mailbox and Hostinger website.
    DATABASE_SSL=true
 
    npm run db:migrate
+   npm run db:seed       # loads the sample entries; skip for a clean start
    ```
+
+   The site saves through this server-side connection only. Every table has row-level security on
+   with no policies, so Supabase's public API (and the publishable key) can't read or change data.
 
 4. Optional: add a `.mcp.json` pointing Claude Code's Supabase MCP at the new project ref, as in the
    Event Registration project.
@@ -42,7 +46,7 @@ full email address. Check SPF/DKIM in hPanel → Emails → DNS settings.
 
    ```
    NODE_ENV=production
-   DATABASE_URL=<Supabase session pooler URI>
+   DATABASE_URL=<Supabase session pooler URI>   # required: the site loads and saves entries here
    DATABASE_SSL=true
    SESSION_SECRET=<64 random hex chars>
    EMAIL_TRANSPORT=smtp

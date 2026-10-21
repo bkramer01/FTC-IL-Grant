@@ -5,6 +5,6 @@ import { Dashboard } from "./Dashboard";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default function DashboardPage() {
-  return <Dashboard data={loadClientGrantData()} today={todayCentral()} />;
+export default async function DashboardPage() {
+  return <Dashboard data={await loadClientGrantData()} today={todayCentral()} />;
 }

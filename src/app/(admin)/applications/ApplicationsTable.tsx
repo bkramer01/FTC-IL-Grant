@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { HeaderScrollbar } from "@/components/HeaderScrollbar";
 import { ChoiceSelect, FileLink, YesNoBadge, YesNoSelect } from "@/components/inputs";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
+import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort } from "@/components/SortHeader";
 import { APP_FILTERS, LINK_FILTERS, matchesFilter, type AppFilter } from "@/lib/app-filters";
 import {
@@ -18,6 +19,7 @@ import {
 import { applicationsCsv, downloadCsv } from "@/lib/export";
 import { formDate, formDateTime, shortDate, todayCentral } from "@/lib/format";
 import { TITLE1_NEEDED, type TeamAge } from "@/lib/grant";
+import { saveReviewAction } from "../actions";
 
 /** The team age the coach picked on the form, if it names one. */
 function ageFromForm(provided: string): TeamAge | null {
@@ -61,8 +63,11 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
   const [sort, setSort] = useState<Sort<SortKey>>({ key: "timestamp", dir: -1 });
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
 
+  const saver = useSaver();
+
   function update(timestamp: string, patch: Partial<Review>) {
     setReviews((r) => ({ ...r, [timestamp]: { ...(r[timestamp] ?? EMPTY_REVIEW), ...patch } }));
+    saver.queue(`${timestamp}:${Object.keys(patch).sort().join(",")}`, () => saveReviewAction(timestamp, patch));
   }
 
   const q = search.trim().toLowerCase();
@@ -89,7 +94,10 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
 
   return (
     <>
-      <h1 className="mb-4 text-3xl">Grant Application Status</h1>
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="text-3xl">Grant Application Status</h1>
+        <SaveStatus state={saver.state} />
+      </div>
 
       <Card
         title="Applications"

@@ -10,6 +10,7 @@ A list of the grant emails sent to coaches. Emails are written and sent outside 
 
 ## Change history
 
+- **Oct 20, 2026:** Changes are now saved to the database as you go ("Saving… / All changes saved" shows near the page title).
 - **Oct 19, 2026:** Notes is a five-line box; line breaks in notes show in the Emails sent table.
 - **Oct 19, 2026:** New description under the page title.
 - **Oct 19, 2026:** Email purpose dropdown and the Emails sent table show "Add'l Info Needed" for Additional Info Needed.

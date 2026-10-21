@@ -30,8 +30,8 @@ export function MockupBanner() {
   return (
     <div role="status" className="bg-warning text-ink">
       <div className="mx-auto max-w-7xl px-4 py-2 text-sm font-semibold">
-        ⚠ MOCKUP: sample data from FTC IL Grant Status.xlsx. Edits work on the page but are not saved; reloading resets
-        them.
+        ⚠ MOCKUP: form responses and team names are a snapshot of the Google Sheets (Refresh Data isn&apos;t connected
+        yet). Your entries and changes are saved.
       </div>
     </div>
   );

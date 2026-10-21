@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Card } from "@/components/SiteChrome";
+import { SaveStatus, useSaver } from "@/components/useSaver";
 import { EMAIL_PURPOSE_LABELS, EMAIL_PURPOSES, type EmailEntry, type EmailPurpose } from "@/lib/applications";
 import { shortDate } from "@/lib/format";
+import { addEmailAction, deleteEmailAction } from "../actions";
 
 type Team = { teamNumber: number; teamName: string | null; coach: string; email: string };
 
@@ -15,6 +17,7 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
   const [purpose, setPurpose] = useState<string>(EMAIL_PURPOSES[0]);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
+  const saver = useSaver();
 
   const teamName = (n: number) => teams.find((t) => t.teamNumber === n)?.teamName ?? "";
 
@@ -24,20 +27,32 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
     if (t) setRecipient(t.coach);
   }
 
-  function add(e: React.FormEvent) {
+  async function add(e: React.FormEvent) {
     e.preventDefault();
-    setEmails((list) => [...list, { date, teamNumber: Number(teamNumber), recipient, purpose, notes }]);
+    setAdded(false);
+    const saved = await saver.run(() => addEmailAction({ date, teamNumber: Number(teamNumber), recipient, purpose, notes }));
+    if (!saved) return; // the save note shows the problem; the form keeps what was typed
+    setEmails((list) => [...list, saved]);
     setTeamNumber("");
     setRecipient("");
     setNotes("");
     setAdded(true);
   }
 
+  function remove(i: number) {
+    const id = emails[i].id;
+    setEmails((list) => list.filter((_, j) => j !== i));
+    if (id) void saver.run(() => deleteEmailAction(id));
+  }
+
   const sorted = emails.map((e, i) => ({ ...e, i })).sort((a, b) => b.date.localeCompare(a.date) || b.i - a.i);
 
   return (
     <>
-      <h1 className="mb-1 text-3xl">Grant Email Log</h1>
+      <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="text-3xl">Grant Email Log</h1>
+        <SaveStatus state={saver.state} />
+      </div>
       <p className="mb-4 text-muted">
         This page captures emails sent to grantees, categorized by additional info needed, grant award, or other. Using
         the additional info needed and grant award entries will fill in the email sent columns on the application and
@@ -102,7 +117,7 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
             </button>
           </div>
         </form>
-        {added && <p className="mt-3 text-sm text-success" role="status">Added. (Mockup: not saved.)</p>}
+        {added && <p className="mt-3 text-sm text-success" role="status">Added.</p>}
       </Card>
 
       <Card title={`Emails sent (${emails.length})`}>
@@ -139,7 +154,7 @@ export function EmailLog({ initialEmails, teams, today }: { initialEmails: Email
                     <button
                       type="button"
                       className="btn btn-outline btn-sm"
-                      onClick={() => setEmails((list) => list.filter((_, j) => j !== e.i))}
+                      onClick={() => remove(e.i)}
                     >
                       Delete
                     </button>

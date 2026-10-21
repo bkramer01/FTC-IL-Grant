@@ -37,7 +37,7 @@ Filled out by the Grant Administrator to track requests for funds from the Donor
 
 - **+ Add ask** adds a row; **Remove** deletes one. There's no limit on the number of asks.
 - **Total Ask for Year**: the most recent ask's cumulative amount, and the sum of all ask amounts.
-- *Mockup: starts with the two asks from the spreadsheet's Goals tab; changes are not saved.*
+- Each change saves as you go. The sample data starts with the two asks from the spreadsheet's Goals tab.
 
 ## Fundraising Status
 
@@ -69,6 +69,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 20, 2026:** Changes are now saved to the database as you go ("Saving… / All changes saved" shows near the page title).
 - **Oct 20, 2026:** Added the Grant Matching Report (Excel) button next to Refresh Data.
 - **Oct 20, 2026:** Grant Ask Tracker heading shortened to "Cumulative Qualified Grants as of End Date".
 - **Oct 20, 2026:** Grant Ask Tracker made more compact: columns sized to their contents and all boxes in a row lined up. Use current and Remove are small gray pills so the dates and amounts stand out.

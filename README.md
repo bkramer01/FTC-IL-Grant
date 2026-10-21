@@ -18,15 +18,19 @@ npm install
 cp .env.example .env.local        # then edit ADMIN_PASSWORD and SESSION_SECRET
 npm run db:local                  # terminal 1: starts Postgres on localhost:54339 (leave running)
 npm run db:migrate                # terminal 2: creates the tables
+npm run db:seed                   # loads the sample administrator entries
 npm run dev                       # http://localhost:3010
 ```
 
 Sign in at http://localhost:3010 as **FTCAdmin** with the `ADMIN_PASSWORD` from `.env.local`.
 The pages are described in [docs/README.md](docs/README.md).
 
-**Current stage: mockup.** The pages run on sample data copied from `FTC IL Grant Status.xlsx`
-into `src/mock/sample-data.json` (loaded by `src/lib/data.ts`). Edits aren't saved and Refresh Data
-doesn't contact Google yet. The grant rules live in `src/lib/grant.ts` and `src/lib/applications.ts`.
+**Current stage.** Form responses and BioBuzz team names come from a snapshot in
+`src/mock/sample-data.json` (Refresh Data doesn't contact Google yet). Everything the Grant
+Administrator enters (reviews, fundraising and checks, the email log, grant asks) is saved to Postgres
+through server actions (`src/app/(admin)/actions.ts` → `src/lib/store.ts`). After `npm run db:migrate`,
+run `npm run db:seed` to load the sample entries (`-- --reset` to start over). The grant rules live in
+`src/lib/grant.ts` and `src/lib/applications.ts`.
 
 Ports 3010 and 54339 are chosen so this site can run alongside the Event Registration site
 (3000 / 54329).
@@ -39,6 +43,7 @@ Ports 3010 and 54339 are chosen so this site can run alongside the Event Registr
 | `npm run db:local` | Embedded Postgres in `.local-pg/`. |
 | `npm run db:generate` | Creates a migration in `drizzle/` from `src/db/schema.ts`. |
 | `npm run db:migrate` | Applies migrations to `DATABASE_URL`. |
+| `npm run db:seed` | Loads the sample reviews, emails and grant asks into empty tables (`-- --reset` empties them first). |
 | `npm test` | Vitest against a throwaway embedded Postgres. |
 | `npm run typecheck` / `npm run lint` | Type check / lint. |
 | `npm run build` | Production build into `.next/standalone`. |

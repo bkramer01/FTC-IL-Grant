@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { MoneyInput } from "@/components/inputs";
+import { SaveStatus, useSaver } from "@/components/useSaver";
 import { Card } from "@/components/SiteChrome";
 import { askTotals, type GrantAsk } from "@/lib/applications";
 import { money } from "@/lib/format";
+import { addAskAction, removeAskAction, updateAskAction } from "./actions";
 
 /**
  * Requests for money from the Donor Fund during the season. Everything is entered by the
  * Grant Administrator; "Use current" copies today's Qualified Grants from Fundraising total.
- * MOCKUP: edits are not saved.
+ * Changes save to the database as you go.
  */
 export function GrantAskTracker({
   initialAsks,
@@ -21,12 +23,23 @@ export function GrantAskTracker({
   const [asks, setAsks] = useState(initialAsks);
   const totals = askTotals(asks);
 
+  const saver = useSaver();
+
   function update(i: number, patch: Partial<GrantAsk>) {
+    const id = asks[i].id;
     setAsks((list) => list.map((a, j) => (j === i ? { ...a, ...patch } : a)));
+    if (id) saver.queue(`ask:${id}:${Object.keys(patch).sort().join(",")}`, () => updateAskAction(id, patch));
   }
 
-  function addAsk() {
-    setAsks((list) => [...list, { name: `Ask ${list.length + 1}`, start: null, end: null, cumulative: null, ask: null }]);
+  async function addAsk() {
+    const created = await saver.run(() => addAskAction(`Ask ${asks.length + 1}`));
+    if (created) setAsks((list) => [...list, created]);
+  }
+
+  function remove(i: number) {
+    const id = asks[i].id;
+    setAsks((list) => list.filter((_, j) => j !== i));
+    if (id) void saver.run(() => removeAskAction(id));
   }
 
   return (
@@ -34,9 +47,12 @@ export function GrantAskTracker({
       id="grant-ask-tracker"
       title="Grant Ask Tracker"
       actions={
-        <button type="button" className="btn btn-outline btn-sm" onClick={addAsk}>
-          + Add ask
-        </button>
+        <div className="flex items-center gap-3">
+          <SaveStatus state={saver.state} />
+          <button type="button" className="btn btn-outline btn-sm" onClick={addAsk}>
+            + Add ask
+          </button>
+        </div>
       }
     >
       <p className="mb-3 text-sm text-muted">
@@ -71,7 +87,7 @@ export function GrantAskTracker({
               </tr>
             )}
             {asks.map((a, i) => (
-              <tr key={i}>
+              <tr key={a.id ?? i}>
                 <td className="w-28">
                   <input
                     aria-label={`Name of ask ${i + 1}`}
@@ -136,7 +152,7 @@ export function GrantAskTracker({
                     <button
                       type="button"
                       className="cell-pill"
-                      onClick={() => setAsks((list) => list.filter((_, j) => j !== i))}
+                      onClick={() => remove(i)}
                     >
                       Remove
                     </button>

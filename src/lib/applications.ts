@@ -46,13 +46,16 @@ export const EMAIL_PURPOSE_LABELS: Record<EmailPurpose, string> = {
   "Grant Award": "Grant Award",
   Other: "Other",
 };
-export type EmailEntry = { date: string; teamNumber: number; recipient: string; purpose: string; notes: string };
+/** One logged email. `id` is the database row (absent only in the bundled sample data). */
+export type EmailEntry = { id?: number; date: string; teamNumber: number; recipient: string; purpose: string; notes: string };
 
 /**
  * One request for money from the Donor Fund (Grant Ask Tracker). All fields are typed by the
  * Grant Administrator; dates are "YYYY-MM-DD".
  */
 export type GrantAsk = {
+  /** Database row; absent only in the bundled sample data. */
+  id?: number;
   name: string;
   start: string | null;
   end: string | null;

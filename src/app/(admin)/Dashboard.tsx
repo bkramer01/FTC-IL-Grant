@@ -6,6 +6,7 @@ import { MoneyInput } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { ReportButton } from "@/components/ReportButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
+import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort as SortState } from "@/components/SortHeader";
 import {
   buildApplications,
@@ -26,6 +27,7 @@ import {
   type GrantCategory,
 } from "@/lib/grant";
 import { GrantAskTracker } from "./GrantAskTracker";
+import { saveReviewAction } from "./actions";
 
 type SortKey =
   | "team"
@@ -93,8 +95,11 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   // Every submission whose Grant Approved is still blank or Under Review.
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
+  const saver = useSaver();
+
   function update(timestamp: string, patch: Partial<Review>) {
     setReviews((r) => ({ ...r, [timestamp]: { ...(r[timestamp] ?? EMPTY_REVIEW), ...patch } }));
+    saver.queue(`${timestamp}:${Object.keys(patch).sort().join(",")}`, () => saveReviewAction(timestamp, patch));
   }
 
   function onSort(key: SortKey) {
@@ -136,7 +141,10 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
 
   return (
     <>
-      <h1 className="mb-4 text-3xl">FTC Illinois Matching Grants, 2026–27 season</h1>
+      <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+        <h1 className="text-3xl">FTC Illinois Matching Grants, 2026–27 season</h1>
+        <SaveStatus state={saver.state} />
+      </div>
 
       <Card
         title="Grant Matching Totals"

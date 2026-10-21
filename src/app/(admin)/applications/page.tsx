@@ -9,5 +9,5 @@ export const metadata: Metadata = { title: "Applications" };
 export default async function ApplicationsPage({ searchParams }: PageProps<"/applications">) {
   const { show } = await searchParams;
   const filter = findFilter(show)?.value ?? "all";
-  return <ApplicationsTable data={loadClientGrantData()} initialFilter={filter} />;
+  return <ApplicationsTable data={await loadClientGrantData()} initialFilter={filter} />;
 }

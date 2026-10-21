@@ -30,8 +30,8 @@ const SHORT_HEADERS = [
 ];
 
 /** Read-only copy of the "Form Responses 1" tab, as last pulled by Refresh Data. */
-export default function ResponsesPage() {
-  const { responses, refreshedAt } = loadGrantData();
+export default async function ResponsesPage() {
+  const { responses, refreshedAt } = await loadGrantData();
   return (
     <>
       <h1 className="mb-1 text-3xl">Form Responses</h1>

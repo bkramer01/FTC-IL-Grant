@@ -4,7 +4,7 @@
 
 This folder documents every page of the grant site: what each page does, what users see, and which settings control it. There is one document per page.
 
-> **Mockup stage:** the pages run on sample data copied from `FTC IL Grant Status.xlsx` (`src/mock/sample-data.json`). Edits work on the page but are not saved, and Refresh Data doesn't contact Google yet.
+> **Current stage:** form responses and team names come from a snapshot of the Google Sheets (`src/mock/sample-data.json`); Refresh Data doesn't contact Google yet. Everything typed or picked on the pages is saved to the database (Supabase in production) as you go; each page shows "Saving… / All changes saved".
 
 ## The pages
 

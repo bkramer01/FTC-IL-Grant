@@ -6,8 +6,8 @@ import { EmailLog } from "./EmailLog";
 
 export const metadata: Metadata = { title: "Email Log" };
 
-export default function EmailLogPage() {
-  const data = loadClientGrantData();
+export default async function EmailLogPage() {
+  const data = await loadClientGrantData();
   // Team # → team name and coach, to fill in the recipient when adding an email.
   const teams = new Map<number, { teamNumber: number; teamName: string | null; coach: string; email: string }>();
   for (const a of buildApplications(data)) {
