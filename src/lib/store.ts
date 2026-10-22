@@ -3,7 +3,8 @@
 import { asc, desc, eq, sql } from "drizzle-orm";
 import type { Db } from "@/db";
 import { applicationReviews, emailLog, grantAsks, sheetSnapshots } from "@/db/schema";
-import type { EmailEntry, GrantAsk, Review, SheetTable } from "./applications";
+import { hqAmountFromRow, responseTimestamp, type EmailEntry, type GrantAsk, type Review, type SheetTable } from "./applications";
+import { todayCentral } from "./format";
 
 type ReviewRow = typeof applicationReviews.$inferSelect;
 
@@ -18,7 +19,9 @@ function toReview(r: ReviewRow): Review {
     notes: r.notes,
     raised: r.raised,
     raisedUpdatedOn: r.raisedUpdatedOn,
+    raisedSet: r.raisedSet,
     checkAmount: r.checkAmount,
+    checkAmountFor: r.checkAmountFor,
     checkNumber: r.checkNumber,
     checkMailedOn: r.checkMailedOn,
   };
@@ -96,9 +99,27 @@ export async function removeAsk(db: Db, id: number) {
   await db.delete(grantAsks).where(eq(grantAsks.id, id));
 }
 
-/** Replaces both sheet snapshots together (one transaction) and returns the refresh time. */
+/**
+ * Replaces both sheet snapshots and, in the same transaction, copies each form response's HQ
+ * grant amount into Raised by Team where that hasn't been set yet (blank and non-numeric
+ * amounts are skipped until the sheet has a number). Returns the refresh time.
+ */
 export async function saveSnapshots(db: Db, tables: Record<"responses" | "biobuzz", SheetTable>, now = new Date()) {
+  const today = todayCentral(now);
   await db.transaction(async (tx) => {
+    for (const row of tables.responses.rows) {
+      const amount = hqAmountFromRow(row);
+      if (amount === null || amount === "error") continue;
+      const values = { raised: amount, raisedUpdatedOn: today, raisedSet: true, updatedAt: now };
+      await tx
+        .insert(applicationReviews)
+        .values({ responseTimestamp: responseTimestamp(row), ...values })
+        .onConflictDoUpdate({
+          target: applicationReviews.responseTimestamp,
+          set: values,
+          setWhere: eq(applicationReviews.raisedSet, false),
+        });
+    }
     for (const source of ["responses", "biobuzz"] as const) {
       const { headers, rows } = tables[source];
       await tx

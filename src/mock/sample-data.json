@@ -5658,7 +5658,9 @@
    "notes": "Not Qualified - veteran team, not Title 1",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5672,7 +5674,9 @@
    "notes": "Not Qualified - veteran team, not Title 1",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5686,7 +5690,9 @@
    "notes": "Not Qualified - veteran team, not Title 1",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5700,7 +5706,9 @@
    "notes": "Waiting on matching grant letter",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5714,7 +5722,9 @@
    "notes": "Not Qualified - veteran team, not Title 1",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5728,7 +5738,9 @@
    "notes": "Not Qualified - veteran team, not Title 1",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5742,7 +5754,9 @@
    "notes": "Team # is Second Year; form says veteran",
    "raised": 400,
    "raisedUpdatedOn": "2026-10-09",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5756,7 +5770,9 @@
    "notes": "Team # is Second Year; form says veteran",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5770,7 +5786,9 @@
    "notes": "",
    "raised": 750,
    "raisedUpdatedOn": "2026-10-08",
+   "raisedSet": true,
    "checkAmount": 750,
+   "checkAmountFor": null,
    "checkNumber": "2245",
    "checkMailedOn": "2026-10-10"
   },
@@ -5784,7 +5802,9 @@
    "notes": "Additional info email sent - letter missing",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5798,7 +5818,9 @@
    "notes": "Form says Rookie; team # is Second Year",
    "raised": 500,
    "raisedUpdatedOn": "2026-10-07",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5812,7 +5834,9 @@
    "notes": "",
    "raised": 1200,
    "raisedUpdatedOn": "2026-10-06",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5826,7 +5850,9 @@
    "notes": "",
    "raised": 1000,
    "raisedUpdatedOn": "2026-10-05",
+   "raisedSet": true,
    "checkAmount": 3000,
+   "checkAmountFor": null,
    "checkNumber": "4432",
    "checkMailedOn": "2026-10-12"
   },
@@ -5840,7 +5866,9 @@
    "notes": "Approved - sample data",
    "raised": 900,
    "raisedUpdatedOn": "2026-10-11",
+   "raisedSet": true,
    "checkAmount": 750,
+   "checkAmountFor": null,
    "checkNumber": "3352",
    "checkMailedOn": "2026-10-13"
   },
@@ -5854,7 +5882,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 250,
    "raisedUpdatedOn": "2026-10-02",
+   "raisedSet": true,
    "checkAmount": 500,
+   "checkAmountFor": null,
    "checkNumber": "3345",
    "checkMailedOn": "2026-10-06"
   },
@@ -5868,7 +5898,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 600,
    "raisedUpdatedOn": "2026-10-04",
+   "raisedSet": true,
    "checkAmount": 1200,
+   "checkAmountFor": null,
    "checkNumber": "3345",
    "checkMailedOn": "2026-10-09"
   },
@@ -5882,7 +5914,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 800,
    "raisedUpdatedOn": "2026-10-05",
+   "raisedSet": true,
    "checkAmount": 1200,
+   "checkAmountFor": null,
    "checkNumber": "3332",
    "checkMailedOn": "2026-10-11"
   },
@@ -5896,7 +5930,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 450,
    "raisedUpdatedOn": "2026-10-07",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5910,7 +5946,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 300,
    "raisedUpdatedOn": "2026-10-08",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5924,7 +5962,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 1000,
    "raisedUpdatedOn": "2026-10-09",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5938,7 +5978,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 600,
    "raisedUpdatedOn": "2026-10-10",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5952,7 +5994,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 150,
    "raisedUpdatedOn": "2026-10-12",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5966,7 +6010,9 @@
    "notes": "SAMPLE row - pending review",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -5980,7 +6026,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 900,
    "raisedUpdatedOn": "2026-10-03",
+   "raisedSet": true,
    "checkAmount": 900,
+   "checkAmountFor": null,
    "checkNumber": "3335",
    "checkMailedOn": "2026-10-08"
   },
@@ -5994,7 +6042,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 1800,
    "raisedUpdatedOn": "2026-10-06",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6008,7 +6058,9 @@
    "notes": "SAMPLE row - pending review",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6022,7 +6074,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 700,
    "raisedUpdatedOn": "2026-10-09",
+   "raisedSet": true,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6036,7 +6090,9 @@
    "notes": "SAMPLE row - pending review",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6050,7 +6106,9 @@
    "notes": "SAMPLE row (mockup only)",
    "raised": 500,
    "raisedUpdatedOn": "2026-10-11",
+   "raisedSet": true,
    "checkAmount": 1050,
+   "checkAmountFor": null,
    "checkNumber": "2343",
    "checkMailedOn": "2026-10-14"
   },
@@ -6064,7 +6122,9 @@
    "notes": "SAMPLE duplicate submission (mockup only)",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6078,7 +6138,9 @@
    "notes": "SAMPLE team number not in BioBuzz (mockup only)",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6092,7 +6154,9 @@
    "notes": "",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6106,7 +6170,9 @@
    "notes": "",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6120,7 +6186,9 @@
    "notes": "",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6134,7 +6202,9 @@
    "notes": "",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   },
@@ -6148,7 +6218,9 @@
    "notes": "",
    "raised": null,
    "raisedUpdatedOn": null,
+   "raisedSet": false,
    "checkAmount": null,
+   "checkAmountFor": null,
    "checkNumber": null,
    "checkMailedOn": null
   }

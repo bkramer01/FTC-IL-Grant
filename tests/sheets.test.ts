@@ -18,6 +18,6 @@ test("layout check names the column that moved", () => {
 
 test("the grant form's key columns match today's sheet", () => {
   const headers = Array.from({ length: 19 }, (_, i) => `col${i}`);
-  Object.assign(headers, { 0: "Timestamp", 4: "Team Number", 5: "Coach Name", 14: "Street Address", 15: "City State", 18: "Zip" });
+  Object.assign(headers, { 0: "Timestamp", 4: "Team Number", 5: "Coach Name", 8: "IF yes- how much did your team receive as credit from FIRST Headquarters", 14: "Street Address", 15: "City State", 18: "Zip" });
   expect(() => checkLayout("responses", { headers, rows: [] })).not.toThrow();
 });

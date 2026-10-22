@@ -25,7 +25,10 @@ const reviewPatch = z
     notes: z.string().max(5000),
     raised: dollars,
     raisedUpdatedOn: isoDate,
+    // Sent with every Raised by Team edit, so later refreshes don't copy the form's amount over it.
+    raisedSet: z.literal(true),
     checkAmount: dollars,
+    checkAmountFor: dollars,
     checkNumber: z.string().max(50).nullable(),
     checkMailedOn: isoDate,
   })

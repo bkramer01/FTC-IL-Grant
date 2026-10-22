@@ -6,7 +6,6 @@ import { maxFundraisingTarget, maxGrantAward, multiplierLabel } from "./grant";
 type Column = [string, (a: Application) => string | number | null];
 
 const APPLICATION_COLUMNS: Column[] = [
-  ["Timestamp", (a) => a.timestamp],
   ["Team #", (a) => a.teamNumber],
   ["Team Name", (a) => a.teamName ?? "not found"],
   ["Coach Name", (a) => a.coach],
@@ -14,20 +13,21 @@ const APPLICATION_COLUMNS: Column[] = [
   ["Rookie/Veteran Status Provided", (a) => a.categoryProvided],
   ["Calculated Team Age", (a) => a.age],
   ["Grant Approved", (a) => a.review.approved ?? "Not reviewed"],
+  ["Raised by Team", (a) => a.review.raised],
+  ["Possible Grant Award", (a) => a.possibleAward],
   ["Review Notes", (a) => a.review.notes],
   ["Rookie/Veteran Status for Grant", (a) => a.category],
   ["School Title 1 Status", (a) => a.review.title1],
   ["Fundraising Letter Rec'd", (a) => a.review.letterReceived],
   ["Fundraising Letter Link", (a) => a.letterUrl],
-  ["Event Volunteering?", (a) => a.review.volunteering],
   ["List of Volunteers", (a) => a.volunteers],
   ["Fully Registered? (from Team)", (a) => a.fullyRegistered],
-  ["Qualified Purchase?", (a) => a.review.qualifiedPurchase],
   ["End of Season Survey Completed?", (a) => a.surveyCompleted],
   ["VRS Task Completed", (a) => a.review.vrsCompleted],
   ["VRS Screenshot Link", (a) => a.vrsUrl],
   ["Add'l Info Email Sent", (a) => shortDate(a.additionalInfoEmailOn)],
   ["Submissions from Team", (a) => a.duplicateCount],
+  ["Timestamp", (a) => a.timestamp],
 ];
 
 /** Both Fundraising Status tabs, in on-screen order: Fundraising Status, then Check Status. */
@@ -48,7 +48,7 @@ const FUNDRAISING_COLUMNS: Column[] = [
   ["Street Address", (a) => a.street],
   ["City, State", (a) => a.cityState],
   ["Zip", (a) => a.zip],
-  ["Amount of Check", (a) => a.review.checkAmount],
+  ["Amount of Check", (a) => a.checkAmount],
   ["Check #", (a) => a.review.checkNumber],
   ["Date Check Mailed", (a) => shortDate(a.review.checkMailedOn)],
   ["Grant Award Email Sent", (a) => shortDate(a.awardEmailOn)],

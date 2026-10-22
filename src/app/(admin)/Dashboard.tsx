@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { MoneyInput } from "@/components/inputs";
+import { HqAmountError, MoneyInput } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { ReportButton } from "@/components/ReportButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
@@ -12,6 +12,7 @@ import {
   buildApplications,
   computeTotals,
   EMPTY_REVIEW,
+  isCheckLocked,
   type Application,
   type GrantData,
   type Review,
@@ -65,7 +66,7 @@ function sortValue(a: Application, key: SortKey): number | string | null {
     case "unused":
       return a.unusedMatch;
     case "checkAmount":
-      return a.review.checkAmount;
+      return a.checkAmount;
     case "checkNumber": {
       const n = a.review.checkNumber?.trim();
       if (!n) return null;
@@ -102,6 +103,14 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     saver.queue(`${timestamp}:${Object.keys(patch).sort().join(",")}`, () => saveReviewAction(timestamp, patch));
   }
 
+  /** Check # or Date Check Mailed changed. Completing both locks the check at its current amount. */
+  function updateCheck(a: Application, patch: Pick<Partial<Review>, "checkNumber" | "checkMailedOn">) {
+    update(a.timestamp, patch);
+    if (!a.checkLocked && isCheckLocked({ ...a.review, ...patch })) {
+      update(a.timestamp, { checkAmount: a.checkAmount, checkAmountFor: a.possibleAward });
+    }
+  }
+
   function onSort(key: SortKey) {
     setSort((s) => nextSort(s, key));
   }
@@ -121,7 +130,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     fundTotals.raised += a.review.raised ?? 0;
     fundTotals.possible += a.possibleAward ?? 0;
     fundTotals.unused += a.unusedMatch ?? 0;
-    fundTotals.checks += a.review.checkAmount ?? 0;
+    fundTotals.checks += a.checkAmount ?? 0;
   }
 
   const teamCell = (a: Application) => (
@@ -198,7 +207,9 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   </span>
                 </th>
                 <th className="num">Qualified Grants from Fundraising</th>
-                <th className="num">Grants Distributed to Teams</th>
+                <th className="num cursor-help" title="Includes amount of checks mailed to teams">
+                  Grants Distributed to Teams <span className="text-muted">ⓘ</span>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -329,7 +340,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       sortKey="raised"
                       sort={sort}
                       onSort={onSort}
-                      className="manual num"
+                      className="num"
                     />
                     <th className="num">
                       Possible
@@ -380,7 +391,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     </th>
                     <th className="num">Zip</th>
                     <SortHeader
-                      label={<>Amount<br />of Check</>}
+                      label={<>Amount<br />of Check <span className="text-muted">ⓘ</span></>}
+                      title="If check number and date check mailed are filled out, then the check amount is no longer editable"
                       sortKey="checkAmount"
                       sort={sort}
                       onSort={onSort}
@@ -417,13 +429,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="num">{multiplierLabel(a.category)}</td>
                       <td className="num">{money(maxGrantAward(a.category))}</td>
                       <td className="num">{money(maxFundraisingTarget(a.category))}</td>
-                      <td className="w-28">
-                        <MoneyInput
-                          label={`Amount raised by team ${a.teamNumber}`}
-                          value={a.review.raised}
-                          onChange={(v) => update(a.timestamp, { raised: v, raisedUpdatedOn: today })}
-                        />
-                      </td>
+                      <td className="num">{a.raisedError ? <HqAmountError value={a.hqAmount} /> : money(a.review.raised)}</td>
                       <td className="num">{money(a.possibleAward)}</td>
                       <td className="num">{money(a.unusedMatch)}</td>
                       <td className="whitespace-nowrap">{shortDate(a.review.raisedUpdatedOn)}</td>
@@ -436,19 +442,28 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="min-w-36">{a.street}</td>
                       <td className="whitespace-nowrap">{a.cityState}</td>
                       <td className="num whitespace-nowrap">{a.zip}</td>
-                      <td className="w-28">
-                        <MoneyInput
-                          label={`Check amount for team ${a.teamNumber}`}
-                          value={a.review.checkAmount}
-                          onChange={(v) => update(a.timestamp, { checkAmount: v })}
-                        />
-                      </td>
+                      {a.checkLocked ? (
+                        <td
+                          className="num cursor-help"
+                          title="Locked because Check # and Date Check Mailed are filled in. Clear either one to change the amount."
+                        >
+                          {money(a.checkAmount)} <span aria-hidden>🔒</span>
+                        </td>
+                      ) : (
+                        <td className="w-28">
+                          <MoneyInput
+                            label={`Check amount for team ${a.teamNumber}`}
+                            value={a.checkAmount}
+                            onChange={(v) => update(a.timestamp, { checkAmount: v, checkAmountFor: a.possibleAward })}
+                          />
+                        </td>
+                      )}
                       <td className="w-24">
                         <input
                           aria-label={`Check number for team ${a.teamNumber}`}
                           className="cell-input text-center"
                           value={a.review.checkNumber ?? ""}
-                          onChange={(e) => update(a.timestamp, { checkNumber: e.target.value || null })}
+                          onChange={(e) => updateCheck(a, { checkNumber: e.target.value || null })}
                         />
                       </td>
                       <td>
@@ -457,7 +472,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                           aria-label={`Date check mailed to team ${a.teamNumber}`}
                           className="cell-input"
                           value={a.review.checkMailedOn ?? ""}
-                          onChange={(e) => update(a.timestamp, { checkMailedOn: e.target.value || null })}
+                          onChange={(e) => updateCheck(a, { checkMailedOn: e.target.value || null })}
                         />
                       </td>
                       <td className="whitespace-nowrap">{shortDate(a.awardEmailOn)}</td>

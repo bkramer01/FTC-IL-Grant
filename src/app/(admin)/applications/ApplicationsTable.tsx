@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { HeaderScrollbar } from "@/components/HeaderScrollbar";
-import { ChoiceSelect, FileLink, YesNoBadge, YesNoSelect } from "@/components/inputs";
+import { ChoiceSelect, FileLink, HqAmountError, MoneyInput, YesNoBadge, YesNoSelect } from "@/components/inputs";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
 import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort } from "@/components/SortHeader";
@@ -17,7 +17,7 @@ import {
   type Review,
 } from "@/lib/applications";
 import { applicationsCsv, downloadCsv } from "@/lib/export";
-import { formDate, formDateTime, shortDate, todayCentral } from "@/lib/format";
+import { formDate, formDateTime, money, shortDate, todayCentral } from "@/lib/format";
 import { TITLE1_NEEDED, type TeamAge } from "@/lib/grant";
 import { saveReviewAction } from "../actions";
 
@@ -149,8 +149,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
           <table className="data-table sticky-head">
             <thead>
               <tr>
-                <SortHeader label="Timestamp" sortKey="timestamp" sort={sort} onSort={onSort} />
-                <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} />
+                <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} className="freeze" />
                 <th>Team Name</th>
                 <th>Coach Name</th>
                 <th>
@@ -172,6 +171,16 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   onSort={onSort}
                 />
                 <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
+                <th className="manual">
+                  Raised by
+                  <br />
+                  Team
+                </th>
+                <th className="num">
+                  Possible
+                  <br />
+                  Grant Award
+                </th>
                 <th className="manual">Review Notes</th>
                 <th>
                   Rookie/Veteran
@@ -180,14 +189,12 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 </th>
                 <th className="manual yn">School Title 1 Status</th>
                 <th className="manual yn">Fundraising Letter Rec&apos;d</th>
-                <th className="manual yn">Event Volunteering?</th>
                 <th>List of Volunteers</th>
                 <th>
                   Fully Registered?
                   <br />
                   (from Team)
                 </th>
-                <th className="manual yn">Qualified Purchase?</th>
                 <th>
                   End of Season
                   <br />
@@ -199,6 +206,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   <br />
                   Email Sent
                 </th>
+                <SortHeader label="Timestamp" sortKey="timestamp" sort={sort} onSort={onSort} />
               </tr>
               <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
             </thead>
@@ -214,12 +222,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 const formAge = ageFromForm(a.categoryProvided);
                 return (
                   <tr key={a.timestamp}>
-                    <td className="whitespace-nowrap">
-                      <span className="cursor-help" title={formDateTime(a.submittedAt)}>
-                        {formDate(a.submittedAt)}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap">
+                    <td className="freeze whitespace-nowrap">
                       {a.teamNumber}
                       {a.duplicateCount > 1 && (
                         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
@@ -255,6 +258,19 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         onChange={(v) => update(a.timestamp, { approved: v })}
                       />
                     </td>
+                    <td className="w-28">
+                      <MoneyInput
+                        label={`Amount raised by team ${a.teamNumber}`}
+                        value={a.review.raised}
+                        onChange={(v) => update(a.timestamp, { raised: v, raisedUpdatedOn: todayCentral(), raisedSet: true })}
+                      />
+                      {a.raisedError && (
+                        <div className="mt-1">
+                          <HqAmountError value={a.hqAmount} />
+                        </div>
+                      )}
+                    </td>
+                    <td className="num">{money(a.possibleAward)}</td>
                     <td className="min-w-56">
                       <textarea
                         aria-label={`Review notes for team ${a.teamNumber}`}
@@ -284,23 +300,9 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         <FileLink href={a.letterUrl}>Letter</FileLink>
                       </div>
                     </td>
-                    <td>
-                      <YesNoSelect
-                        label={`Event volunteering for team ${a.teamNumber}`}
-                        value={a.review.volunteering}
-                        onChange={(v) => update(a.timestamp, { volunteering: v })}
-                      />
-                    </td>
                     <td className="w-48 min-w-48 [overflow-wrap:anywhere]">{a.volunteers}</td>
                     <td>
                       <YesNoBadge value={a.fullyRegistered} />
-                    </td>
-                    <td>
-                      <YesNoSelect
-                        label={`Qualified purchase for team ${a.teamNumber}`}
-                        value={a.review.qualifiedPurchase}
-                        onChange={(v) => update(a.timestamp, { qualifiedPurchase: v })}
-                      />
                     </td>
                     <td>
                       <YesNoBadge value={a.surveyCompleted} />
@@ -318,6 +320,11 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       </div>
                     </td>
                     <td className="whitespace-nowrap">{shortDate(a.additionalInfoEmailOn)}</td>
+                    <td className="whitespace-nowrap">
+                      <span className="cursor-help" title={formDateTime(a.submittedAt)}>
+                        {formDate(a.submittedAt)}
+                      </span>
+                    </td>
                   </tr>
                 );
               })}

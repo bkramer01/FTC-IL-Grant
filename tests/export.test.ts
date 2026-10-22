@@ -19,11 +19,15 @@ describe("csvField", () => {
 test("exports every application, newest first", () => {
   const apps = buildApplications(sample as GrantData);
   const lines = applicationsCsv(apps).trimEnd().split("\r\n");
-  expect(lines[0].startsWith("Timestamp,Team #,Team Name,Coach Name,Coach Email,")).toBe(true);
+  expect(lines[0].startsWith("Team #,Team Name,Coach Name,Coach Email,")).toBe(true);
+  expect(lines[0]).toContain(",Grant Approved,Raised by Team,Possible Grant Award,Review Notes,");
+  expect(lines[0]).not.toMatch(/Event Volunteering|Qualified Purchase/);
+  expect(lines[0].endsWith(",Submissions from Team,Timestamp")).toBe(true);
   expect(lines).toHaveLength(apps.length + 1);
-  expect(lines[1].startsWith("10/19/2026 17:46:38,38467,VHR,")).toBe(true);
+  expect(lines[1].startsWith("38467,VHR,")).toBe(true);
+  expect(lines[1].endsWith(",10/19/2026 17:46:38")).toBe(true);
   // No Grant Approved decision yet exports as "Not reviewed", like the page shows it.
-  expect(lines[1].split(",")[7]).toBe("Not reviewed");
+  expect(lines[1].split(",")[6]).toBe("Not reviewed");
 });
 
 test("fundraising export has both tabs' columns for the rows given", () => {

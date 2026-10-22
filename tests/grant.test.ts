@@ -85,7 +85,8 @@ describe("sample data", () => {
   // Matches the spreadsheet's Grant Totals mockup tab, except: team 26463 (Second Year Title 1) now
   // shows $500 raised instead of $350, and the 5 responses added from the Google Sheet on Oct 19
   // have no Title 1 status yet. Team 37465's newest application is one of them, so it drops out of
-  // Rookie 1 title 1 (applied 3 -> 2).
+  // Rookie 1 title 1 (applied 3 -> 2). Grants distributed count only mailed checks (Check # and
+  // Date Check Mailed filled in); every sample check was mailed.
   test("totals match the Grant Totals mockup tab", () => {
     const { rows, total, title1Needed } = computeTotals(apps);
     const pick = (c: string) => {

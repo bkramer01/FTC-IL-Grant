@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, check, date, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, boolean, check, date, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 // Grant site tables. Edit here, run `npm run db:generate`, and commit the new file in
 // drizzle/. Every table has row-level security on with no policies (added in the
@@ -32,7 +32,13 @@ export const applicationReviews = pgTable(
     notes: text("notes").notNull().default(""),
     raised: integer("raised"),
     raisedUpdatedOn: date("raised_updated_on"),
+    // True once Raised by Team has a value (copied from the form's HQ grant amount by a
+    // refresh, or typed in); after that, refreshes leave it alone.
+    raisedSet: boolean("raised_set").notNull().default(false),
+    // A typed Amount of Check, and the Possible Grant Award it was typed against. The check
+    // follows Possible Grant Award again once that changes (unless the check was mailed).
     checkAmount: integer("check_amount"),
+    checkAmountFor: integer("check_amount_for"),
     checkNumber: text("check_number"),
     checkMailedOn: date("check_mailed_on"),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

@@ -86,6 +86,38 @@ describe("grant asks", () => {
   });
 });
 
+describe("HQ grant amount", () => {
+  const responses = (amounts: string[]) => ({
+    headers: ["Timestamp"],
+    rows: amounts.map((amt, i) => {
+      const row = Array<string>(19).fill("");
+      row[0] = `10/${i + 1}/2026 9:00:00`;
+      row[8] = amt;
+      return row;
+    }),
+  });
+  const biobuzz = { headers: ["TeamNumber", "TeamName"], rows: [] };
+  const raised = async () =>
+    Object.fromEntries(Object.entries((await loadAdminEntries(db)).reviews).map(([ts, r]) => [ts, [r.raised, r.raisedSet, r.raisedUpdatedOn]]));
+
+  test("is copied into Raised by Team once, and never over a typed amount", async () => {
+    await saveReview(db, "10/1/2026 9:00:00", { approved: "Yes" });
+    await saveSnapshots(db, { responses: responses(["1500", "$2,000", "none", ""]), biobuzz }, new Date("2026-10-21T15:00:00Z"));
+    expect(await raised()).toEqual({
+      "10/1/2026 9:00:00": [1500, true, "2026-10-21"],
+      "10/2/2026 9:00:00": [2000, true, "2026-10-21"],
+    });
+    // The administrator changes one; the sheet changes; the text one is fixed.
+    await saveReview(db, "10/2/2026 9:00:00", { raised: 900, raisedSet: true });
+    await saveSnapshots(db, { responses: responses(["1600", "2100", "700", ""]), biobuzz }, new Date("2026-10-22T15:00:00Z"));
+    expect(await raised()).toEqual({
+      "10/1/2026 9:00:00": [1500, true, "2026-10-21"],
+      "10/2/2026 9:00:00": [900, true, "2026-10-21"],
+      "10/3/2026 9:00:00": [700, true, "2026-10-22"],
+    });
+  });
+});
+
 describe("sheet snapshots", () => {
   test("nothing before the first refresh; a refresh replaces both tabs", async () => {
     expect(await loadSnapshots(db)).toEqual({

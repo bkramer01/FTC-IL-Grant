@@ -33,7 +33,12 @@ export type Review = {
   notes: string;
   raised: number | null;
   raisedUpdatedOn: string | null;
+  /** True once Raised by Team was copied from the form or typed in; refreshes then leave it alone. */
+  raisedSet: boolean;
+  /** A typed Amount of Check (blank: the check follows Possible Grant Award). */
   checkAmount: number | null;
+  /** The Possible Grant Award when checkAmount was typed; the typed amount lapses once that changes. */
+  checkAmountFor: number | null;
   checkNumber: string | null;
   checkMailedOn: string | null;
 };
@@ -99,7 +104,9 @@ export const EMPTY_REVIEW: Review = {
   notes: "",
   raised: null,
   raisedUpdatedOn: null,
+  raisedSet: false,
   checkAmount: null,
+  checkAmountFor: null,
   checkNumber: null,
   checkMailedOn: null,
 };
@@ -113,6 +120,7 @@ const COL = {
   teamNumber: 4,
   coach: 5,
   categoryProvided: 6,
+  hqAmount: 8, // "IF yes- how much did your team receive as credit from FIRST Headquarters…"
   volunteers: 10,
   letterUrl: 11,
   checkPayee: 12,
@@ -146,8 +154,47 @@ export type Application = {
   awardEmailOn: string | null;
   possibleAward: number | null;
   unusedMatch: number | null;
+  /** The form's HQ grant amount as typed (Raised by Team starts from it). */
+  hqAmount: string;
+  /** Raised by Team hasn't been set and the form's HQ grant amount isn't a number. */
+  raisedError: boolean;
+  /** Check # and Date Check Mailed are both filled in, so Amount of Check can't be changed. */
+  checkLocked: boolean;
+  /** Amount of Check: the typed amount while it still applies, otherwise Possible Grant Award. */
+  checkAmount: number | null;
   review: Review;
 };
+
+/** Whole dollars from a form answer such as "1500", "$2,000" or "800.00"; null if it isn't a number. */
+export function parseDollars(raw: string): number | null {
+  const v = raw.replace(/[$,\s]/g, "");
+  return /^\d+(\.\d+)?$/.test(v) ? Math.round(Number(v)) : null;
+}
+
+/** The form's HQ grant amount for one response row: a number, blank (null) or "error". */
+export function hqAmountFromRow(row: string[]): number | null | "error" {
+  const raw = (row[COL.hqAmount] ?? "").trim();
+  if (!raw) return null;
+  return parseDollars(raw) ?? "error";
+}
+
+export function responseTimestamp(row: string[]): string {
+  return row[COL.timestamp];
+}
+
+/**
+ * Amount of Check: once mailed (Check # and date filled in) the saved amount stands; a typed
+ * amount stands while Possible Grant Award is what it was when typed; otherwise the check is
+ * the Possible Grant Award.
+ */
+export function effectiveCheckAmount(review: Review, possible: number | null, locked: boolean): number | null {
+  if (review.checkAmount !== null && (locked || review.checkAmountFor === possible)) return review.checkAmount;
+  return possible;
+}
+
+export function isCheckLocked(review: Pick<Review, "checkNumber" | "checkMailedOn">): boolean {
+  return !!review.checkNumber?.trim() && !!review.checkMailedOn;
+}
 
 /** Parses a Google Forms timestamp such as "10/2/2026 6:28:36" (Central time). */
 export function parseTimestamp(ts: string): number {
@@ -189,6 +236,8 @@ export function buildApplications(data: GrantData): Application[] {
     const age = teamAge(teamNumber);
     const category = grantCategory(age, review.title1);
     const possible = possibleAward(category, review.raised);
+    const locked = isCheckLocked(review);
+    const hq = hqAmountFromRow(r);
     return {
       timestamp: r[COL.timestamp],
       submittedAt: parseTimestamp(r[COL.timestamp]),
@@ -213,6 +262,10 @@ export function buildApplications(data: GrantData): Application[] {
       awardEmailOn: latestEmail(data.emails, teamNumber, "Grant Award"),
       possibleAward: possible,
       unusedMatch: unusedMatch(category, possible),
+      hqAmount: (r[COL.hqAmount] ?? "").trim(),
+      raisedError: !review.raisedSet && review.raised === null && hq === "error",
+      checkLocked: locked,
+      checkAmount: effectiveCheckAmount(review, possible, locked),
       review,
     };
   });
@@ -274,7 +327,8 @@ export function computeTotals(apps: Application[]) {
     row.awarded++;
     row.raised += a.review.raised ?? 0;
     row.qualified += a.possibleAward ?? 0;
-    row.distributed += a.review.checkAmount ?? 0;
+    // Only checks that went out (Check # and Date Check Mailed filled in).
+    if (a.checkLocked) row.distributed += a.checkAmount ?? 0;
   }
   for (const row of rows) {
     row.totalPossible = row.awarded * row.grantorMatch;

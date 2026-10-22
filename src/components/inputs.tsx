@@ -95,3 +95,15 @@ export function MoneyInput({
     />
   );
 }
+
+/** Raised by Team can't start from the form: its HQ grant amount isn't a number. */
+export function HqAmountError({ value }: { value: string }) {
+  return (
+    <span
+      className="badge badge-danger cursor-help"
+      title={`The form's HQ grant amount is "${value}", which isn't a number. Fix it in the Google Sheet (it's copied on the next Refresh Data) or type the amount on the Applications page.`}
+    >
+      error
+    </span>
+  );
+}

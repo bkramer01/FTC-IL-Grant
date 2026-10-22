@@ -13,8 +13,9 @@ export const SHEETS: Record<
     label: "Grant form responses",
     spreadsheetId: "1b7nY9zdAcAE2zjmlmY_qk7wl69xO2UfHdN7yLbEr8MA",
     gid: 370691157,
-    // The columns the site reads by position (see COL in applications.ts).
-    expect: { 0: "Timestamp", 4: "Team Number", 5: "Coach Name", 14: "Street Address", 15: "City State", 18: "Zip" },
+    // The columns the site reads by position (see COL in applications.ts). A heading only has
+    // to start with the expected text (column I's question is long).
+    expect: { 0: "Timestamp", 4: "Team Number", 5: "Coach Name", 8: "IF yes- how much did your team receive", 14: "Street Address", 15: "City State", 18: "Zip" },
   },
   biobuzz: {
     label: "BioBuzz team list",
@@ -39,7 +40,7 @@ export function normalizeTable(values: string[][]): SheetTable {
 export function checkLayout(source: SheetSource, table: SheetTable) {
   const { label, expect } = SHEETS[source];
   const problems = Object.entries(expect)
-    .filter(([i, name]) => (table.headers[Number(i)] ?? "").trim().toLowerCase() !== name.toLowerCase())
+    .filter(([i, name]) => !(table.headers[Number(i)] ?? "").trim().toLowerCase().startsWith(name.toLowerCase()))
     .map(([i, name]) => `column ${String.fromCharCode(65 + Number(i))} should be "${name}" but is "${table.headers[Number(i)] ?? "(missing)"}"`);
   if (problems.length) {
     throw new Error(`${label}: the sheet's columns have changed (${problems.join("; ")}). Nothing was refreshed.`);
