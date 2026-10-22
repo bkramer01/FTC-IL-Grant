@@ -1,18 +1,19 @@
 # Dashboard
 
-> **Address:** `/` · **Last updated:** October 21, 2026
+> **Address:** `/` · **Last updated:** October 22, 2026
 
 The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has four sections: Grant Matching Totals, Grant Ask Tracker, Fundraising Status (with a Check Status tab) and Grant Rules.
 
 ## Grant Matching Totals
 
 - **Refresh Data** (top right) reads the latest grant form responses and the BioBuzz team list from Google Sheets, saves them, and reloads the page. It shows when data was last refreshed ("never" before the first refresh). Responses deleted from the sheet disappear on the next refresh; the administrator's entries stay linked to each response by its timestamp. Each refresh also copies the form's HQ grant amount (column I) into **Raised by Team** for any response that doesn't have one yet (see Applications); amounts already copied or typed in are never overwritten. If a sheet can't be read (not shared with the service account, or a key column moved), nothing changes and the reason appears under the button.
+- Every formula on this page, with worked examples, is in [Grant Rules and Calculations](grant-rules.md). Where the data comes from and what Refresh Data changes is in [Data and Refresh Data](data-and-refresh.md).
 - One row per category, plus a Total row. Hover the **Teams Applied ⓘ** heading for how teams are counted. The asterisk (*) on **Rookie/Veteran Status** links to the explanation in Grant Rules.
 
 | Column | How it's worked out |
 |---|---|
 | Teams Applied | Every grant application, by rookie/veteran status: a team that sent the form twice counts twice. Applications still missing a School Title 1 Status aren't counted until it's entered. The other columns count only teams with Grant Approved = Yes, each team once. |
-| Teams Awarded Grants | Teams with Team Approved for Grant = Yes. |
+| Teams Awarded Grants | Teams with Grant Approved = Yes, each team once (its latest approved application). |
 | Matching Multiplier / Grantor Match per Team / Max Fundraising Target | Category settings (see Grant Rules). |
 | Total Possible Grant Amount | Teams Awarded × Grantor Match per Team. |
 | Total Team Fundraising as of today | Sum of Raised by Team for approved teams: 100% of what they raised, not capped at the max fundraising target. |
@@ -36,12 +37,14 @@ Filled out by the Grant Administrator to track requests for funds from the Donor
 | Total Ask Amount from Donor Fund | Typed in. |
 
 - **+ Add ask** adds a row; **Remove** deletes one. There's no limit on the number of asks.
-- **Total Ask for Year**: the most recent ask's cumulative amount, and the sum of all ask amounts.
-- Each change saves as you go. The sample data starts with the two asks from the spreadsheet's Goals tab.
+- **Total Ask for Year**: under Cumulative, the last ask in the list that has a cumulative amount; under Total Ask Amount, the sum of every ask.
+- **Use current** shows the amount it will copy when you hover it. The copy doesn't change later on its own.
+- Each change saves as you go. Asks are listed in the order they were added.
 
 ## Fundraising Status
 
-- Approved teams by default; untick **Approved teams only** to see every application.
+- One row per application (a team that applied twice has two rows, each with a yellow ×2 badge). Approved applications by default; untick **Approved teams only** to see every application.
+- A team number that isn't on the BioBuzz list shows a red **not in BioBuzz** badge instead of a team name.
 - Two tabs, each starting with Team # and Team Name:
   - **Fundraising Status:** Coach Name, Approved, Rookie/Veteran Status, Matching Multiplier, Max Grant Award (max fundraising target × multiplier, the grantor match per team; blank until Title 1 is entered), Team Target (the category's Max Fundraising Target: the most of a team's fundraising that gets matched, from the category settings), Raised by Team (read-only; shows **error** when the form's HQ grant amount isn't a number, and counts as $0 in the totals), Possible Grant Award, Unused Grant Match, Last Update (date the amount raised was last changed).
   - **Check Status:** Check Addressee, Street Address, City, State, Zip (from the form's new Zip column; responses sent before it was added show the zip inside City, State and a blank Zip), **Amount of Check**, **Check #**, **Date Check Mailed**, Grant Award Email Sent.
@@ -70,6 +73,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 22, 2026:** Links to the new Grant Rules and Data documents; Total Ask for Year, duplicate rows and the not-in-BioBuzz badge described; Teams Awarded wording uses "Grant Approved".
 - **Oct 21, 2026:** Teams Applied counts every application (a team that applied twice counts twice), and its hover note now reads: Tracks the number of applications by rookie/veteran status. Other columns in the chart only count teams with "Grant Approved" equal to "Yes".
 - **Oct 21, 2026:** The Total row on Fundraising Status and Check Status stays frozen at the bottom of the scroll box.
 - **Oct 21, 2026:** Grants Distributed to Teams counts only mailed checks (Check # and Date Check Mailed filled in), also in the Grant Matching Report; its heading has a hover note.

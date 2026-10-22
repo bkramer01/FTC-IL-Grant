@@ -1,48 +1,48 @@
-# FTC IL Grant Site: Page Guide
+# FTC IL Grant Site: Documentation
 
-> **Last updated:** October 19, 2026
+> **Last updated:** October 22, 2026
 
-This folder documents every page of the grant site: what each page does, what users see, and which settings control it. There is one document per page.
+The FTC Illinois Grant site is where the Grant Administrator reviews matching-grant applications, tracks team fundraising and checks, and follows the season's grant totals. These documents describe the site's structure, every feature, and the logic behind each one.
 
-> **Data:** form responses and team names are the copy saved by the last **Refresh Data** (Dashboard), which reads both Google Sheets. Everything typed or picked on the pages is saved to the database (Supabase) as you go; each page shows "Saving… / All changes saved".
+## Start here
+
+| Document | What it covers |
+|---|---|
+| [Site Structure](site-structure.md) | Site map, how the pages connect, and the features every page shares (saving, sorting, exports, badges). |
+| [Grant Rules and Calculations](grant-rules.md) | Team age, grant categories, Possible Grant Award, Unused Grant Match, Amount of Check, and every Grant Matching Totals column, with worked examples. |
+| [Data and Refresh Data](data-and-refresh.md) | The two Google Sheets and which columns are used, what Refresh Data does and never changes, duplicates, saving, and fields that are saved but hidden. |
+| [Behind the Scenes](behind-the-scenes.md) | Hosting, database, Google access, security, server settings and how changes are made. For whoever maintains the site. |
 
 ## The pages
 
 | Page | Address | What it's for |
 |---|---|---|
 | [Sign In](sign-in.md) | `/login` | Shared `FTCAdmin` login. Every other page requires it. |
-| [Dashboard](dashboard.md) | `/` | Grant totals by category, Refresh Data, the Grant Ask Tracker, Fundraising and Check Status tabs, and the grant rules. |
+| [Dashboard](dashboard.md) | `/` | Grant Matching Totals with Refresh Data and the Excel report, the Grant Ask Tracker, Fundraising and Check Status tabs, and the grant rules. |
 | [Applications](applications.md) | `/applications` | One row per grant form response, with the Grant Administrator's review columns. |
 | [Email Log](email-log.md) | `/emails` | Emails sent to coaches, entered by hand. |
 | [Form Responses](form-responses.md) | `/responses` | Read-only copy of the form's Google Sheet. |
 
-## How the site fits together
+## In one minute
 
-- **Data sources** (pulled by Refresh Data with the Google service account `ftc-grant-sheets-reader@project-115d3a43-e62e-443b-8d5.iam.gserviceaccount.com`, which must have Viewer access to both sheets): the grant form's Google Sheet ("Form Responses 1") and the BioBuzz team list ("biobuzz - including unpaid"), which supplies team names.
-- **Grant Administrator entries** (yellow column headers): Title 1 status, checklist answers, approval, notes, amount raised, and check details.
-- **Calculated**: team age from the team number, grant category from age + Title 1, possible award, unused match, totals.
+1. Coaches apply with the Google Form. Their answers land in the form's Google Sheet.
+2. **Refresh Data** (Dashboard) copies the form responses and the BioBuzz team list into the site, and starts each team's Raised by Team at the HQ grant amount from the form.
+3. On **Applications**, the Grant Administrator enters School Title 1 Status, checks the letter and VRS task, adjusts Raised by Team, and sets **Grant Approved**.
+4. The **Dashboard** works out each team's category and award, totals them by category, and tracks checks from the default amount through to mailed.
+5. The **Email Log** records emails to coaches, and the **Grant Ask Tracker** records requests to the Donor Fund.
 
-## Data sources (Google Sheets)
-
-| Sheet | Tab | What the site uses |
-|---|---|---|
-| [Apply for an FTC IL Matching Grant … (Responses)](https://docs.google.com/spreadsheets/d/1b7nY9zdAcAE2zjmlmY_qk7wl69xO2UfHdN7yLbEr8MA/edit?gid=370691157) | "Form Responses 1" (tab ID 370691157) | Every grant form response. |
-| [2026/2027 BioBuzz Team Registration Parsing](https://docs.google.com/spreadsheets/d/1ydZLnPGo8iGmWBToRH0Qa6lMbiWpNrz3oZW3__-tt7c/edit?gid=1750695360) | "biobuzz - including unpaid - 10/20" (tab ID 1750695360) | Team names by team number. |
-
-**Changes noted Oct 20, 2026:**
-
-- The form sheet's column P is now **City State**, and a new **Zip** column was added at the end (column S, after the VRS columns). Responses submitted before the change still have the zip inside City State and a blank Zip. The site shows those as entered (it doesn't split them); only the sample rows that aren't in the Google Sheet had their zip moved into Zip.
-- The BioBuzz columns are unchanged (it already had TeamZipCode), but its tab names now end in a date ("- 10/20"). When Refresh Data is built, it should find tabs by tab ID, not by name.
-
-## Key rules
+## Key terms
 
 | Term | Meaning |
 |---|---|
-| **Team age** | Rookie: team # 35127 and up. Second Year: 25609–35126. Veteran: 25608 and below. |
-| **Grant category** | Rookie 1 / Rookie 1 title 1 / Second Year / Second Year Title 1 / Veteran Title 1 / Not Qualified (veteran, not Title 1). Shows **Title 1 status needed** until Title 1 is entered. |
-| **Possible Grant Award** | Amount raised, capped at the category's max fundraising target, × its multiplier. |
-| **Duplicate** | A team number that sent the form more than once. Both rows stay; each is flagged. Totals count the team once. |
+| **Team age** | Rookie (team # 35127 and up), Second Year (25609–35126) or Veteran (25608 and below). |
+| **Grant category** | Team age + School Title 1 Status: Rookie 1, Rookie 1 title 1, Second Year, Second Year Title 1, Veteran Title 1, or Not Qualified (Veteran without Title 1). "Title 1 status needed" until Title 1 is entered. |
+| **Raised by Team** | What the team has raised. Starts as the form's HQ grant amount and is edited on Applications. |
+| **Possible Grant Award** | Raised by Team, capped at the category's max fundraising target, × its multiplier. |
+| **Approved** | Grant Approved = Yes on Applications. Only approved teams count in the Dashboard totals (except Teams Applied). |
+| **Duplicate** | A team number that sent the form more than once. Each response stays and is flagged. |
+| **Mailed check** | A check with both Check # and Date Check Mailed filled in. Its amount is locked, and it counts in Grants Distributed to Teams. |
 
 ## Keeping these docs current
 
-Each page document ends with a **Change history**. Whenever a feature is added or changed, the document for that page is updated in the same change.
+Each document ends with a **Change history**. Whenever a feature is added or changed, the document for that page, and any of the documents above that describe it, is updated in the same change.

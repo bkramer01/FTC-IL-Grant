@@ -2,7 +2,7 @@
 
 > **Address:** `/applications` · **Last updated:** October 22, 2026
 
-One row per grant form response, newest first. This is where the Grant Administrator reviews each application.
+One row per grant form response, newest first. This is where the Grant Administrator reviews each application. How categories and awards are worked out is in [Grant Rules and Calculations](grant-rules.md); where each form column comes from is in [Data and Refresh Data](data-and-refresh.md#form-columns-the-site-uses).
 
 ## Finding applications
 
@@ -29,7 +29,11 @@ In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calcula
 | Timestamp | Form. Shows the date; hover it for the date and time. |
 | Coach Name (+ email), Rookie/Veteran Status Provided, List of Volunteers | Form |
 | Team Name | BioBuzz, by team number |
-| Calculated Team Age, Rookie/Veteran Status for Grant | Calculated |
+| Calculated Team Age | Calculated from the team number ([rules](grant-rules.md#1-team-age-from-the-team-number)). |
+| Rookie/Veteran Status for Grant | Calculated from team age and School Title 1 Status ([rules](grant-rules.md#2-grant-category-team-age--school-title-1-status)); "Title 1 status needed" until Title 1 is entered. |
+| School Title 1 Status | Grant Administrator: Yes or No. Sets the grant category, so it changes the award and where the team counts on the Dashboard. |
+| Fundraising Letter Rec'd | Grant Administrator: Yes or No, with a **Letter ↗** link to the file the coach uploaded. |
+| Review Notes | Grant Administrator: free text, two lines tall. |
 | Fully Registered? | Form ("Team is in the green") |
 | End of Season Survey Completed? | Form question 2 ("rookie Biobuzz" shows as N/A) |
 | Add'l Info Email Sent | Latest "Additional Info Needed" entry in the Email Log |
@@ -38,10 +42,15 @@ In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calcula
 | Raised by Team | Starts as the form's HQ grant amount (column I, "how much did your team receive as credit from FIRST Headquarters"), copied by Refresh Data with that day as the Last Update date. "$" and commas are fine; anything else that isn't a number shows **error** (hover for the form's answer) and counts as $0 in totals: fix it in the sheet and the next refresh copies it, or type the amount here. A blank answer stays blank until the sheet has one. Once an amount is copied or typed, refreshes never change it. The Grant Administrator can edit it on any row (shows as dollars; click to type a plain number); changing it sets the Last Update date to today. This is the only place it's edited; the Dashboard's Fundraising Status shows the same amount. |
 | Possible Grant Award | Calculated from Raised by Team and the team's category, the same as on the Dashboard's Fundraising Status; updates as soon as Raised by Team changes. |
 
-The **Letter ↗** and **Screenshot ↗** links open the files the coach uploaded with the form.
+The **Letter ↗** and **Screenshot ↗** links open the files the coach uploaded with the form ("no file" when there isn't one).
+
+## Saved but hidden
+
+**Event Volunteering?** and **Qualified Purchase?** were removed from the table and the export on Oct 21, 2026. Their answers are still saved in the database (including any entered before then) and can be brought back with a small code change.
 
 ## Change history
 
+- **Oct 22, 2026:** Links to the new Grant Rules and Data documents; every review column described; hidden fields noted.
 - **Oct 22, 2026:** Grant Approved and Review Notes moved to the end, just before Timestamp (also in the export).
 - **Oct 21, 2026:** Row count under the table, like Fundraising Status.
 - **Oct 21, 2026:** Raised by Team starts from the form's HQ grant amount (copied once by Refresh Data) and shows "error" when that answer isn't a number.

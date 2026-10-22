@@ -48,6 +48,7 @@ full email address. Check SPF/DKIM in hPanel → Emails → DNS settings.
    NODE_ENV=production
    DATABASE_URL=<Supabase session pooler URI>   # required: the site loads and saves entries here
    DATABASE_SSL=true
+   ADMIN_PASSWORD=<password for the FTCAdmin login>
    SESSION_SECRET=<64 random hex chars>
    GOOGLE_SERVICE_ACCOUNT_KEY=<service account key, base64; see below>
    EMAIL_TRANSPORT=smtp
