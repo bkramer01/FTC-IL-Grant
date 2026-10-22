@@ -84,8 +84,8 @@ describe("sample data", () => {
 
   // Matches the spreadsheet's Grant Totals mockup tab, except: team 26463 (Second Year Title 1) now
   // shows $500 raised instead of $350, and the 5 responses added from the Google Sheet on Oct 19
-  // have no Title 1 status yet. Team 37465's newest application is one of them, so it drops out of
-  // Rookie 1 title 1 (applied 3 -> 2). Grants distributed count only mailed checks (Check # and
+  // have no Title 1 status yet, and Teams Applied now counts every application (two Rookie 1 title 1
+  // teams applied twice, so 4 there). Grants distributed count only mailed checks (Check # and
   // Date Check Mailed filled in); every sample check was mailed.
   test("totals match the Grant Totals mockup tab", () => {
     const { rows, total, title1Needed } = computeTotals(apps);
@@ -94,12 +94,12 @@ describe("sample data", () => {
       return [r.applied, r.awarded, r.totalPossible, r.raised, r.qualified, r.distributed];
     };
     expect(pick("Rookie 1")).toEqual([4, 3, 4500, 3900, 3600, 900]);
-    expect(pick("Rookie 1 title 1")).toEqual([2, 2, 6000, 1700, 5100, 3000]);
+    expect(pick("Rookie 1 title 1")).toEqual([4, 2, 6000, 1700, 5100, 3000]);
     expect(pick("Second Year")).toEqual([4, 3, 2250, 2050, 1900, 1500]);
     expect(pick("Second Year Title 1")).toEqual([3, 2, 3000, 1000, 3000, 1050]);
     expect(pick("Veteran Title 1")).toEqual([10, 8, 9600, 4150, 7100, 2900]);
     expect(pick("Not Qualified")).toEqual([5, 0, 0, 0, 0, 0]);
-    expect(total).toMatchObject({ applied: 28, awarded: 18, totalPossible: 25350, raised: 12800, qualified: 20700, distributed: 9350 });
+    expect(total).toMatchObject({ applied: 30, awarded: 18, totalPossible: 25350, raised: 12800, qualified: 20700, distributed: 9350 });
     expect(title1Needed).toBe(6);
   });
 

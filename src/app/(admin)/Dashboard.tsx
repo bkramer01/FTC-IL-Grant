@@ -184,7 +184,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 </th>
                 <th
                   className="num cursor-help"
-                  title="Teams Applied counts every team that sent the form (each team once). Every other column counts only teams with Team Approved for Grant = Yes."
+                  title={'Tracks the number of applications by rookie/veteran status. Other columns in the chart only count teams with "Grant Approved" equal to "Yes".'}
                 >
                   Teams
                   <br />

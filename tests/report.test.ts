@@ -26,7 +26,7 @@ test("Grant Matching Report matches the totals table", async () => {
   expect(row(9)).toEqual(["Not Qualified", 5, 0, "—", 0, 0, 0, 0, 0, 0]);
   expect(ws.getCell("A10").value).toBe("Total");
   expect([ws.getCell("B10").value, ws.getCell("F10").value, ws.getCell("H10").value, ws.getCell("J10").value]).toEqual([
-    28, 25350, 12800, 9350,
+    30, 25350, 12800, 9350,
   ]);
 
   // Dollar formatting, and green only where every approved team raised the max.

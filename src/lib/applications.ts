@@ -287,10 +287,10 @@ export type TotalsRow = {
 };
 
 /**
- * One row per category. Each team counts once: its latest approved application if it
- * has one, otherwise its latest application. Applied counts every team; the other
- * columns count only approved teams. Teams still missing a Title 1 status are left
- * out and reported in `title1Needed`.
+ * One row per category. Applied counts every application (a team that sent the form twice
+ * counts twice). The other columns count each approved team once, using its latest
+ * approved application. Applications still missing a Title 1 status are left out of
+ * every column; `title1Needed` counts those teams.
  */
 export function computeTotals(apps: Application[]) {
   const byTeam = new Map<number, Application>();
@@ -315,6 +315,9 @@ export function computeTotals(apps: Application[]) {
     distributed: 0,
     maxedOut: false,
   }));
+  for (const a of apps) {
+    if (a.category !== TITLE1_NEEDED) rows.find((r) => r.category === a.category)!.applied++;
+  }
   let title1Needed = 0;
   for (const a of byTeam.values()) {
     if (a.category === TITLE1_NEEDED) {
@@ -322,7 +325,6 @@ export function computeTotals(apps: Application[]) {
       continue;
     }
     const row = rows.find((r) => r.category === a.category)!;
-    row.applied++;
     if (a.review.approved !== "Yes") continue;
     row.awarded++;
     row.raised += a.review.raised ?? 0;

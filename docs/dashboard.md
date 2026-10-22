@@ -11,7 +11,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 | Column | How it's worked out |
 |---|---|
-| Teams Applied | Teams that sent the form, each team counted once. |
+| Teams Applied | Every grant application, by rookie/veteran status: a team that sent the form twice counts twice. Applications still missing a School Title 1 Status aren't counted until it's entered. The other columns count only teams with Grant Approved = Yes, each team once. |
 | Teams Awarded Grants | Teams with Team Approved for Grant = Yes. |
 | Matching Multiplier / Grantor Match per Team / Max Fundraising Target | Category settings (see Grant Rules). |
 | Total Possible Grant Amount | Teams Awarded × Grantor Match per Team. |
@@ -70,6 +70,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Oct 21, 2026:** Teams Applied counts every application (a team that applied twice counts twice), and its hover note now reads: Tracks the number of applications by rookie/veteran status. Other columns in the chart only count teams with "Grant Approved" equal to "Yes".
 - **Oct 21, 2026:** The Total row on Fundraising Status and Check Status stays frozen at the bottom of the scroll box.
 - **Oct 21, 2026:** Grants Distributed to Teams counts only mailed checks (Check # and Date Check Mailed filled in), also in the Grant Matching Report; its heading has a hover note.
 - **Oct 21, 2026:** Amount of Check defaults to Possible Grant Award (a typed amount lasts until Possible Grant Award changes) and locks once Check # and Date Check Mailed are filled in; its heading has a hover note. Raised by Team shows "error" when the form's HQ grant amount isn't a number. Refresh Data copies the HQ grant amount into Raised by Team once.
