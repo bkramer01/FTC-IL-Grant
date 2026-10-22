@@ -10,7 +10,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 - A small yellow box above the table shows **Total applications** and counts the Grant Approved answers across all applications: **Grants approved** (Yes), **Rejected** (No), **Not reviewed** (blank) and **Under review**. It updates as answers change and ignores search and filter.
 - Click the **Team #**, **Calculated Team Age**, **Grant Approved** or **Timestamp** heading to sort; click again to reverse. The table starts newest first. Team age sorts Rookie, Second Year, Veteran; Grant Approved sorts Yes, Under Review, No, Not reviewed.
 - **Show** filter: All applications, or one Grant Approved status (Yes, Under Review, No, Not reviewed). The Dashboard's "not fully reviewed/complete" link opens the page filtered to Not reviewed or Under Review; that choice appears in the list only while it's active.
-- The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down. **Team #** stays frozen at the left as you scroll sideways. Scroll sideways with the scrollbar just under the headings or the one at the bottom of the box.
+- The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down. **Team #** stays frozen at the left as you scroll sideways. Scroll sideways with the scrollbar just under the headings or the one at the bottom of the box. The number of rows shown (after search and filter) appears under the table.
 - **Export** downloads every application (all rows, ignoring search and filter) as a CSV file that opens in Excel, named `grant-applications-YYYY-MM-DD.csv`. It has the table's columns, in the same order, plus Coach Email, the letter and VRS screenshot links, and how many times the team submitted. It includes changes made on the page that haven't been saved. Applications with no Grant Approved decision export as "Not reviewed".
 
 ## Flags
@@ -42,6 +42,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 21, 2026:** Row count under the table, like Fundraising Status.
 - **Oct 21, 2026:** Raised by Team starts from the form's HQ grant amount (copied once by Refresh Data) and shows "error" when that answer isn't a number.
 - **Oct 21, 2026:** Added Possible Grant Award (read-only, same as on Fundraising Status) after Raised by Team, also in the export.
 - **Oct 21, 2026:** Added Raised by Team after Grant Approved (moved here from the Dashboard, where it's now read-only). Removed the Event Volunteering? and Qualified Purchase? columns (also from the export; earlier answers are kept). Timestamp moved to the last column; Team # is now first and stays frozen when scrolling sideways. The export uses the new column order.

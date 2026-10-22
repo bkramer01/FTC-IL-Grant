@@ -331,6 +331,9 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
             </tbody>
           </table>
         </div>
+        <p className="mt-2 text-sm text-muted" aria-live="polite">
+          {shown.length} {shown.length === 1 ? "row" : "rows"}
+        </p>
       </Card>
     </>
   );
