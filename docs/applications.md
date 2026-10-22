@@ -1,6 +1,6 @@
 # Applications
 
-> **Address:** `/applications` · **Last updated:** October 21, 2026
+> **Address:** `/applications` · **Last updated:** October 22, 2026
 
 One row per grant form response, newest first. This is where the Grant Administrator reviews each application.
 
@@ -22,7 +22,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 
 ## Columns
 
-In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calculated Team Age, **Grant Approved**, **Raised by Team**, Possible Grant Award, **Review Notes**, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Fundraising Letter Rec'd**, List of Volunteers, Fully Registered?, End of Season Survey Completed?, **VRS Task Completed**, Add'l Info Email Sent, Timestamp. Columns in bold have yellow headings: the Grant Administrator fills them in.
+In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calculated Team Age, **Raised by Team**, Possible Grant Award, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Fundraising Letter Rec'd**, List of Volunteers, Fully Registered?, End of Season Survey Completed?, **VRS Task Completed**, Add'l Info Email Sent, **Grant Approved**, **Review Notes**, Timestamp. Columns in bold have yellow headings: the Grant Administrator fills them in.
 
 | Column | Source |
 |---|---|
@@ -42,6 +42,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 22, 2026:** Grant Approved and Review Notes moved to the end, just before Timestamp (also in the export).
 - **Oct 21, 2026:** Row count under the table, like Fundraising Status.
 - **Oct 21, 2026:** Raised by Team starts from the form's HQ grant amount (copied once by Refresh Data) and shows "error" when that answer isn't a number.
 - **Oct 21, 2026:** Added Possible Grant Award (read-only, same as on Fundraising Status) after Raised by Team, also in the export.

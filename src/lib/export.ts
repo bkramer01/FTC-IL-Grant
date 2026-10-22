@@ -12,10 +12,8 @@ const APPLICATION_COLUMNS: Column[] = [
   ["Coach Email", (a) => a.email],
   ["Rookie/Veteran Status Provided", (a) => a.categoryProvided],
   ["Calculated Team Age", (a) => a.age],
-  ["Grant Approved", (a) => a.review.approved ?? "Not reviewed"],
   ["Raised by Team", (a) => a.review.raised],
   ["Possible Grant Award", (a) => a.possibleAward],
-  ["Review Notes", (a) => a.review.notes],
   ["Rookie/Veteran Status for Grant", (a) => a.category],
   ["School Title 1 Status", (a) => a.review.title1],
   ["Fundraising Letter Rec'd", (a) => a.review.letterReceived],
@@ -27,6 +25,8 @@ const APPLICATION_COLUMNS: Column[] = [
   ["VRS Screenshot Link", (a) => a.vrsUrl],
   ["Add'l Info Email Sent", (a) => shortDate(a.additionalInfoEmailOn)],
   ["Submissions from Team", (a) => a.duplicateCount],
+  ["Grant Approved", (a) => a.review.approved ?? "Not reviewed"],
+  ["Review Notes", (a) => a.review.notes],
   ["Timestamp", (a) => a.timestamp],
 ];
 

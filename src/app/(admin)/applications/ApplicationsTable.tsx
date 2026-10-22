@@ -170,7 +170,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   sort={sort}
                   onSort={onSort}
                 />
-                <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
                 <th className="manual">
                   Raised by
                   <br />
@@ -181,7 +180,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   <br />
                   Grant Award
                 </th>
-                <th className="manual">Review Notes</th>
                 <th>
                   Rookie/Veteran
                   <br />
@@ -206,6 +204,8 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   <br />
                   Email Sent
                 </th>
+                <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
+                <th className="manual">Review Notes</th>
                 <SortHeader label="Timestamp" sortKey="timestamp" sort={sort} onSort={onSort} />
               </tr>
               <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
@@ -248,16 +248,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                         </div>
                       )}
                     </td>
-                    <td>
-                      <ChoiceSelect
-                        options={APPROVAL_OPTIONS}
-                        blankLabel="Not reviewed"
-                        width="7.25rem"
-                        label={`Team ${a.teamNumber} approved for grant`}
-                        value={a.review.approved}
-                        onChange={(v) => update(a.timestamp, { approved: v })}
-                      />
-                    </td>
                     <td className="w-28">
                       <MoneyInput
                         label={`Amount raised by team ${a.teamNumber}`}
@@ -271,15 +261,6 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       )}
                     </td>
                     <td className="num">{money(a.possibleAward)}</td>
-                    <td className="min-w-56">
-                      <textarea
-                        aria-label={`Review notes for team ${a.teamNumber}`}
-                        rows={2}
-                        className="cell-input"
-                        value={a.review.notes}
-                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
-                      />
-                    </td>
                     <td className="whitespace-nowrap">
                       {a.category === TITLE1_NEEDED ? <span className="badge badge-warning">{a.category}</span> : a.category}
                     </td>
@@ -320,6 +301,25 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       </div>
                     </td>
                     <td className="whitespace-nowrap">{shortDate(a.additionalInfoEmailOn)}</td>
+                    <td>
+                      <ChoiceSelect
+                        options={APPROVAL_OPTIONS}
+                        blankLabel="Not reviewed"
+                        width="7.25rem"
+                        label={`Team ${a.teamNumber} approved for grant`}
+                        value={a.review.approved}
+                        onChange={(v) => update(a.timestamp, { approved: v })}
+                      />
+                    </td>
+                    <td className="min-w-56">
+                      <textarea
+                        aria-label={`Review notes for team ${a.teamNumber}`}
+                        rows={2}
+                        className="cell-input"
+                        value={a.review.notes}
+                        onChange={(e) => update(a.timestamp, { notes: e.target.value })}
+                      />
+                    </td>
                     <td className="whitespace-nowrap">
                       <span className="cursor-help" title={formDateTime(a.submittedAt)}>
                         {formDate(a.submittedAt)}
