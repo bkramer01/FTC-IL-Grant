@@ -298,7 +298,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         <div id="fund-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
           <ManualKey />
           <div className="max-h-[calc(100vh-7rem)] overflow-auto">
-            <table className="data-table compact sticky-head center-num">
+            <table className="data-table compact sticky-head sticky-foot center-num">
               <thead>
                 {tab === "fundraising" ? (
                   <tr>
