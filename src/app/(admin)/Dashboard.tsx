@@ -446,7 +446,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     </th>
                     <SortHeader
                       label={<>Amount<br />of Check <span className="text-muted">ⓘ</span></>}
-                      title="If check number and date check mailed are filled out, then the check amount is no longer editable"
+                      title="Defaults to the Possible Grant Award. The Grant Administrator can type a different amount, but if the Possible Grant Award changes, the check amount updates to match it again. If check number and date check mailed are filled out, then the check amount is no longer editable."
                       sortKey="checkAmount"
                       sort={sort}
                       onSort={onSort}
@@ -494,7 +494,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       {nameCell(a)}
                       <td className="min-w-48">{a.checkPayee}</td>
                       <td className="min-w-36">{a.street}</td>
-                      <td className="whitespace-nowrap">{a.cityState}</td>
+                      <td className="w-24 min-w-24">{a.cityState}</td>
                       <td className="num whitespace-nowrap">{a.zip}</td>
                       <td>
                         {a.review.approved === "Yes" && (
