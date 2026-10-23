@@ -1,13 +1,19 @@
-// CSV exports of the Applications and Fundraising Status tables (open directly in Excel).
-import type { Application } from "./applications";
+// Exports: the Applications table as CSV, and the Fundraising Status table's contents for
+// its Excel file (built in report.ts).
+import type { Application, FundGroup, FundTotals } from "./applications";
 import { shortDate } from "./format";
 import { maxFundraisingTarget, maxGrantAward, multiplierLabel } from "./grant";
 
 type AskName = (id: number | null) => string | null;
+
+/** Team # as a number, or as typed on the form when it isn't a single number. */
+function teamNumberValue(a: Application): string | number {
+  return Number.isFinite(a.teamNumber) ? a.teamNumber : a.teamNumberText;
+}
 type Column = [string, (a: Application, askName: AskName) => string | number | null];
 
 const APPLICATION_COLUMNS: Column[] = [
-  ["Team #", (a) => a.teamNumber],
+  ["Team #", (a) => teamNumberValue(a)],
   ["Team Name", (a) => a.teamName ?? "not found"],
   ["Coach Name", (a) => a.coach],
   ["Coach Email", (a) => a.email],
@@ -33,7 +39,7 @@ const APPLICATION_COLUMNS: Column[] = [
 
 /** Both Fundraising Status tabs, in on-screen order: Fundraising Status, then Check Status. */
 const FUNDRAISING_COLUMNS: Column[] = [
-  ["Team #", (a) => a.teamNumber],
+  ["Team #", (a) => teamNumberValue(a)],
   ["Team Name", (a) => a.teamName ?? "not found"],
   ["Coach Name", (a) => a.coach],
   ["Approved", (a) => a.review.approved ?? "Not reviewed"],
@@ -76,9 +82,36 @@ export function applicationsCsv(apps: Application[]): string {
   return toCsv(APPLICATION_COLUMNS, [...apps].sort((a, b) => b.submittedAt - a.submittedAt));
 }
 
-/** The rows shown in Fundraising Status (in their current order), with the columns of both tabs. */
-export function fundraisingCsv(rows: Application[], askName: AskName = () => null): string {
-  return toCsv(FUNDRAISING_COLUMNS, rows, askName);
+/** Which total goes in each Fundraising Status column of the summary rows (the dollar columns). */
+export const FUNDRAISING_TOTALS: Record<string, keyof FundTotals> = {
+  "Max Grant Award": "maxGrant",
+  "Team Target": "target",
+  "Raised by Team": "raised",
+  "Possible Grant Award": "possible",
+  "Unused Grant Match": "unused",
+  "Amount of Check": "checks",
+};
+
+export type CellValue = string | number | null;
+export type FundraisingTable = { headers: string[]; rows: CellValue[][]; summary: CellValue[][] };
+
+/**
+ * The rows shown in Fundraising Status (in their current order), with the columns of both
+ * tabs, plus `summary` rows (the Total, then each Ask Period) with the label in the first
+ * column and each amount in its own column, as under the table.
+ */
+export function fundraisingTable(rows: Application[], askName: AskName = () => null, summary: FundGroup[] = []): FundraisingTable {
+  return {
+    headers: FUNDRAISING_COLUMNS.map(([h]) => h),
+    rows: rows.map((a) => FUNDRAISING_COLUMNS.map(([, get]) => get(a, askName))),
+    summary: summary.map((g, i) =>
+      FUNDRAISING_COLUMNS.map(([h], c) => {
+        if (c === 0) return i === 0 ? g.label : `${g.label} (${g.count})`;
+        const key = FUNDRAISING_TOTALS[h];
+        return key ? g.totals[key] : null;
+      }),
+    ),
+  };
 }
 
 /** Saves CSV text as a file in the browser. The byte-order mark tells Excel the file is UTF-8. */

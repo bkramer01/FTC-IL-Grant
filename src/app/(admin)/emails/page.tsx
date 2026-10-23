@@ -11,6 +11,8 @@ export default async function EmailLogPage() {
   // Team # → team name and coach, to fill in the recipient when adding an email.
   const teams = new Map<number, { teamNumber: number; teamName: string | null; coach: string; email: string }>();
   for (const a of buildApplications(data)) {
+    // A Team Number answer that isn't a single number can't have emails logged against it.
+    if (!Number.isFinite(a.teamNumber)) continue;
     teams.set(a.teamNumber, { teamNumber: a.teamNumber, teamName: a.teamName, coach: a.coach, email: a.email });
   }
   return (

@@ -1,5 +1,6 @@
 // Grant Matching Report: the Grant Matching Totals table as a formatted Excel workbook.
 import type { TotalsRow } from "./applications";
+import { FUNDRAISING_TOTALS, type FundraisingTable } from "./export";
 import { centralDateTime, shortDate, todayCentral } from "./format";
 
 type Totals = {
@@ -92,4 +93,70 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
 /** File name for a report generated on the given day, e.g. grant-matching-report-2026-10-20.xlsx. */
 export function reportFileName(now = new Date()) {
   return `grant-matching-report-${todayCentral(now)}.xlsx`;
+}
+
+/**
+ * The Fundraising Status export: a title row (what's shown and when), the headings (bold,
+ * frozen), one row per team, a blank row, then the Total (bold) and the Ask Period rows.
+ * Dollar columns are real numbers formatted as whole dollars.
+ */
+export async function fundraisingWorkbook(table: FundraisingTable, now = new Date(), shown = "Approved teams only") {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "FTC Illinois Grants";
+  wb.created = now;
+  const ws = wb.addWorksheet("Fundraising Status", { views: [{ state: "frozen", ySplit: 3 }] });
+  const n = table.headers.length;
+  const money = new Set(table.headers.flatMap((h, i) => (h in FUNDRAISING_TOTALS ? [i + 1] : [])));
+
+  ws.mergeCells(1, 1, 1, n);
+  const title = ws.getCell(1, 1);
+  title.value = `Fundraising Status - ${shown} - as of ${centralDateTime(now.toISOString())}`;
+  title.font = { bold: true, size: 14 };
+
+  const head = ws.getRow(3);
+  head.values = table.headers;
+  head.height = 32;
+  head.eachCell((c) => {
+    c.font = { bold: true };
+    c.alignment = { horizontal: "center", vertical: "bottom", wrapText: true };
+    c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: HEAD_FILL } };
+    c.border = { bottom: { style: "medium" } };
+  });
+
+  const style = (row: import("exceljs").Row, opts: { bold?: boolean; top?: boolean }) => {
+    for (let col = 1; col <= n; col++) {
+      const c = row.getCell(col);
+      if (money.has(col)) {
+        c.numFmt = MONEY;
+        c.alignment = { horizontal: "center" };
+      } else c.alignment = { horizontal: "left", vertical: "top", wrapText: true };
+      if (opts.bold) c.font = { bold: true };
+      c.border = opts.top ? { top: { style: "medium" } } : { bottom: { style: "thin", color: { argb: "FFDEE2E6" } } };
+    }
+  };
+
+  // Excel can't open a file with a cell that isn't a real number (NaN), so blank those.
+  const safe = (values: (string | number | null)[]) => values.map((v) => (typeof v === "number" && !Number.isFinite(v) ? null : v));
+  table.rows.forEach((values, i) => {
+    const row = ws.getRow(4 + i);
+    row.values = safe(values);
+    style(row, {});
+  });
+  const first = 4 + table.rows.length + 1; // after one blank row
+  table.summary.forEach((values, i) => {
+    const row = ws.getRow(first + i);
+    row.values = safe(values);
+    style(row, { bold: i === 0, top: i === 0 });
+  });
+
+  table.headers.forEach((h, i) => {
+    ws.getColumn(i + 1).width = money.has(i + 1) ? 13 : /Name|Addressee|Address/.test(h) ? 24 : i === 0 ? 16 : 12;
+  });
+  return wb;
+}
+
+/** e.g. grant-fundraising-2026-10-23.xlsx */
+export function fundraisingFileName(now = new Date()) {
+  return `grant-fundraising-${todayCentral(now)}.xlsx`;
 }

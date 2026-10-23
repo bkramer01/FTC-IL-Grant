@@ -103,6 +103,10 @@ The reason appears in red under the button, and nothing is changed.
 
 The **Team Name** comes from the BioBuzz list by team number. A team number that isn't on the list shows a red **not found** badge on Applications and **not in BioBuzz** on Fundraising Status. It usually means the team hasn't registered with BioBuzz yet, or the coach typed the wrong team number on the form.
 
+## Team Number answers
+
+Each response should have one team number. If the Team Number answer isn't a single number (for example "31768, 31769, 31770, 31771"), the site shows it as typed with a red **not one team #** badge and exports it as text. Split it into one response per team in the Google Sheet, then click Refresh Data.
+
 ## Duplicate applications
 
 A team number that appears on more than one form response is a duplicate. Every response stays on Applications and Fundraising Status, each with a yellow **Dup ×2** (or **×2**) badge, and each is reviewed separately. In Grant Matching Totals, Teams Applied counts every response, and the other columns count the team once (see [Grant Rules](grant-rules.md#6-grant-matching-totals-dashboard)).
@@ -132,4 +136,5 @@ Dates use Central time (America/Chicago): "today" for Last Update, the Email Log
 
 ## Change history
 
+- **Oct 23, 2026:** Added Team Number answers that aren't a single number.
 - **Oct 22, 2026:** Document created.

@@ -72,7 +72,7 @@ BioBuzz team list sheet ──────────────┘           
 | **Row counts** | "*N* rows" under the table, counting what's shown after search and filters. | Applications, Fundraising Status |
 | **Hover notes (ⓘ)** | Hover a heading with ⓘ, or a badge, for an explanation. | Throughout |
 | **Dollar amounts** | Shown as $1,050. Click a dollar box to type a plain number ("$" and commas are ignored). | Throughout |
-| **Exports** | Download a CSV file that opens in Excel, or the Excel Grant Matching Report. Exports include changes not yet saved. | Applications, Fundraising Status, Dashboard |
+| **Exports** | Download a CSV file that opens in Excel (Applications), or an Excel file (Fundraising Status, Grant Matching Report). Exports include changes not yet saved. | Applications, Fundraising Status, Dashboard |
 | **Badges** | Small colored labels: yellow for things to check (Dup, form says …, Title 1 status needed), red for problems (not found, error, No), green for Yes. | Applications, Dashboard |
 
 ## Downloads
@@ -80,7 +80,7 @@ BioBuzz team list sheet ──────────────┘           
 | Button | File | Contents |
 |---|---|---|
 | Applications → **⤓ Export** | `grant-applications-YYYY-MM-DD.csv` | Every application, ignoring search and filter, in the Applications column order plus Coach Email, file links and number of submissions. |
-| Fundraising Status → **⤓ Export** | `grant-fundraising-YYYY-MM-DD.csv` | The rows shown, in their current order, with the columns of both tabs. |
+| Fundraising Status → **⤓ Export** | `grant-fundraising-YYYY-MM-DD.xlsx` | The rows shown, in their current order, with the columns of both tabs and whole-dollar formatting, then the Total and Ask Period subtotals. |
 | Dashboard → **⤓ Grant Matching Report** | `grant-matching-report-YYYY-MM-DD.xlsx` | The Grant Matching Totals table with an "as of" title, dollar formatting and the green highlight. |
 
 ## Change history

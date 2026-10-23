@@ -220,16 +220,23 @@ select.form-control {
 .data-table.sticky-head thead th.manual {
   box-shadow: inset 0 -2px 0 var(--color-warning);
 }
-/* Frozen Total row: stays at the bottom of the scroll box, with its rule drawn as a shadow. */
-.data-table.sticky-foot tfoot {
+/* Frozen Total row: stays at the bottom of the scroll box, with its rule drawn as a shadow.
+   Only the Total row is frozen; breakdown rows under it scroll with the table. */
+.data-table.sticky-foot tfoot tr.total-row td {
   position: sticky;
   bottom: 0;
   z-index: 2;
-}
-.data-table.sticky-foot tfoot td {
   border-top: 0;
   background: #fff;
   box-shadow: inset 0 2px 0 var(--color-ink);
+}
+/* Breakdown rows under a Total: lighter than the Total row. */
+.data-table tfoot tr.breakdown-row td {
+  border-top: 0;
+  font-weight: 400;
+  font-size: 0.85rem;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
 }
 /* Frozen first column: stays at the left of the scroll box when scrolling sideways. Sticky
    cells need a solid background (the row stripe is drawn into it) and a shadow for the rule

@@ -1,6 +1,6 @@
 # Applications
 
-> **Address:** `/applications` · **Last updated:** October 22, 2026
+> **Address:** `/applications` · **Last updated:** October 23, 2026
 
 One row per grant form response, newest first. This is where the Grant Administrator reviews each application. How categories and awards are worked out is in [Grant Rules and Calculations](grant-rules.md); where each form column comes from is in [Data and Refresh Data](data-and-refresh.md#form-columns-the-site-uses).
 
@@ -16,6 +16,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 ## Flags
 
 - **Dup ×2**: the team sent the form more than once. Both rows stay.
+- **not one team #** (in Team #, red): the form's Team Number answer isn't a single number (for example, several team numbers in one response). The answer is shown as typed; hover for how to fix it: split it into one response per team in the Google Sheet and click Refresh Data. Until then the team age and category can't be trusted, there's no team name, and the response doesn't appear in the Email Log's team list.
 - **not found** (in Team Name): the team number isn't on the BioBuzz list, so there's no team name.
 - **form says …**: the team age the coach picked on the form doesn't match the team number. Hover the Calculated Team Age heading (ⓘ) for a reminder of this check.
 - **Title 1 status needed**: the category can't be worked out until School Title 1 Status is entered.
@@ -39,7 +40,7 @@ In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calcula
 | Add'l Info Email Sent | Latest "Additional Info Needed" entry in the Email Log |
 | Grant Approved | Grant Administrator: Yes, Under Review or No ("Not reviewed" until one is picked) |
 | VRS Task Completed | Grant Administrator: Yes, In Progress or No |
-| Raised by Team | Starts as the form's HQ grant amount (column I, "how much did your team receive as credit from FIRST Headquarters"), copied by Refresh Data with that day as the Last Update date. "$" and commas are fine; anything else that isn't a number shows **error** (hover for the form's answer) and counts as $0 in totals: fix it in the sheet and the next refresh copies it, or type the amount here. A blank answer stays blank until the sheet has one. Once an amount is copied or typed, refreshes never change it. The Grant Administrator can edit it on any row (shows as dollars; click to type a plain number); changing it sets the Last Update date to today. This is the only place it's edited; the Dashboard's Fundraising Status shows the same amount. |
+| Raised by Team | Starts as the form's HQ grant amount (column I, "how much did your team receive as credit from FIRST Headquarters"), copied by Refresh Data with that day as the Last Update date. "$" and commas are fine; anything else that isn't a number shows **error** (hover for the form's answer) and counts as $0 in totals: fix it in the sheet and the next refresh copies it, or type the amount here. A blank answer stays blank until the sheet has one. Once an amount is copied or typed, refreshes never change it. Hover the heading (ⓘ): "Defaults to Amount Received from HQ from grant application". The Grant Administrator can edit it on any row (shows as dollars; click to type a plain number); changing it sets the Last Update date to today. This is the only place it's edited; the Dashboard's Fundraising Status shows the same amount. |
 | Possible Grant Award | Calculated from Raised by Team and the team's category, the same as on the Dashboard's Fundraising Status; updates as soon as Raised by Team changes. |
 
 The **Letter ↗** and **Screenshot ↗** links open the files the coach uploaded with the form ("no file" when there isn't one).
@@ -50,6 +51,8 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Oct 23, 2026:** A Team Number answer that isn't a single number shows as typed with a red "not one team #" badge (instead of "NaN"), also in the export.
+- **Oct 23, 2026:** Raised by Team heading has a hover note: "Defaults to Amount Received from HQ from grant application".
 - **Oct 22, 2026:** Links to the new Grant Rules and Data documents; every review column described; hidden fields noted.
 - **Oct 22, 2026:** Grant Approved and Review Notes moved to the end, just before Timestamp (also in the export).
 - **Oct 21, 2026:** Row count under the table, like Fundraising Status.

@@ -4,6 +4,8 @@ import {
   CATEGORY_RULES,
   grantCategory,
   grantorMatch,
+  maxFundraisingTarget,
+  maxGrantAward,
   possibleAward,
   teamAge,
   TITLE1_NEEDED,
@@ -135,6 +137,8 @@ export type Application = {
   submittedAt: number;
   email: string;
   teamNumber: number;
+  /** The form's Team Number answer as typed (shown when it isn't a single number). */
+  teamNumberText: string;
   teamName: string | null;
   coach: string;
   categoryProvided: string;
@@ -243,6 +247,7 @@ export function buildApplications(data: GrantData): Application[] {
       submittedAt: parseTimestamp(r[COL.timestamp]),
       email: r[COL.email],
       teamNumber,
+      teamNumberText: (r[COL.teamNumber] ?? "").trim(),
       teamName: teamNames.get(String(teamNumber)) || null,
       coach: r[COL.coach],
       categoryProvided: r[COL.categoryProvided],
@@ -392,4 +397,47 @@ export function askRows(asks: GrantAsk[], apps: Application[]): { rows: AskRow[]
     return { ...ask, amount, cumulative: running, assigned: ask.id === undefined ? 0 : (assigned.get(ask.id) ?? 0) };
   });
   return { rows, total: running };
+}
+
+/** Dollar totals of some Fundraising Status rows (blanks count as $0). */
+export type FundTotals = { maxGrant: number; target: number; raised: number; possible: number; unused: number; checks: number };
+
+export function sumFundRows(rows: Application[]): FundTotals {
+  const t = { maxGrant: 0, target: 0, raised: 0, possible: 0, unused: 0, checks: 0 };
+  for (const a of rows) {
+    t.maxGrant += maxGrantAward(a.category) ?? 0;
+    t.target += maxFundraisingTarget(a.category) ?? 0;
+    t.raised += a.review.raised ?? 0;
+    t.possible += a.possibleAward ?? 0;
+    t.unused += a.unusedMatch ?? 0;
+    t.checks += a.checkAmount ?? 0;
+  }
+  return t;
+}
+
+export type FundGroup = { label: string; count: number; totals: FundTotals };
+
+/**
+ * The Fundraising Status totals split by Ask Period: each active ask (even with no teams),
+ * any other ask that still has approved teams ("(no dates)"), Unassigned (approved, no ask)
+ * and, when unapproved rows are shown, Not approved. The groups always add up to the totals
+ * of `rows`. Used under the table and at the bottom of its export.
+ */
+export function fundBreakdown(rows: Application[], asks: GrantAsk[], includeNotApproved: boolean): FundGroup[] {
+  const approved = rows.filter((a) => a.review.approved === "Yes");
+  const active = asks.filter((a) => isActiveAsk(a) && a.id !== undefined);
+  const otherIds = [
+    ...new Set(
+      approved.map((a) => a.review.askId).filter((id): id is number => id !== null && !active.some((ask) => ask.id === id)),
+    ),
+  ];
+  return [
+    ...active.map((ask) => ({ label: ask.name, rows: approved.filter((a) => a.review.askId === ask.id) })),
+    ...otherIds.map((id) => ({
+      label: `${asks.find((ask) => ask.id === id)?.name ?? "?"} (no dates)`,
+      rows: approved.filter((a) => a.review.askId === id),
+    })),
+    { label: "Unassigned", rows: approved.filter((a) => a.review.askId === null) },
+    ...(includeNotApproved ? [{ label: "Not approved", rows: rows.filter((a) => a.review.approved !== "Yes") }] : []),
+  ].map((g) => ({ label: g.label, count: g.rows.length, totals: sumFundRows(g.rows) }));
 }

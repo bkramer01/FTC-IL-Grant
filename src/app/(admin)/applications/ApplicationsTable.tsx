@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { HeaderScrollbar } from "@/components/HeaderScrollbar";
-import { ChoiceSelect, FileLink, HqAmountError, MoneyInput, YesNoBadge, YesNoSelect } from "@/components/inputs";
+import { ChoiceSelect, FileLink, HqAmountError, MoneyInput, TeamNumber, YesNoBadge, YesNoSelect } from "@/components/inputs";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
 import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort } from "@/components/SortHeader";
@@ -170,10 +170,10 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   sort={sort}
                   onSort={onSort}
                 />
-                <th className="manual">
+                <th className="manual cursor-help" title="Defaults to Amount Received from HQ from grant application">
                   Raised by
                   <br />
-                  Team
+                  Team <span className="text-muted">ⓘ</span>
                 </th>
                 <th className="num">
                   Possible
@@ -223,7 +223,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 return (
                   <tr key={a.timestamp}>
                     <td className="freeze whitespace-nowrap">
-                      {a.teamNumber}
+                      <TeamNumber app={a} />
                       {a.duplicateCount > 1 && (
                         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
                           Dup ×{a.duplicateCount}

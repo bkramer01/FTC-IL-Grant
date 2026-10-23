@@ -107,3 +107,17 @@ export function HqAmountError({ value }: { value: string }) {
     </span>
   );
 }
+
+/** Team # as a number, or what the coach typed (with a red flag) when it isn't one number. */
+export function TeamNumber({ app }: { app: { teamNumber: number; teamNumberText: string } }) {
+  if (Number.isFinite(app.teamNumber)) return <>{app.teamNumber}</>;
+  return (
+    <span
+      className="cursor-help"
+      title={`The form's Team Number is "${app.teamNumberText}", not a single team number. Fix it in the Google Sheet (one team per response) and click Refresh Data.`}
+    >
+      <span className="whitespace-normal">{app.teamNumberText || "(blank)"}</span>{" "}
+      <span className="badge badge-danger">not one team #</span>
+    </span>
+  );
+}

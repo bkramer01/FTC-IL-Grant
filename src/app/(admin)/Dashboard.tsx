@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { HqAmountError, MoneyInput } from "@/components/inputs";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlignedFooter } from "@/components/AlignedFooter";
+import { HqAmountError, MoneyInput, TeamNumber } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { ReportButton } from "@/components/ReportButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
@@ -12,15 +13,19 @@ import {
   buildApplications,
   computeTotals,
   EMPTY_REVIEW,
+  fundBreakdown,
   isActiveAsk,
+  sumFundRows,
   isCheckLocked,
   type Application,
   type AskFilter,
+  type FundTotals,
   type GrantAsk,
   type GrantData,
   type Review,
 } from "@/lib/applications";
-import { downloadCsv, fundraisingCsv } from "@/lib/export";
+import { downloadBlob, fundraisingTable } from "@/lib/export";
+import { fundraisingFileName, fundraisingWorkbook } from "@/lib/report";
 import { money, shortDate } from "@/lib/format";
 import {
   AGE_CUTOFFS,
@@ -110,6 +115,19 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
   const saver = useSaver();
+  const fundScrollerRef = useRef<HTMLDivElement>(null);
+  const fundTableRef = useRef<HTMLTableElement>(null);
+  // Height of what sits under the Fundraising Status box (Ask Period breakdown + row count),
+  // so the box leaves room for it: headings and every subtotal fit in the window together.
+  const fundBelowRef = useRef<HTMLDivElement>(null);
+  const [fundBelowHeight, setFundBelowHeight] = useState(0);
+  useEffect(() => {
+    const el = fundBelowRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setFundBelowHeight(el.getBoundingClientRect().height));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   function update(timestamp: string, patch: Partial<Review>) {
     setReviews((r) => ({ ...r, [timestamp]: { ...(r[timestamp] ?? EMPTY_REVIEW), ...patch } }));
@@ -143,19 +161,53 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     );
 
   // Totals of the rows shown (blanks count as $0).
-  const fundTotals = { maxGrant: 0, target: 0, raised: 0, possible: 0, unused: 0, checks: 0 };
-  for (const a of fundRows) {
-    fundTotals.maxGrant += maxGrantAward(a.category) ?? 0;
-    fundTotals.target += maxFundraisingTarget(a.category) ?? 0;
-    fundTotals.raised += a.review.raised ?? 0;
-    fundTotals.possible += a.possibleAward ?? 0;
-    fundTotals.unused += a.unusedMatch ?? 0;
-    fundTotals.checks += a.checkAmount ?? 0;
+  const fundTotals = sumFundRows(fundRows);
+  // The same totals split by Ask Period (always adds up to the Total row).
+  const breakdown = fundBreakdown(fundRows, asks, !approvedOnly);
+
+  /** Downloads the rows shown, with both tabs' columns and the subtotals, as an Excel file. */
+  async function exportFundraising() {
+    const now = new Date();
+    const table = fundraisingTable(fundRows, askName, [{ label: "Total", count: fundRows.length, totals: fundTotals }, ...breakdown]);
+    const wb = await fundraisingWorkbook(table, now, approvedOnly ? "Approved teams only" : "All applications");
+    const buffer = await wb.xlsx.writeBuffer();
+    downloadBlob(
+      fundraisingFileName(now),
+      new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    );
+  }
+
+  /** The Total row (frozen at the bottom of the table) or one breakdown row (below the box). */
+  function totalsRow(g: { label: string; count: number | null; totals: FundTotals }, total: boolean) {
+    const label = total ? (
+      "Total"
+    ) : (
+      <span className="pl-4">
+        {g.label} <span className="text-muted">({g.count})</span>
+      </span>
+    );
+    return tab === "fundraising" ? (
+      <tr key={g.label} className={total ? "total-row" : "breakdown-row"}>
+        <td colSpan={6}>{label}</td>
+        <td className="num">{money(g.totals.maxGrant)}</td>
+        <td className="num">{money(g.totals.target)}</td>
+        <td className="num">{money(g.totals.raised)}</td>
+        <td className="num">{money(g.totals.possible)}</td>
+        <td className="num">{money(g.totals.unused)}</td>
+        <td />
+      </tr>
+    ) : (
+      <tr key={g.label} className={total ? "total-row" : "breakdown-row"}>
+        <td colSpan={7}>{label}</td>
+        <td className="num">{money(g.totals.checks)}</td>
+        <td colSpan={3} />
+      </tr>
+    );
   }
 
   const teamCell = (a: Application) => (
     <td className="whitespace-nowrap">
-      {a.teamNumber}
+      <TeamNumber app={a} />
       {a.duplicateCount > 1 && (
         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
           ×{a.duplicateCount}
@@ -307,8 +359,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
             <button
               type="button"
               className="btn btn-outline btn-sm"
-              onClick={() => downloadCsv(`grant-fundraising-${today}.csv`, fundraisingCsv(fundRows, askName))}
-              title="Download the rows shown, with the columns of both tabs, as a CSV file for Excel"
+              onClick={exportFundraising}
+              title="Download the rows shown, with the columns of both tabs and the subtotals, as an Excel file"
             >
               ⤓ Export
             </button>
@@ -343,8 +395,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
 
         <div id="fund-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
           <ManualKey />
-          <div className="max-h-[calc(100vh-7rem)] overflow-auto">
-            <table className="data-table compact sticky-head sticky-foot center-num">
+          <div
+            className="overflow-auto"
+            style={{ maxHeight: `calc(100vh - ${Math.round(fundBelowHeight) + 24}px)` }}
+            ref={fundScrollerRef}
+          >
+            <table className="data-table compact sticky-head sticky-foot center-num" ref={fundTableRef}>
               <thead>
                 {tab === "fundraising" ? (
                   <tr>
@@ -555,31 +611,20 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 )}
               </tbody>
               {fundRows.length > 0 && (
-                <tfoot>
-                  {tab === "fundraising" ? (
-                    <tr>
-                      <td colSpan={6}>Total</td>
-                      <td className="num">{money(fundTotals.maxGrant)}</td>
-                      <td className="num">{money(fundTotals.target)}</td>
-                      <td className="num">{money(fundTotals.raised)}</td>
-                      <td className="num">{money(fundTotals.possible)}</td>
-                      <td className="num">{money(fundTotals.unused)}</td>
-                      <td />
-                    </tr>
-                  ) : (
-                    <tr>
-                      <td colSpan={7}>Total</td>
-                      <td className="num">{money(fundTotals.checks)}</td>
-                      <td colSpan={3} />
-                    </tr>
-                  )}
-                </tfoot>
+                <tfoot>{totalsRow({ label: "Total", count: null, totals: fundTotals }, true)}</tfoot>
               )}
             </table>
           </div>
-          <p className="mt-2 text-sm text-muted" aria-live="polite">
-            {fundRows.length} {fundRows.length === 1 ? "row" : "rows"}
-          </p>
+          <div ref={fundBelowRef}>
+            {fundRows.length > 0 && (
+              <AlignedFooter tableRef={fundTableRef} scrollerRef={fundScrollerRef} className="compact center-num">
+                {breakdown.map((g) => totalsRow(g, false))}
+              </AlignedFooter>
+            )}
+            <p className="mt-2 text-sm text-muted" aria-live="polite">
+              {fundRows.length} {fundRows.length === 1 ? "row" : "rows"}
+            </p>
+          </div>
         </div>
       </Card>
 
