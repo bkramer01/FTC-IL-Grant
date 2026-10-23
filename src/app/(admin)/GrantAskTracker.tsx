@@ -1,28 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { MoneyInput } from "@/components/inputs";
+import type { Dispatch, SetStateAction } from "react";
 import { SaveStatus, useSaver } from "@/components/useSaver";
 import { Card } from "@/components/SiteChrome";
-import { askTotals, type GrantAsk } from "@/lib/applications";
+import { askRows, type Application, type GrantAsk } from "@/lib/applications";
 import { money } from "@/lib/format";
 import { addAskAction, removeAskAction, updateAskAction } from "./actions";
 
 /**
- * Requests for money from the Donor Fund during the season. Everything is entered by the
- * Grant Administrator; "Use current" copies today's Qualified Grants from Fundraising total.
- * Changes save to the database as you go.
+ * Requests for money from the Donor Fund during the season. The Grant Administrator names
+ * each ask and sets its dates; the amounts add up the Amount of Check of the approved teams
+ * assigned to it (Ask Period on Check Status). Changes save to the database as you go.
+ * The list itself lives on the Dashboard, which also uses it for Ask Period and the filter.
  */
 export function GrantAskTracker({
-  initialAsks,
-  currentQualified,
+  asks,
+  setAsks,
+  apps,
+  onRemoved,
 }: {
-  initialAsks: GrantAsk[];
-  currentQualified: number;
+  asks: GrantAsk[];
+  setAsks: Dispatch<SetStateAction<GrantAsk[]>>;
+  apps: Application[];
+  /** Called after an ask is removed, so its teams can be shown as unassigned. */
+  onRemoved: (id: number) => void;
 }) {
-  const [asks, setAsks] = useState(initialAsks);
-  const totals = askTotals(asks);
-
+  const { rows, total } = askRows(asks, apps);
   const saver = useSaver();
 
   function update(i: number, patch: Partial<GrantAsk>) {
@@ -36,10 +39,22 @@ export function GrantAskTracker({
     if (created) setAsks((list) => [...list, created]);
   }
 
-  function remove(i: number) {
-    const id = asks[i].id;
+  async function remove(i: number) {
+    const { id, name, assigned } = rows[i];
+    if (
+      assigned > 0 &&
+      !window.confirm(
+        `${assigned} ${assigned === 1 ? "team is" : "teams are"} assigned to ${name}. Remove ${name} anyway? ` +
+          `Those teams will no longer have an Ask Period.`,
+      )
+    ) {
+      return;
+    }
     setAsks((list) => list.filter((_, j) => j !== i));
-    if (id) void saver.run(() => removeAskAction(id));
+    if (id) {
+      await saver.run(() => removeAskAction(id));
+      onRemoved(id);
+    }
   }
 
   return (
@@ -56,7 +71,9 @@ export function GrantAskTracker({
       }
     >
       <p className="mb-3 text-sm text-muted">
-        Filled out by the Grant Administrator to track requests for funds from the Donor Fund during the season.
+        Filled out by the Grant Administrator to track requests for funds from the Donor Fund during the season. Give an
+        ask a start and end date to make it available as an Ask Period on Check Status; its amounts add up the teams
+        assigned to it.
       </p>
       <div className="overflow-x-auto">
         <table className="data-table center-num !w-auto">
@@ -65,28 +82,34 @@ export function GrantAskTracker({
               <th className="manual">Name</th>
               <th className="manual">Start Date</th>
               <th className="manual">End Date</th>
-              <th className="manual num !whitespace-normal">
+              <th
+                className="num cursor-help !whitespace-normal"
+                title="Running total: this ask's Total Ask Amount plus every ask above it"
+              >
                 Cumulative Qualified
                 <br />
-                Grants as of End Date
+                Grants as of End Date <span className="text-muted">ⓘ</span>
               </th>
-              <th className="manual num !whitespace-normal">
+              <th
+                className="num cursor-help !whitespace-normal"
+                title="Amount of Check (mailed or not) of the approved teams assigned to this ask on Check Status"
+              >
                 Total Ask Amount
                 <br />
-                from Donor Fund
+                from Donor Fund <span className="text-muted">ⓘ</span>
               </th>
               <th />
             </tr>
           </thead>
           <tbody>
-            {asks.length === 0 && (
+            {rows.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-muted">
                   No asks yet. Use <strong>+ Add ask</strong> to start one.
                 </td>
               </tr>
             )}
-            {asks.map((a, i) => (
+            {rows.map((a, i) => (
               <tr key={a.id ?? i}>
                 <td className="w-28">
                   <input
@@ -119,41 +142,11 @@ export function GrantAskTracker({
                     </div>
                   )}
                 </td>
-                <td className="num">
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-32">
-                      <MoneyInput
-                        label={`Cumulative qualified grants for ${a.name}`}
-                        value={a.cumulative}
-                        onChange={(v) => update(i, { cumulative: v })}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="cell-pill"
-                      title={`Copy today's Qualified Grants from Fundraising total (${money(currentQualified)})`}
-                      onClick={() => update(i, { cumulative: currentQualified })}
-                    >
-                      Use current
-                    </button>
-                  </div>
-                </td>
-                <td className="num">
-                  <div className="mx-auto w-32">
-                    <MoneyInput
-                      label={`Total ask amount for ${a.name}`}
-                      value={a.ask}
-                      onChange={(v) => update(i, { ask: v })}
-                    />
-                  </div>
-                </td>
+                <td className="num">{money(a.cumulative)}</td>
+                <td className="num">{money(a.amount)}</td>
                 <td>
                   <div className="flex h-[1.625rem] items-center">
-                    <button
-                      type="button"
-                      className="cell-pill"
-                      onClick={() => remove(i)}
-                    >
+                    <button type="button" className="cell-pill" onClick={() => remove(i)}>
                       Remove
                     </button>
                   </div>
@@ -164,16 +157,8 @@ export function GrantAskTracker({
           <tfoot>
             <tr>
               <td colSpan={3}>Total Ask for Year</td>
-              <td className="num" title="The most recent ask's cumulative amount">
-                {/* Same layout as the rows (amount box + Use current) so the total sits under the amounts. */}
-                <div className="flex items-center justify-center gap-2">
-                  <span className="w-32 text-center">{money(totals.cumulative)}</span>
-                  <span className="cell-pill invisible" aria-hidden>
-                    Use current
-                  </span>
-                </div>
-              </td>
-              <td className="num">{money(totals.ask)}</td>
+              <td className="num">{money(total)}</td>
+              <td className="num">{money(total)}</td>
               <td />
             </tr>
           </tfoot>

@@ -41,6 +41,8 @@ export type Review = {
   checkAmountFor: number | null;
   checkNumber: string | null;
   checkMailedOn: string | null;
+  /** Grant Ask Tracker ask this team's check is funded from (Ask Period on Check Status). */
+  askId: number | null;
 };
 
 export const EMAIL_PURPOSES = ["Additional Info Needed", "Grant Award", "Other"] as const;
@@ -64,11 +66,21 @@ export type GrantAsk = {
   name: string;
   start: string | null;
   end: string | null;
-  /** Cumulative Qualified Grants from Fundraising as of the ask's end date. */
-  cumulative: number | null;
-  /** Total ask amount from the Donor Fund. */
-  ask: number | null;
 };
+
+/** An ask is active (offered in the Ask Period dropdown and filter) once both dates are set. */
+export function isActiveAsk(a: Pick<GrantAsk, "start" | "end">): boolean {
+  return !!a.start && !!a.end;
+}
+
+/** Grant Matching Totals filter: every team, teams assigned to one ask (its id), or teams with none. */
+export type AskFilter = "all" | "unassigned" | number;
+
+function matchesAsk(a: Application, filter: AskFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "unassigned") return a.review.askId === null;
+  return a.review.askId === filter;
+}
 
 export type GrantData = {
   /** When Refresh Data last read the Google Sheets; null before the first refresh. */
@@ -80,19 +92,6 @@ export type GrantData = {
   asks: GrantAsk[];
 };
 
-/**
- * Total row of the Grant Ask Tracker: the latest ask's cumulative amount (the last row that
- * has one) and the sum of all asks for the year.
- */
-export function askTotals(asks: GrantAsk[]) {
-  let cumulative: number | null = null;
-  let ask = 0;
-  for (const a of asks) {
-    if (a.cumulative !== null) cumulative = a.cumulative;
-    ask += a.ask ?? 0;
-  }
-  return { cumulative, ask };
-}
 
 export const EMPTY_REVIEW: Review = {
   title1: null,
@@ -109,6 +108,7 @@ export const EMPTY_REVIEW: Review = {
   checkAmountFor: null,
   checkNumber: null,
   checkMailedOn: null,
+  askId: null,
 };
 
 // Form Responses 1 columns (A = 0).
@@ -288,11 +288,16 @@ export type TotalsRow = {
 
 /**
  * One row per category. Applied counts every application (a team that sent the form twice
- * counts twice). The other columns count each approved team once, using its latest
- * approved application. Applications still missing a Title 1 status are left out of
- * every column; `title1Needed` counts those teams.
+ * counts twice) and ignores the ask filter. The other columns count each approved team
+ * once, using its latest approved application, limited to the teams the ask filter picks.
+ * Applications still missing a Title 1 status are left out of every column;
+ * `title1Needed` counts those teams.
  */
-export function computeTotals(apps: Application[]) {
+/**
+ * The one application that counts for each team in the totals: its latest approved
+ * application if it has one, otherwise its latest application.
+ */
+function countedTeams(apps: Application[]): Map<number, Application> {
   const byTeam = new Map<number, Application>();
   for (const a of apps) {
     const cur = byTeam.get(a.teamNumber);
@@ -302,6 +307,11 @@ export function computeTotals(apps: Application[]) {
       byTeam.set(a.teamNumber, a);
     }
   }
+  return byTeam;
+}
+
+export function computeTotals(apps: Application[], askFilter: AskFilter = "all") {
+  const byTeam = countedTeams(apps);
   const rows: TotalsRow[] = TOTALS_CATEGORIES.map((category) => ({
     category,
     applied: 0,
@@ -325,7 +335,7 @@ export function computeTotals(apps: Application[]) {
       continue;
     }
     const row = rows.find((r) => r.category === a.category)!;
-    if (a.review.approved !== "Yes") continue;
+    if (a.review.approved !== "Yes" || !matchesAsk(a, askFilter)) continue;
     row.awarded++;
     row.raised += a.review.raised ?? 0;
     row.qualified += a.possibleAward ?? 0;
@@ -351,4 +361,35 @@ export function computeTotals(apps: Application[]) {
 
 function sum(rows: TotalsRow[], key: keyof TotalsRow) {
   return rows.reduce((n, r) => n + (r[key] as number), 0);
+}
+
+export type AskRow = GrantAsk & {
+  /** Total Ask Amount: Amount of Check (mailed or not) of the approved teams assigned to the ask. */
+  amount: number;
+  /** Cumulative Qualified Grants as of End Date: this ask's amount plus every ask above it. */
+  cumulative: number;
+  /** Applications assigned to the ask (approved or not), for the Remove warning. */
+  assigned: number;
+};
+
+/**
+ * The Grant Ask Tracker's calculated columns, in list order, and its Total Ask for Year row.
+ * Teams are counted as in Grant Matching Totals (each approved team once), so an ask's
+ * amount matches the totals filtered to that ask.
+ */
+export function askRows(asks: GrantAsk[], apps: Application[]): { rows: AskRow[]; total: number } {
+  const amounts = new Map<number, number>();
+  for (const a of countedTeams(apps).values()) {
+    if (a.review.approved !== "Yes" || a.review.askId === null) continue;
+    amounts.set(a.review.askId, (amounts.get(a.review.askId) ?? 0) + (a.checkAmount ?? 0));
+  }
+  const assigned = new Map<number, number>();
+  for (const a of apps) if (a.review.askId !== null) assigned.set(a.review.askId, (assigned.get(a.review.askId) ?? 0) + 1);
+  let running = 0;
+  const rows = asks.map((ask) => {
+    const amount = ask.id === undefined ? 0 : (amounts.get(ask.id) ?? 0);
+    running += amount;
+    return { ...ask, amount, cumulative: running, assigned: ask.id === undefined ? 0 : (assigned.get(ask.id) ?? 0) };
+  });
+  return { rows, total: running };
 }

@@ -53,8 +53,6 @@ export async function seed(db: Db, { reset = false } = {}) {
       name: a.name,
       startDate: a.start,
       endDate: a.end,
-      cumulative: a.cumulative,
-      ask: a.ask,
     }));
     if (rows.length) await db.insert(grantAsks).values(rows);
     counts.asks = rows.length;

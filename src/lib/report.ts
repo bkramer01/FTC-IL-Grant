@@ -17,7 +17,7 @@ const HEAD_FILL = "FFF8F9FA";
  * numbers with dollar formatting; a category whose approved teams all raised the max gets
  * the light green fill on Total Team Fundraising, as on the page.
  */
-export async function grantMatchingReport({ rows, total }: Totals, now = new Date()) {
+export async function grantMatchingReport({ rows, total }: Totals, now = new Date(), askPeriod: string | null = null) {
   const ExcelJS = (await import("exceljs")).default;
   const wb = new ExcelJS.Workbook();
   wb.creator = "FTC Illinois Grants";
@@ -41,7 +41,7 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
 
   ws.mergeCells(1, 1, 1, headers.length);
   const title = ws.getCell(1, 1);
-  title.value = `Grant Matching Report - as of ${centralDateTime(now.toISOString())}`;
+  title.value = `Grant Matching Report${askPeriod ? ` - ${askPeriod}` : ""} - as of ${centralDateTime(now.toISOString())}`;
   title.font = { bold: true, size: 14 };
 
   const head = ws.getRow(3);

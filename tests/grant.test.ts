@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { askTotals, buildApplications, computeTotals, parseTimestamp, type GrantData } from "@/lib/applications";
+import { askRows, buildApplications, computeTotals, parseTimestamp, type GrantData } from "@/lib/applications";
 import { grantCategory, maxFundraisingTarget, maxGrantAward, multiplierLabel, possibleAward, teamAge, unusedMatch } from "@/lib/grant";
 import sample from "@/mock/sample-data.json";
 
@@ -57,14 +57,42 @@ test("parses Google Forms timestamps", () => {
 describe("sample data", () => {
   const apps = buildApplications(data);
 
-  test("grant ask totals: latest cumulative and sum of asks", () => {
-    expect(askTotals(data.asks)).toEqual({ cumulative: 40700, ask: 40700 });
-    // A blank later row doesn't wipe out the latest cumulative.
-    expect(askTotals([...data.asks, { name: "Ask 3", start: null, end: null, cumulative: null, ask: null }])).toEqual({
-      cumulative: 40700,
-      ask: 40700,
+  describe("ask periods", () => {
+    const asks = [
+      { id: 1, name: "Ask 1", start: "2026-09-01", end: "2026-10-20" },
+      { id: 2, name: "Ask 2", start: "2026-10-21", end: "2026-11-20" },
+      { id: 3, name: "Ask 3", start: null, end: null },
+    ];
+    // Assign the approved teams: the first two counted teams to Ask 1, the rest to Ask 2;
+    // one unapproved application is also tagged (it counts as assigned, not in amounts).
+    const approved = [...new Map(apps.filter((a) => a.review.approved === "Yes").map((a) => [a.teamNumber, a])).values()];
+    const reviews = { ...data.reviews };
+    approved.forEach((a, i) => (reviews[a.timestamp] = { ...a.review, askId: i < 2 ? 1 : 2 }));
+    const unapproved = apps.find((a) => a.review.approved !== "Yes")!;
+    reviews[unapproved.timestamp] = { ...unapproved.review, askId: 2 };
+    const tagged = buildApplications({ ...data, reviews });
+
+    test("each ask adds up its teams' Amount of Check; cumulative is a running total", () => {
+      const all = computeTotals(tagged);
+      const ask1 = computeTotals(tagged, 1);
+      const ask2 = computeTotals(tagged, 2);
+      const sumChecks = (f: number) =>
+        [...new Map(tagged.filter((a) => a.review.approved === "Yes" && a.review.askId === f).map((a) => [a.teamNumber, a])).values()]
+          .reduce((s, a) => s + (a.checkAmount ?? 0), 0);
+      const { rows, total } = askRows(asks, tagged);
+      expect(rows.map((r) => [r.name, r.amount, r.cumulative])).toEqual([
+        ["Ask 1", sumChecks(1), sumChecks(1)],
+        ["Ask 2", sumChecks(2), sumChecks(1) + sumChecks(2)],
+        ["Ask 3", 0, sumChecks(1) + sumChecks(2)],
+      ]);
+      expect(total).toBe(sumChecks(1) + sumChecks(2));
+      expect(rows.map((r) => r.assigned)).toEqual([2, approved.length - 2 + 1, 0]);
+      // The filter splits the awarded teams; Teams Applied ignores it.
+      expect(ask1.total.awarded + ask2.total.awarded).toBe(all.total.awarded);
+      expect(ask1.total.applied).toBe(all.total.applied);
+      expect(computeTotals(tagged, "unassigned").total.awarded).toBe(0);
+      expect(computeTotals(apps, "unassigned").total).toEqual(computeTotals(apps).total);
     });
-    expect(askTotals([])).toEqual({ cumulative: null, ask: 0 });
   });
 
   test("reads City State and Zip separately", () => {

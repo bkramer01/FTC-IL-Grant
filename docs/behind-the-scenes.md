@@ -1,6 +1,6 @@
 # Behind the Scenes
 
-> **Applies to:** the whole site · **Last updated:** October 22, 2026
+> **Applies to:** the whole site · **Last updated:** October 23, 2026
 
 The technical setup, for whoever maintains the site. Step-by-step deployment instructions are in [DEPLOY.md](../DEPLOY.md); local development is in the project [README](../README.md).
 
@@ -32,9 +32,9 @@ Everything the Grant Administrator enters, plus the saved copy of the Google She
 
 | Table | One row per | Holds |
 |---|---|---|
-| `application_reviews` | Form response (keyed by its Timestamp) | Title 1, Fundraising Letter Rec'd, VRS Task Completed, Grant Approved, Review Notes, Raised by Team (+ Last Update date, and whether it's been set), Amount of Check (+ the Possible Grant Award it was typed against), Check #, Date Check Mailed. Also the hidden Event Volunteering? and Qualified Purchase? answers. A row is created the first time anything is entered for a response. |
+| `application_reviews` | Form response (keyed by its Timestamp) | Title 1, Fundraising Letter Rec'd, VRS Task Completed, Grant Approved, Review Notes, Raised by Team (+ Last Update date, and whether it's been set), Amount of Check (+ the Possible Grant Award it was typed against), Check #, Date Check Mailed, Ask Period (`ask_id`, linked to `grant_asks`; removing the ask clears it). Also the hidden Event Volunteering? and Qualified Purchase? answers. A row is created the first time anything is entered for a response. |
 | `email_log` | Logged email | Date, team #, recipient, purpose (Additional Info Needed / Grant Award / Other), notes. |
-| `grant_asks` | Grant ask | Name, start and end dates, cumulative qualified grants, ask amount, list order. |
+| `grant_asks` | Grant ask | Name, start and end dates, list order. Its `cumulative` and `ask` columns hold amounts typed before Oct 23, 2026 and are no longer used: both are now calculated. |
 | `sheet_snapshots` | Google Sheet tab (2 rows: `responses`, `biobuzz`) | The headings and rows from the last Refresh Data, and when it ran. |
 | `settings` | — | Reserved; not used yet. |
 
@@ -70,6 +70,7 @@ The database also checks the allowed answers itself (for example, Grant Approved
    - `0001` Grant Administrator entries
    - `0002` sheet snapshots
    - `0003` Raised by Team "set" flag and check-amount tracking
+   - `0004` Ask Period link from reviews to asks
 4. Commit, then fast-forward `main` and push to GitHub. Hostinger deploys from `main`.
 
 ## Where the logic lives
@@ -91,4 +92,5 @@ The database also checks the allowed answers itself (for example, Grant Approved
 
 ## Change history
 
+- **Oct 23, 2026:** Ask Period link (migration 0004); Grant Ask Tracker amounts no longer stored.
 - **Oct 22, 2026:** Document created.

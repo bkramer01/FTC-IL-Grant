@@ -24,6 +24,7 @@ function toReview(r: ReviewRow): Review {
     checkAmountFor: r.checkAmountFor,
     checkNumber: r.checkNumber,
     checkMailedOn: r.checkMailedOn,
+    askId: r.askId,
   };
 }
 
@@ -49,8 +50,6 @@ export async function loadAdminEntries(db: Db) {
     name: a.name,
     start: a.startDate,
     end: a.endDate,
-    cumulative: a.cumulative,
-    ask: a.ask,
   }));
   return { reviews, emails, asks };
 }
@@ -82,7 +81,7 @@ export async function addAsk(db: Db, name: string): Promise<GrantAsk> {
     .insert(grantAsks)
     .values({ name, position: sql`coalesce((select max(${grantAsks.position}) from ${grantAsks}), 0) + 1` })
     .returning();
-  return { id: row.id, name: row.name, start: null, end: null, cumulative: null, ask: null };
+  return { id: row.id, name: row.name, start: null, end: null };
 }
 
 export async function updateAsk(db: Db, id: number, patch: Partial<Omit<GrantAsk, "id">>) {
@@ -90,11 +89,10 @@ export async function updateAsk(db: Db, id: number, patch: Partial<Omit<GrantAsk
   if (patch.name !== undefined) set.name = patch.name;
   if (patch.start !== undefined) set.startDate = patch.start;
   if (patch.end !== undefined) set.endDate = patch.end;
-  if (patch.cumulative !== undefined) set.cumulative = patch.cumulative;
-  if (patch.ask !== undefined) set.ask = patch.ask;
   await db.update(grantAsks).set(set).where(eq(grantAsks.id, id));
 }
 
+/** Deletes an ask; teams assigned to it become unassigned (the foreign key clears ask_id). */
 export async function removeAsk(db: Db, id: number) {
   await db.delete(grantAsks).where(eq(grantAsks.id, id));
 }

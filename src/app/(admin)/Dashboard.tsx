@@ -12,8 +12,11 @@ import {
   buildApplications,
   computeTotals,
   EMPTY_REVIEW,
+  isActiveAsk,
   isCheckLocked,
   type Application,
+  type AskFilter,
+  type GrantAsk,
   type GrantData,
   type Review,
 } from "@/lib/applications";
@@ -90,8 +93,18 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const [approvedOnly, setApprovedOnly] = useState(true);
   const [sort, setSort] = useState<Sort>({ key: "team", dir: 1 });
   const [tab, setTab] = useState<Tab>("fundraising");
+  const [asks, setAsks] = useState<GrantAsk[]>(data.asks);
+  const [askFilterChoice, setAskFilter] = useState<AskFilter>("all");
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
-  const totals = useMemo(() => computeTotals(apps), [apps]);
+  // Asks with both dates set: offered in Ask Period and the filter.
+  const activeAsks = asks.filter((a): a is GrantAsk & { id: number } => isActiveAsk(a) && a.id !== undefined);
+  // A filtered ask that was removed or lost a date falls back to all ask periods.
+  const askFilter =
+    typeof askFilterChoice === "number" && !activeAsks.some((a) => a.id === askFilterChoice) ? "all" : askFilterChoice;
+  const askName = (id: number | null) => asks.find((a) => a.id === id)?.name ?? null;
+  const totals = useMemo(() => computeTotals(apps, askFilter), [apps, askFilter]);
+  const filterLabel =
+    askFilter === "all" ? null : askFilter === "unassigned" ? "Unassigned" : (askName(askFilter) ?? null);
   const { rows, total } = totals;
   // Every submission whose Grant Approved is still blank or Under Review.
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
@@ -109,6 +122,13 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     if (!a.checkLocked && isCheckLocked({ ...a.review, ...patch })) {
       update(a.timestamp, { checkAmount: a.checkAmount, checkAmountFor: a.possibleAward });
     }
+  }
+
+  /** An ask was removed from the Grant Ask Tracker: its teams no longer have an Ask Period. */
+  function onAskRemoved(id: number) {
+    setReviews((r) =>
+      Object.fromEntries(Object.entries(r).map(([ts, review]) => [ts, review.askId === id ? { ...review, askId: null } : review])),
+    );
   }
 
   function onSort(key: SortKey) {
@@ -159,8 +179,28 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         title="Grant Matching Totals"
         actions={
           <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <span className="sr-only sm:not-sr-only">Ask Period</span>
+              <select
+                className="form-control !w-auto !py-1 text-sm"
+                value={String(askFilter)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setAskFilter(v === "all" || v === "unassigned" ? v : Number(v));
+                }}
+                title="Show totals for the approved teams assigned to one ask period. Teams Applied always counts every application."
+              >
+                <option value="all">All Ask Periods</option>
+                {activeAsks.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.name}
+                  </option>
+                ))}
+                <option value="unassigned">Unassigned</option>
+              </select>
+            </label>
             <RefreshButton initialRefreshedAt={data.refreshedAt} />
-            <ReportButton totals={totals} />
+            <ReportButton totals={totals} askPeriod={filterLabel} />
           </div>
         }
       >
@@ -170,6 +210,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
               {notReviewed} application{notReviewed === 1 ? "" : "s"}
             </Link>{" "}
             not fully reviewed/complete.
+          </Alert>
+        )}
+        {filterLabel && (
+          <Alert tone="info" compact>
+            Showing approved teams {askFilter === "unassigned" ? "with no Ask Period" : <>assigned to <strong>{filterLabel}</strong></>}.
+            Teams Applied still counts every application.
           </Alert>
         )}
         <div className="overflow-x-auto">
@@ -248,7 +294,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         </div>
       </Card>
 
-      <GrantAskTracker initialAsks={data.asks} currentQualified={total.qualified} />
+      <GrantAskTracker asks={asks} setAsks={setAsks} apps={apps} onRemoved={onAskRemoved} />
 
       <Card
         title="Fundraising Status"
@@ -261,7 +307,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
             <button
               type="button"
               className="btn btn-outline btn-sm"
-              onClick={() => downloadCsv(`grant-fundraising-${today}.csv`, fundraisingCsv(fundRows))}
+              onClick={() => downloadCsv(`grant-fundraising-${today}.csv`, fundraisingCsv(fundRows, askName))}
               title="Download the rows shown, with the columns of both tabs, as a CSV file for Excel"
             >
               ⤓ Export
@@ -390,6 +436,14 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       State
                     </th>
                     <th className="num">Zip</th>
+                    <th
+                      className="manual cursor-help"
+                      title="The Grant Ask Tracker ask this team's check is funded from. Only approved teams; asks need a start and end date to be listed."
+                    >
+                      Ask
+                      <br />
+                      Period <span className="text-muted">ⓘ</span>
+                    </th>
                     <SortHeader
                       label={<>Amount<br />of Check <span className="text-muted">ⓘ</span></>}
                       title="If check number and date check mailed are filled out, then the check amount is no longer editable"
@@ -442,6 +496,26 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       <td className="min-w-36">{a.street}</td>
                       <td className="whitespace-nowrap">{a.cityState}</td>
                       <td className="num whitespace-nowrap">{a.zip}</td>
+                      <td>
+                        {a.review.approved === "Yes" && (
+                          <select
+                            aria-label={`Ask period for team ${a.teamNumber}`}
+                            className="cell-input !w-auto"
+                            value={a.review.askId ?? ""}
+                            onChange={(e) => update(a.timestamp, { askId: e.target.value ? Number(e.target.value) : null })}
+                          >
+                            <option value="">—</option>
+                            {activeAsks.map((ask) => (
+                              <option key={ask.id} value={ask.id}>
+                                {ask.name}
+                              </option>
+                            ))}
+                            {a.review.askId !== null && !activeAsks.some((ask) => ask.id === a.review.askId) && (
+                              <option value={a.review.askId}>{askName(a.review.askId) ?? "?"} (no dates)</option>
+                            )}
+                          </select>
+                        )}
+                      </td>
                       {a.checkLocked ? (
                         <td
                           className="num cursor-help"
@@ -494,7 +568,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     </tr>
                   ) : (
                     <tr>
-                      <td colSpan={6}>Total</td>
+                      <td colSpan={7}>Total</td>
                       <td className="num">{money(fundTotals.checks)}</td>
                       <td colSpan={3} />
                     </tr>

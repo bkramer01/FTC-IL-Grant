@@ -3,7 +3,8 @@ import type { Application } from "./applications";
 import { shortDate } from "./format";
 import { maxFundraisingTarget, maxGrantAward, multiplierLabel } from "./grant";
 
-type Column = [string, (a: Application) => string | number | null];
+type AskName = (id: number | null) => string | null;
+type Column = [string, (a: Application, askName: AskName) => string | number | null];
 
 const APPLICATION_COLUMNS: Column[] = [
   ["Team #", (a) => a.teamNumber],
@@ -48,6 +49,7 @@ const FUNDRAISING_COLUMNS: Column[] = [
   ["Street Address", (a) => a.street],
   ["City, State", (a) => a.cityState],
   ["Zip", (a) => a.zip],
+  ["Ask Period", (a, askName) => (a.review.approved === "Yes" ? askName(a.review.askId) : null)],
   ["Amount of Check", (a) => a.checkAmount],
   ["Check #", (a) => a.review.checkNumber],
   ["Date Check Mailed", (a) => shortDate(a.review.checkMailedOn)],
@@ -63,9 +65,9 @@ export function csvField(value: string | number | null | undefined): string {
   return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function toCsv(columns: Column[], rows: Application[]): string {
+function toCsv(columns: Column[], rows: Application[], askName: AskName = () => null): string {
   const lines = [columns.map(([h]) => csvField(h)).join(",")];
-  for (const a of rows) lines.push(columns.map(([, get]) => csvField(get(a))).join(","));
+  for (const a of rows) lines.push(columns.map(([, get]) => csvField(get(a, askName))).join(","));
   return lines.join("\r\n") + "\r\n";
 }
 
@@ -75,8 +77,8 @@ export function applicationsCsv(apps: Application[]): string {
 }
 
 /** The rows shown in Fundraising Status (in their current order), with the columns of both tabs. */
-export function fundraisingCsv(rows: Application[]): string {
-  return toCsv(FUNDRAISING_COLUMNS, rows);
+export function fundraisingCsv(rows: Application[], askName: AskName = () => null): string {
+  return toCsv(FUNDRAISING_COLUMNS, rows, askName);
 }
 
 /** Saves CSV text as a file in the browser. The byte-order mark tells Excel the file is UTF-8. */

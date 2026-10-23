@@ -41,6 +41,9 @@ export const applicationReviews = pgTable(
     checkAmountFor: integer("check_amount_for"),
     checkNumber: text("check_number"),
     checkMailedOn: date("check_mailed_on"),
+    // The Grant Ask Tracker ask this team's check is funded from (Check Status "Ask Period").
+    // Removing the ask clears it.
+    askId: bigint("ask_id", { mode: "number" }).references(() => grantAsks.id, { onDelete: "set null" }),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -51,6 +54,7 @@ export const applicationReviews = pgTable(
     check("application_reviews_vrs_completed_check", sql`${t.vrsCompleted} in ('Yes', 'In Progress', 'No')`),
     check("application_reviews_approved_check", sql`${t.approved} in ('Yes', 'Under Review', 'No')`),
     check("application_reviews_amounts_check", sql`${t.raised} >= 0 and ${t.checkAmount} >= 0`),
+    index("application_reviews_ask_idx").on(t.askId),
   ],
 );
 
@@ -82,6 +86,8 @@ export const grantAsks = pgTable(
     name: text("name").notNull(),
     startDate: date("start_date"),
     endDate: date("end_date"),
+    // Typed amounts from before Oct 23, 2026. Both columns are now calculated from the teams
+    // assigned to each ask, so these are no longer read.
     cumulative: integer("cumulative"),
     ask: integer("ask"),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

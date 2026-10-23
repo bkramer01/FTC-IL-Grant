@@ -34,9 +34,9 @@ describe("seed", () => {
     expect(Object.keys(reviews)).toHaveLength(36);
     expect(reviews["9/28/2026 19:07:48"]).toMatchObject({ approved: "Yes", raised: 500, checkAmount: 1050, raisedUpdatedOn: "2026-10-11" });
     expect(emails[0]).toMatchObject({ date: "2026-10-12", teamNumber: 38599, purpose: "Grant Award" });
-    expect(asks.map((a) => [a.name, a.cumulative, a.ask])).toEqual([
-      ["Ask 1", 20700, 20700],
-      ["Ask 2", 40700, 20000],
+    expect(asks.map((a) => [a.name, a.start, a.end])).toEqual([
+      ["Ask 1", "2026-09-01", "2026-10-20"],
+      ["Ask 2", "2026-10-21", "2026-11-20"],
     ]);
   });
 });
@@ -73,16 +73,22 @@ describe("email log", () => {
 });
 
 describe("grant asks", () => {
-  test("add at the end, update, remove", async () => {
+  test("add at the end, rename, remove (unassigning its teams)", async () => {
     const a1 = await addAsk(db, "Ask 1");
     const a2 = await addAsk(db, "Ask 2");
-    await updateAsk(db, a2.id!, { start: "2026-10-21", cumulative: 40700, ask: 20000 });
-    let { asks } = await loadAdminEntries(db);
-    expect(asks.map((a) => a.name)).toEqual(["Ask 1", "Ask 2"]);
-    expect(asks[1]).toMatchObject({ start: "2026-10-21", end: null, cumulative: 40700, ask: 20000 });
+    await updateAsk(db, a2.id!, { start: "2026-10-21", name: "Spring" });
+    const { asks } = await loadAdminEntries(db);
+    expect(asks.map((a) => a.name)).toEqual(["Ask 1", "Spring"]);
+    expect(asks[1]).toMatchObject({ start: "2026-10-21", end: null });
+    // Removing an ask unassigns its teams.
+    await saveReview(db, "10/1/2026 9:00:00", { approved: "Yes", askId: a1.id! });
+    await saveReview(db, "10/2/2026 9:00:00", { approved: "Yes", askId: a2.id! });
     await removeAsk(db, a1.id!);
-    ({ asks } = await loadAdminEntries(db));
-    expect(asks.map((a) => a.name)).toEqual(["Ask 2"]);
+    const after = await loadAdminEntries(db);
+    expect(after.asks.map((a) => a.name)).toEqual(["Spring"]);
+    expect([after.reviews["10/1/2026 9:00:00"].askId, after.reviews["10/2/2026 9:00:00"].askId]).toEqual([null, a2.id]);
+    // An ask that doesn't exist can't be assigned.
+    await expect(saveReview(db, "10/3/2026 9:00:00", { askId: 999999 })).rejects.toThrow();
   });
 });
 

@@ -6,14 +6,21 @@ import { downloadBlob } from "@/lib/export";
 import { grantMatchingReport, reportFileName } from "@/lib/report";
 
 /** Downloads the Grant Matching Totals table as a formatted Excel file. */
-export function ReportButton({ totals }: { totals: ReturnType<typeof computeTotals> }) {
+export function ReportButton({
+  totals,
+  askPeriod,
+}: {
+  totals: ReturnType<typeof computeTotals>;
+  /** The Ask Period filter's choice ("Unassigned" or an ask's name), or null for all. */
+  askPeriod: string | null;
+}) {
   const [busy, setBusy] = useState(false);
 
   async function download() {
     setBusy(true);
     try {
       const now = new Date();
-      const wb = await grantMatchingReport(totals, now);
+      const wb = await grantMatchingReport(totals, now, askPeriod);
       const buffer = await wb.xlsx.writeBuffer();
       downloadBlob(
         reportFileName(now),

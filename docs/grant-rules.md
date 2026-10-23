@@ -1,6 +1,6 @@
 # Grant Rules and Calculations
 
-> **Applies to:** every page · **Last updated:** October 22, 2026
+> **Applies to:** every page · **Last updated:** October 23, 2026
 
 How the site works out each team's grant category and award, and every calculated number on the Dashboard. The rules are the 2026–27 season's, taken from the Goals tab of *FTC IL Grant Status.xlsx*. They're built into the site (`src/lib/grant.ts`); changing a threshold or amount is a code change, not a setting.
 
@@ -90,6 +90,8 @@ Entered on the Dashboard's **Check Status** tab.
 
 One row per category (the five qualifying categories plus Not Qualified) and a Total row.
 
+**Ask Period filter:** with an ask picked, every column except Teams Applied counts only the approved teams assigned to that ask; **Unassigned** counts approved teams with no ask. Teams Applied always counts every application.
+
 **Which applications count:**
 
 - **Teams Applied** counts every application: a team that sent the form twice counts twice.
@@ -114,15 +116,33 @@ One row per category (the five qualifying categories plus Not Qualified) and a T
 - Total Team Fundraising = $900 + $1,500 + $2,000 = $4,400
 - Qualified Grants = $900 + $1,500 + $1,500 = $3,900. The first team is short, so the cell isn't green.
 
-## 7. Other totals
+## 7. Ask periods and the Grant Ask Tracker
+
+- Each approved team can be assigned to one ask (**Ask Period** on Check Status). Only *active* asks, with both a start and end date, can be picked.
+- **Total Ask Amount from Donor Fund** = sum of **Amount of Check** (mailed or not, section 5) for the approved teams assigned to the ask. Teams are counted as in Grant Matching Totals: each team once, using its latest approved application.
+- **Cumulative Qualified Grants as of End Date** = this ask's Total Ask Amount + the Total Ask Amounts of every ask above it in the list.
+- **Total Ask for Year** = sum of all Total Ask Amounts (equal to the last ask's cumulative amount).
+- Filtering Grant Matching Totals to an ask gives the same teams, so its numbers line up with that ask's row.
+
+**Example:** Ask 1 has two teams with checks of $1,500 and $900; Ask 2 has one team with $3,000.
+
+| Ask | Total Ask Amount | Cumulative |
+|---|---|---|
+| Ask 1 | $1,500 + $900 = **$2,400** | **$2,400** |
+| Ask 2 | **$3,000** | $2,400 + $3,000 = **$5,400** |
+| Total Ask for Year | **$5,400** | **$5,400** |
+
+If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,200, Ask 1 becomes $2,700 and both cumulative amounts go up by $300.
+
+## 8. Other totals
 
 | Where | Number | Formula |
 |---|---|---|
 | Dashboard, under the title | "XX applications not fully reviewed/complete" | Applications (not teams) whose Grant Approved is blank or Under Review. |
 | Applications, yellow box | Total applications, Grants approved, Rejected, Not reviewed, Under review | Counts of applications by Grant Approved answer, ignoring search and filter. |
 | Fundraising Status / Check Status | Total row | Adds up the rows shown (blanks count as $0). It follows **Approved teams only**, and duplicate applications are each counted. The Check Status total includes unmailed checks, so it's usually more than Grants Distributed. |
-| Grant Ask Tracker | Total Ask for Year | Cumulative: the last ask in the list that has a cumulative amount. Ask: the sum of every ask's Total Ask Amount. |
 
 ## Change history
 
+- **Oct 23, 2026:** Added ask periods: the Ask Period filter, Total Ask Amount and the running cumulative total.
 - **Oct 22, 2026:** Document created.

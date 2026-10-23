@@ -1,6 +1,6 @@
 # Site Structure
 
-> **Applies to:** every page · **Last updated:** October 22, 2026
+> **Applies to:** every page · **Last updated:** October 23, 2026
 
 How the grant site is laid out, how its pages connect, and the features every page shares.
 
@@ -14,7 +14,7 @@ The whole site is for the **Grant Administrator** (and other FIRST Illinois staf
 Sign In  (/login)
 └── after signing in, the blue menu bar links to:
     ├── Dashboard        (/)
-    │     ├── Grant Matching Totals   + Refresh Data, ⤓ Grant Matching Report
+    │     ├── Grant Matching Totals   + Ask Period filter, Refresh Data, ⤓ Grant Matching Report
     │     ├── Grant Ask Tracker
     │     ├── Fundraising Status      tabs: Fundraising Status | Check Status, ⤓ Export
     │     └── Grant Rules
@@ -26,7 +26,7 @@ Sign In  (/login)
 | Page | What it's for | Grant Administrator enters |
 |---|---|---|
 | [Sign In](sign-in.md) | Shared login for the whole site. | — |
-| [Dashboard](dashboard.md) | Season totals, fundraising and checks, asks to the Donor Fund, the grant rules. | Amount of Check, Check #, Date Check Mailed; the Grant Ask Tracker. |
+| [Dashboard](dashboard.md) | Season totals, fundraising and checks, asks to the Donor Fund, the grant rules. | Ask Period, Amount of Check, Check #, Date Check Mailed; ask names and dates in the Grant Ask Tracker. |
 | [Applications](applications.md) | Review each grant application. | Raised by Team, School Title 1 Status, Fundraising Letter Rec'd, VRS Task Completed, Grant Approved, Review Notes. |
 | [Email Log](email-log.md) | Record emails sent to coaches. | Each email (date, team, recipient, purpose, notes). |
 | [Form Responses](form-responses.md) | Read-only copy of the grant form's Google Sheet. | — |
@@ -49,7 +49,7 @@ BioBuzz team list sheet ──────────────┘           
 - **Refresh Data** brings in new form responses and team names for every page. See [Data and Refresh Data](data-and-refresh.md).
 - **Applications → Dashboard:** School Title 1 Status sets the category, Grant Approved decides which teams count in the totals, and Raised by Team drives Possible Grant Award, Unused Grant Match and the default Amount of Check. Fundraising Status shows Raised by Team read-only.
 - **Dashboard → Applications:** the yellow "XX applications not fully reviewed/complete" link opens Applications showing only applications that aren't reviewed yet or are Under Review.
-- **Dashboard → Grant Ask Tracker:** **Use current** copies the Qualified Grants from Fundraising total from Grant Matching Totals into an ask.
+- **Grant Ask Tracker ↔ Check Status ↔ Grant Matching Totals:** asks with both dates become choices in **Ask Period** on Check Status. Each ask's amounts add up the teams assigned to it, and the **Ask Period** filter on Grant Matching Totals shows the totals for one ask (or the unassigned teams).
 - **Email Log → Applications and Check Status:** each team's latest "Additional Info Needed" and "Grant Award" emails fill in the two "Email Sent" date columns.
 - **Rookie/Veteran Status \*** on Grant Matching Totals jumps to the explanation in Grant Rules at the bottom of the Dashboard.
 
@@ -85,4 +85,5 @@ BioBuzz team list sheet ──────────────┘           
 
 ## Change history
 
+- **Oct 23, 2026:** Ask periods connect the Grant Ask Tracker, Check Status and Grant Matching Totals.
 - **Oct 22, 2026:** Document created.

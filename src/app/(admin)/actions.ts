@@ -31,6 +31,7 @@ const reviewPatch = z
     checkAmountFor: dollars,
     checkNumber: z.string().max(50).nullable(),
     checkMailedOn: isoDate,
+    askId: z.number().int().positive().nullable(),
   })
   .partial()
   .strict();
@@ -64,8 +65,6 @@ const askPatch = z
     name: z.string().max(100),
     start: isoDate,
     end: isoDate,
-    cumulative: dollars,
-    ask: dollars,
   })
   .partial()
   .strict();
