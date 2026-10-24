@@ -24,7 +24,7 @@ The technical setup, for whoever maintains the site. Step-by-step deployment ins
 | **Hosting** | Hostinger Node.js Web App, built with `npm run build` and started with `node .next/standalone/server.js`. |
 | **Database** | Supabase project **FTC IL Grant Project** (ref `uyyighbxmkhoussrleug`, us-west-2), separate from the Event Registration site's. The site connects through the Session pooler. |
 | **Google** | Google Cloud project `project-115d3a43-e62e-443b-8d5` with the Google Sheets API on. Its service account `ftc-grant-sheets-reader@…` has read-only access to the two sheets. |
-| **Software** | Next.js 16 (App Router, Server Actions), TypeScript, Tailwind CSS 4, Drizzle ORM, Zod, exceljs (Excel report), google-auth-library, Vitest (tests). |
+| **Software** | Next.js 16.4.3 (App Router, Server Actions), TypeScript, Tailwind CSS 4, Drizzle ORM, Zod, exceljs (the two Excel files), google-auth-library, Vitest (tests). |
 
 ## Database tables
 
@@ -82,15 +82,22 @@ The database also checks the allowed answers itself (for example, Grant Approved
 | Reading the Google Sheets and the column checks | `src/lib/sheets.ts` |
 | Saving and loading database entries, Refresh Data's HQ copy | `src/lib/store.ts` |
 | Server actions behind every save (with input checks) | `src/app/(admin)/actions.ts` |
-| CSV exports / Excel report | `src/lib/export.ts` / `src/lib/report.ts` |
+| Exports: Applications CSV and the Fundraising Status table's contents / the Excel files (Grant Matching Report, Fundraising Status) | `src/lib/export.ts` / `src/lib/report.ts` |
+| Ask Period subtotals (shared by the page and the Fundraising Status export) | `fundBreakdown` in `src/lib/applications.ts` |
+| Subtotal rows below a scroll box, lined up with its columns | `src/components/AlignedFooter.tsx` |
 | Sign in and sessions | `src/lib/auth.ts`, `src/lib/session.ts`, `src/proxy.ts` |
 | Pages | `src/app/(admin)/…` |
 
+## Keeping the software up to date
+
+Run `npm audit --omit=dev` from time to time to check the site's software for known security problems. On Oct 23, 2026 Next.js was upgraded from 16.4.0 to 16.4.3 because of critical security advisories (GHSA-2464-fhr4-w9xw, GHSA-p3m5-59mp-jv5r, GHSA-673q-mjm6-r5xr). Next.js may also stop a build to warn about such an advisory. Three moderate advisories remain in the `uuid` package inside exceljs and Google's login library; they only matter when uuid is given a buffer to write into, which this site never does, and the only fix today would be a much older exceljs.
+
 ## Tests
 
-`npm test` runs automated checks against a throwaway local database: the grant rules, totals against the spreadsheet mockup, the Grant Matching Report, CSV exports, check-amount rules, HQ amount copying, saving and loading, and the sheet column checks.
+`npm test` runs automated checks against a throwaway local database: the grant rules, totals against the spreadsheet mockup, ask periods (filter, amounts, removing an ask), the Grant Matching Report, the Applications CSV and the Fundraising Status Excel file (including subtotals and a Team Number that isn't one number), check-amount rules, HQ amount copying, saving and loading, and the sheet column checks.
 
 ## Change history
 
+- **Oct 23, 2026:** Next.js 16.4.3 security upgrade and how to check for advisories; where the Ask Period subtotals, aligned subtotal rows and Excel files live; test list updated.
 - **Oct 23, 2026:** Ask Period link (migration 0004); Grant Ask Tracker amounts no longer stored.
 - **Oct 22, 2026:** Document created.

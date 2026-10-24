@@ -18,7 +18,7 @@ The FTC Illinois Grant site is where the Grant Administrator reviews matching-gr
 | Page | Address | What it's for |
 |---|---|---|
 | [Sign In](sign-in.md) | `/login` | Shared `FTCAdmin` login. Every other page requires it. |
-| [Dashboard](dashboard.md) | `/` | Grant Matching Totals with Refresh Data and the Excel report, the Grant Ask Tracker, Fundraising and Check Status tabs, and the grant rules. |
+| [Dashboard](dashboard.md) | `/` | Grant Matching Totals with the Ask Period filter, Refresh Data and the Excel report; the Grant Ask Tracker; Fundraising and Check Status tabs with Ask Period subtotals and an Excel export; and the grant rules. |
 | [Applications](applications.md) | `/applications` | One row per grant form response, with the Grant Administrator's review columns. |
 | [Email Log](email-log.md) | `/emails` | Emails sent to coaches, entered by hand. |
 | [Form Responses](form-responses.md) | `/responses` | Read-only copy of the form's Google Sheet. |
@@ -29,7 +29,8 @@ The FTC Illinois Grant site is where the Grant Administrator reviews matching-gr
 2. **Refresh Data** (Dashboard) copies the form responses and the BioBuzz team list into the site, and starts each team's Raised by Team at the HQ grant amount from the form.
 3. On **Applications**, the Grant Administrator enters School Title 1 Status, checks the letter and VRS task, adjusts Raised by Team, and sets **Grant Approved**.
 4. The **Dashboard** works out each team's category and award, totals them by category, and tracks checks from the default amount through to mailed.
-5. The **Email Log** records emails to coaches, and the **Grant Ask Tracker** records requests to the Donor Fund.
+5. On **Check Status**, each approved team is assigned an **Ask Period**: the Grant Ask Tracker ask its check is funded from. Each ask's amount adds itself up from those teams, and the totals can be filtered or subtotaled by ask.
+6. The **Email Log** records emails to coaches.
 
 ## Key terms
 

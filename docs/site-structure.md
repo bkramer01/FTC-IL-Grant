@@ -69,11 +69,12 @@ BioBuzz team list sheet ──────────────┘           
 | **Frozen headings** | Wide tables scroll inside their own box, no taller than the window. Headings stay at the top, with an extra sideways scrollbar under them. | Applications, Fundraising Status, Form Responses |
 | **Frozen Team #** | Team # stays at the left when scrolling sideways. | Applications |
 | **Frozen Total row** | The Total row stays at the bottom of the box. | Fundraising Status, Check Status |
+| **Ask Period subtotals** | Below the box, outside the scrolling: the Total split by ask, lined up under the Total's amounts. The box leaves room so the headings and every subtotal fit on screen. | Fundraising Status, Check Status |
 | **Row counts** | "*N* rows" under the table, counting what's shown after search and filters. | Applications, Fundraising Status |
 | **Hover notes (ⓘ)** | Hover a heading with ⓘ, or a badge, for an explanation. | Throughout |
 | **Dollar amounts** | Shown as $1,050. Click a dollar box to type a plain number ("$" and commas are ignored). | Throughout |
 | **Exports** | Download a CSV file that opens in Excel (Applications), or an Excel file (Fundraising Status, Grant Matching Report). Exports include changes not yet saved. | Applications, Fundraising Status, Dashboard |
-| **Badges** | Small colored labels: yellow for things to check (Dup, form says …, Title 1 status needed), red for problems (not found, error, No), green for Yes. | Applications, Dashboard |
+| **Badges** | Small colored labels: yellow for things to check (Dup, form says …, Title 1 status needed, Ends before it starts), red for problems (not found, not in BioBuzz, not one team #, error, No), green for Yes. | Applications, Dashboard |
 
 ## Downloads
 
@@ -85,5 +86,6 @@ BioBuzz team list sheet ──────────────┘           
 
 ## Change history
 
+- **Oct 23, 2026:** Ask Period subtotals; badges list updated.
 - **Oct 23, 2026:** Ask periods connect the Grant Ask Tracker, Check Status and Grant Matching Totals.
 - **Oct 22, 2026:** Document created.

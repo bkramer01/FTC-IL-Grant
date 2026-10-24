@@ -140,9 +140,10 @@ If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,
 |---|---|---|
 | Dashboard, under the title | "XX applications not fully reviewed/complete" | Applications (not teams) whose Grant Approved is blank or Under Review. |
 | Applications, yellow box | Total applications, Grants approved, Rejected, Not reviewed, Under review | Counts of applications by Grant Approved answer, ignoring search and filter. |
-| Fundraising Status / Check Status | Total row | Adds up the rows shown (blanks count as $0). It follows **Approved teams only**, and duplicate applications are each counted. The Check Status total includes unmailed checks, so it's usually more than Grants Distributed. |
+| Fundraising Status / Check Status | Total row and Ask Period subtotals | The Total adds up the rows shown (blanks count as $0). It follows **Approved teams only**, and duplicate applications are each counted. The subtotals below it split those same rows by Ask Period (each active ask, Unassigned, and Not approved when unapproved rows are shown), so they always add up to the Total. The export has the same rows. The Check Status total includes unmailed checks, so it's usually more than Grants Distributed. |
 
 ## Change history
 
+- **Oct 23, 2026:** Ask Period subtotals under Fundraising Status and Check Status.
 - **Oct 23, 2026:** Added ask periods: the Ask Period filter, Total Ask Amount and the running cumulative total.
 - **Oct 22, 2026:** Document created.

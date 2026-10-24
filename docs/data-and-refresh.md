@@ -1,6 +1,6 @@
 # Data and Refresh Data
 
-> **Applies to:** every page · **Last updated:** October 22, 2026
+> **Applies to:** every page · **Last updated:** October 23, 2026
 
 Where the site's information comes from, what **Refresh Data** does, and what's saved where.
 
