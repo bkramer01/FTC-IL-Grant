@@ -31,6 +31,7 @@ const reviewPatch = z
     checkAmountFor: dollars,
     checkNumber: z.string().max(50).nullable(),
     checkMailedOn: isoDate,
+    checkPaid: z.boolean(),
     askId: z.number().int().positive().nullable(),
   })
   .partial()

@@ -1,0 +1,1 @@
+ALTER TABLE "application_reviews" ADD COLUMN "check_paid" boolean DEFAULT false NOT NULL;

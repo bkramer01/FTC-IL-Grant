@@ -41,6 +41,9 @@ export const applicationReviews = pgTable(
     checkAmountFor: integer("check_amount_for"),
     checkNumber: text("check_number"),
     checkMailedOn: date("check_mailed_on"),
+    // Check Status "Paid" (picked by the Grant Administrator once the check is Sent, i.e. Check #
+    // and Date Check Mailed are filled in). Cleared when either of those is cleared.
+    checkPaid: boolean("check_paid").notNull().default(false),
     // The Grant Ask Tracker ask this team's check is funded from (Check Status "Ask Period").
     // Removing the ask clears it.
     askId: bigint("ask_id", { mode: "number" }).references(() => grantAsks.id, { onDelete: "set null" }),

@@ -1,0 +1,451 @@
+{
+  "id": "f6e62843-9383-45ba-bf78-7b6972c24e06",
+  "prevId": "dd1d889c-89e8-4e2c-8643-6b94eb6d27eb",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.application_reviews": {
+      "name": "application_reviews",
+      "schema": "",
+      "columns": {
+        "response_timestamp": {
+          "name": "response_timestamp",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title1": {
+          "name": "title1",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "letter_received": {
+          "name": "letter_received",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "volunteering": {
+          "name": "volunteering",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "qualified_purchase": {
+          "name": "qualified_purchase",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vrs_completed": {
+          "name": "vrs_completed",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved": {
+          "name": "approved",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "raised": {
+          "name": "raised",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "raised_updated_on": {
+          "name": "raised_updated_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "raised_set": {
+          "name": "raised_set",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "check_amount": {
+          "name": "check_amount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_amount_for": {
+          "name": "check_amount_for",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_number": {
+          "name": "check_number",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_mailed_on": {
+          "name": "check_mailed_on",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "check_paid": {
+          "name": "check_paid",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "ask_id": {
+          "name": "ask_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "application_reviews_ask_idx": {
+          "name": "application_reviews_ask_idx",
+          "columns": [
+            {
+              "expression": "ask_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "application_reviews_ask_id_grant_asks_id_fk": {
+          "name": "application_reviews_ask_id_grant_asks_id_fk",
+          "tableFrom": "application_reviews",
+          "tableTo": "grant_asks",
+          "columnsFrom": [
+            "ask_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "application_reviews_title1_check": {
+          "name": "application_reviews_title1_check",
+          "value": "\"title1\" in ('Yes', 'No')"
+        },
+        "application_reviews_letter_received_check": {
+          "name": "application_reviews_letter_received_check",
+          "value": "\"letter_received\" in ('Yes', 'No')"
+        },
+        "application_reviews_volunteering_check": {
+          "name": "application_reviews_volunteering_check",
+          "value": "\"volunteering\" in ('Yes', 'No')"
+        },
+        "application_reviews_qualified_purchase_check": {
+          "name": "application_reviews_qualified_purchase_check",
+          "value": "\"qualified_purchase\" in ('Yes', 'No')"
+        },
+        "application_reviews_vrs_completed_check": {
+          "name": "application_reviews_vrs_completed_check",
+          "value": "\"application_reviews\".\"vrs_completed\" in ('Yes', 'In Progress', 'No')"
+        },
+        "application_reviews_approved_check": {
+          "name": "application_reviews_approved_check",
+          "value": "\"application_reviews\".\"approved\" in ('Yes', 'Under Review', 'No')"
+        },
+        "application_reviews_amounts_check": {
+          "name": "application_reviews_amounts_check",
+          "value": "\"application_reviews\".\"raised\" >= 0 and \"application_reviews\".\"check_amount\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.email_log": {
+      "name": "email_log",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "email_log_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "email_date": {
+          "name": "email_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_number": {
+          "name": "team_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient": {
+          "name": "recipient",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "purpose": {
+          "name": "purpose",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "email_log_team_purpose_idx": {
+          "name": "email_log_team_purpose_idx",
+          "columns": [
+            {
+              "expression": "team_number",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "purpose",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "email_log_purpose_check": {
+          "name": "email_log_purpose_check",
+          "value": "\"email_log\".\"purpose\" in ('Additional Info Needed', 'Grant Award', 'Other')"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.grant_asks": {
+      "name": "grant_asks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "bigint",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "grant_asks_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "9223372036854775807",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cumulative": {
+          "name": "cumulative",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ask": {
+          "name": "ask",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "grant_asks_amounts_check": {
+          "name": "grant_asks_amounts_check",
+          "value": "\"grant_asks\".\"cumulative\" >= 0 and \"grant_asks\".\"ask\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.settings": {
+      "name": "settings",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.sheet_snapshots": {
+      "name": "sheet_snapshots",
+      "schema": "",
+      "columns": {
+        "source": {
+          "name": "source",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "headers": {
+          "name": "headers",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rows": {
+          "name": "rows",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refreshed_at": {
+          "name": "refreshed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "sheet_snapshots_source_check": {
+          "name": "sheet_snapshots_source_check",
+          "value": "\"sheet_snapshots\".\"source\" in ('responses', 'biobuzz')"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

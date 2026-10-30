@@ -59,6 +59,7 @@ const FUNDRAISING_COLUMNS: Column[] = [
   ["Amount of Check", (a) => a.checkAmount],
   ["Check #", (a) => a.review.checkNumber],
   ["Date Check Mailed", (a) => shortDate(a.review.checkMailedOn)],
+  ["Check Status", (a) => a.checkStatus],
   ["Grant Award Email Sent", (a) => shortDate(a.awardEmailOn)],
 ];
 

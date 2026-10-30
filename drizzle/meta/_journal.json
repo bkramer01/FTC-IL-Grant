@@ -36,6 +36,13 @@
       "when": 1792783997114,
       "tag": "0004_ask_periods",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793321604660,
+      "tag": "0005_check_paid",
+      "breakpoints": true
     }
   ]
 }

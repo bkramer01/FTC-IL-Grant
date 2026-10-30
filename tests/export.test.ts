@@ -37,7 +37,7 @@ test("fundraising export has both tabs' columns for the rows given", () => {
   const t = fundraisingTable(approved);
   expect(t.headers.join(",")).toBe(
     "Team #,Team Name,Coach Name,Approved,Rookie/Veteran Status,Matching Multiplier,Max Grant Award,Team Target,Raised by Team,Possible Grant Award,Unused Grant Match," +
-      "Last Update,Check Addressee,Street Address,City, State,Zip,Ask Period,Amount of Check,Check #,Date Check Mailed,Grant Award Email Sent",
+      "Last Update,Check Addressee,Street Address,City, State,Zip,Ask Period,Amount of Check,Check #,Date Check Mailed,Check Status,Grant Award Email Sent",
   );
   expect(t.rows).toHaveLength(approved.length);
   const team3640 = t.rows.find((r) => r[0] === 3640)!;

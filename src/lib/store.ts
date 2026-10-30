@@ -24,6 +24,7 @@ function toReview(r: ReviewRow): Review {
     checkAmountFor: r.checkAmountFor,
     checkNumber: r.checkNumber,
     checkMailedOn: r.checkMailedOn,
+    checkPaid: r.checkPaid,
     askId: r.askId,
   };
 }

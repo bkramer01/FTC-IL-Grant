@@ -11,6 +11,7 @@ import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort as SortState } from "@/components/SortHeader";
 import {
   buildApplications,
+  CHECK_STATUSES,
   computeTotals,
   EMPTY_REVIEW,
   fundBreakdown,
@@ -47,6 +48,7 @@ type SortKey =
   | "checkAmount"
   | "checkNumber"
   | "checkMailed"
+  | "checkStatus"
   | "awardEmail";
 type Sort = SortState<SortKey>;
 type Tab = "fundraising" | "checks";
@@ -82,6 +84,8 @@ function sortValue(a: Application, key: SortKey): number | string | null {
     }
     case "checkMailed":
       return a.review.checkMailedOn;
+    case "checkStatus":
+      return a.checkStatus === null ? null : CHECK_STATUSES.indexOf(a.checkStatus);
     case "awardEmail":
       return a.awardEmailOn;
     default:
@@ -134,12 +138,17 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     saver.queue(`${timestamp}:${Object.keys(patch).sort().join(",")}`, () => saveReviewAction(timestamp, patch));
   }
 
-  /** Check # or Date Check Mailed changed. Completing both locks the check at its current amount. */
+  /**
+   * Check # or Date Check Mailed changed. Completing both locks the check at its current amount
+   * (and Check Status reads Sent); clearing either one also clears a Paid Check Status.
+   */
   function updateCheck(a: Application, patch: Pick<Partial<Review>, "checkNumber" | "checkMailedOn">) {
     update(a.timestamp, patch);
-    if (!a.checkLocked && isCheckLocked({ ...a.review, ...patch })) {
+    const locked = isCheckLocked({ ...a.review, ...patch });
+    if (!a.checkLocked && locked) {
       update(a.timestamp, { checkAmount: a.checkAmount, checkAmountFor: a.possibleAward });
     }
+    if (!locked && a.review.checkPaid) update(a.timestamp, { checkPaid: false });
   }
 
   /** An ask was removed from the Grant Ask Tracker: its teams no longer have an Ask Period. */
@@ -200,7 +209,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       <tr key={g.label} className={total ? "total-row" : "breakdown-row"}>
         <td colSpan={7}>{label}</td>
         <td className="num">{money(g.totals.checks)}</td>
-        <td colSpan={3} />
+        <td colSpan={4} />
       </tr>
     );
   }
@@ -516,6 +525,14 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       onSort={onSort}
                       className="manual"
                     />
+                    <SortHeader
+                      label={<>Check<br />Status</>}
+                      title="Blank until Check # and Date Check Mailed are filled in, then Sent. The Grant Administrator can change it to Paid once the check is paid. Clearing Check # or Date Check Mailed makes it blank again."
+                      sortKey="checkStatus"
+                      sort={sort}
+                      onSort={onSort}
+                      className="manual cursor-help"
+                    />
                     <SortHeader label={<>Grant Award<br />Email Sent</>} sortKey="awardEmail" sort={sort} onSort={onSort} />
                   </tr>
                 )}
@@ -548,8 +565,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     <tr key={a.timestamp}>
                       {teamCell(a)}
                       {nameCell(a)}
-                      <td className="min-w-48">{a.checkPayee}</td>
-                      <td className="min-w-36">{a.street}</td>
+                      <td className="min-w-44">{a.checkPayee}</td>
+                      <td className="min-w-32">{a.street}</td>
                       <td className="w-24 min-w-24">{a.cityState}</td>
                       <td className="num whitespace-nowrap">{a.zip}</td>
                       <td>
@@ -588,10 +605,10 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                           />
                         </td>
                       )}
-                      <td className="w-24">
+                      <td className="w-20">
                         <input
                           aria-label={`Check number for team ${a.teamNumber}`}
-                          className="cell-input text-center"
+                          className="cell-input !min-w-0 text-center"
                           value={a.review.checkNumber ?? ""}
                           onChange={(e) => updateCheck(a, { checkNumber: e.target.value || null })}
                         />
@@ -600,10 +617,26 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                         <input
                           type="date"
                           aria-label={`Date check mailed to team ${a.teamNumber}`}
-                          className="cell-input"
+                          className="cell-input !w-[6.25rem] !min-w-0 !pl-1 !pr-0 !text-[0.75rem]"
                           value={a.review.checkMailedOn ?? ""}
                           onChange={(e) => updateCheck(a, { checkMailedOn: e.target.value || null })}
                         />
+                      </td>
+                      <td>
+                        {a.checkStatus && (
+                          <select
+                            aria-label={`Check status for team ${a.teamNumber}`}
+                            className="cell-input !w-auto !min-w-0"
+                            value={a.checkStatus}
+                            onChange={(e) => update(a.timestamp, { checkPaid: e.target.value === "Paid" })}
+                          >
+                            {CHECK_STATUSES.map((s) => (
+                              <option key={s} value={s}>
+                                {s}
+                              </option>
+                            ))}
+                          </select>
+                        )}
                       </td>
                       <td className="whitespace-nowrap">{shortDate(a.awardEmailOn)}</td>
                     </tr>

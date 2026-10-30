@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { buildApplications, EMPTY_REVIEW, effectiveCheckAmount, parseDollars, type GrantData, type Review } from "@/lib/applications";
+import { buildApplications, checkStatus, EMPTY_REVIEW, effectiveCheckAmount, parseDollars, type GrantData, type Review } from "@/lib/applications";
 
 test("form dollar amounts", () => {
   expect(["1500", "$2,000", " 800.00 ", "0", "none", "", "$"].map(parseDollars)).toEqual([1500, 2000, 800, 0, null, null, null]);
@@ -14,6 +14,18 @@ test("Amount of Check follows Possible Grant Award unless typed for it or mailed
   // Mailed: the saved amount stands whatever the award does.
   expect(effectiveCheckAmount(r({ checkAmount: 1500, checkAmountFor: 1500 }), 1800, true)).toBe(1500);
   expect(effectiveCheckAmount(r({}), null, false)).toBeNull();
+});
+
+test("Check Status is blank until the check is mailed, then Sent or Paid", () => {
+  const r = (p: Partial<Review>) => ({ ...EMPTY_REVIEW, ...p });
+  expect(checkStatus(r({}))).toBeNull();
+  expect(checkStatus(r({ checkNumber: "1001" }))).toBeNull();
+  expect(checkStatus(r({ checkMailedOn: "2026-10-29" }))).toBeNull();
+  expect(checkStatus(r({ checkNumber: " ", checkMailedOn: "2026-10-29" }))).toBeNull();
+  expect(checkStatus(r({ checkNumber: "1001", checkMailedOn: "2026-10-29" }))).toBe("Sent");
+  expect(checkStatus(r({ checkNumber: "1001", checkMailedOn: "2026-10-29", checkPaid: true }))).toBe("Paid");
+  // Paid without a mailed check doesn't show.
+  expect(checkStatus(r({ checkNumber: "1001", checkPaid: true }))).toBeNull();
 });
 
 test("a non-numeric HQ grant amount shows as an error until Raised by Team is set", () => {

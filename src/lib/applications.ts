@@ -43,6 +43,8 @@ export type Review = {
   checkAmountFor: number | null;
   checkNumber: string | null;
   checkMailedOn: string | null;
+  /** Check Status is Paid (only counts while the check is Sent: Check # and Date Check Mailed filled in). */
+  checkPaid: boolean;
   /** Grant Ask Tracker ask this team's check is funded from (Ask Period on Check Status). */
   askId: number | null;
 };
@@ -110,6 +112,7 @@ export const EMPTY_REVIEW: Review = {
   checkAmountFor: null,
   checkNumber: null,
   checkMailedOn: null,
+  checkPaid: false,
   askId: null,
 };
 
@@ -166,6 +169,8 @@ export type Application = {
   checkLocked: boolean;
   /** Amount of Check: the typed amount while it still applies, otherwise Possible Grant Award. */
   checkAmount: number | null;
+  /** Check Status: blank until Check # and Date Check Mailed are filled in, then Sent (or Paid). */
+  checkStatus: CheckStatus | null;
   review: Review;
 };
 
@@ -194,6 +199,15 @@ export function responseTimestamp(row: string[]): string {
 export function effectiveCheckAmount(review: Review, possible: number | null, locked: boolean): number | null {
   if (review.checkAmount !== null && (locked || review.checkAmountFor === possible)) return review.checkAmount;
   return possible;
+}
+
+export const CHECK_STATUSES = ["Sent", "Paid"] as const;
+export type CheckStatus = (typeof CHECK_STATUSES)[number];
+
+/** Check Status: blank until the check is mailed (Check # and Date Check Mailed), then Sent or Paid. */
+export function checkStatus(review: Pick<Review, "checkNumber" | "checkMailedOn" | "checkPaid">): CheckStatus | null {
+  if (!isCheckLocked(review)) return null;
+  return review.checkPaid ? "Paid" : "Sent";
 }
 
 export function isCheckLocked(review: Pick<Review, "checkNumber" | "checkMailedOn">): boolean {
@@ -271,6 +285,7 @@ export function buildApplications(data: GrantData): Application[] {
       raisedError: !review.raisedSet && review.raised === null && hq === "error",
       checkLocked: locked,
       checkAmount: effectiveCheckAmount(review, possible, locked),
+      checkStatus: checkStatus(review),
       review,
     };
   });
