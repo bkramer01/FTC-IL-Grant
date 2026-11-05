@@ -21,6 +21,7 @@ import {
   isActiveAsk,
   sumFundRows,
   isCheckLocked,
+  mailingAddress,
   matchesAskPicks,
   type Application,
   type AskFilter,
@@ -256,7 +257,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       </tr>
     ) : (
       <tr key={g.label} className={total ? "total-row" : "breakdown-row"}>
-        <td colSpan={7}>{label}</td>
+        <td colSpan={6}>{label}</td>
         <td className="num">{money(g.totals.checks)}</td>
         <td colSpan={4} />
       </tr>
@@ -546,16 +547,22 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       Addressee
                     </th>
                     <th>
-                      Street
+                      Mailing
                       <br />
                       Address
                     </th>
-                    <th>
-                      City,
-                      <br />
-                      State
-                    </th>
-                    <th className="num">Zip</th>
+                    <SortHeader
+                      label={
+                        <>
+                          Rookie/Veteran
+                          <br />
+                          Status
+                        </>
+                      }
+                      sortKey="category"
+                      sort={sort}
+                      onSort={onSort}
+                    />
                     <th
                       className="manual cursor-help"
                       title="The Grant Ask Tracker ask this team's check is funded from. Only approved teams; asks need a start and end date to be listed."
@@ -621,9 +628,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       {teamCell(a)}
                       {nameCell(a)}
                       <td className="min-w-40">{a.checkPayee}</td>
-                      <td className="min-w-32">{a.street}</td>
-                      <td className="w-24 min-w-24">{a.cityState}</td>
-                      <td className="num whitespace-nowrap">{a.zip}</td>
+                      <td className="min-w-36">
+                        {mailingAddress(a.street, a.cityState, a.zip).map((line) => (
+                          <div key={line}>{line}</div>
+                        ))}
+                      </td>
+                      <td className="text-balance">{a.category}</td>
                       <td>
                         {a.review.approved === "Yes" && isRowLocked(a) && (
                           <div className="locked-field cursor-help whitespace-nowrap" title="Locked. Click Edit in the Check Status column to change it.">

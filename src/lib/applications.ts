@@ -216,6 +216,19 @@ export function checkStatus(
   return review.checkPaid ? "Paid" : "Sent";
 }
 
+/**
+ * The address as envelope lines: street, then city, state and ZIP. Many responses repeat the
+ * ZIP inside City State, so it's only added when it isn't there already.
+ */
+export function mailingAddress(street: string, cityState: string, zip: string): string[] {
+  const place = cityState.trim();
+  const code = zip.trim();
+  return [
+    street.trim().replace(/,$/, ""),
+    code && !place.includes(code) ? `${place} ${code}`.trim() : place,
+  ].filter(Boolean);
+}
+
 /** Check numbers used on more than one application, with those applications. */
 export function duplicateCheckNumbers(apps: Application[]): Map<string, Application[]> {
   const byNumber = new Map<string, Application[]>();

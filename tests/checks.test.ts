@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { buildApplications, checkStatus, duplicateCheckNumbers, EMPTY_REVIEW, effectiveCheckAmount, parseDollars, type Application, type GrantData, type Review } from "@/lib/applications";
+import { buildApplications, checkStatus, duplicateCheckNumbers, EMPTY_REVIEW, effectiveCheckAmount, mailingAddress, parseDollars, type Application, type GrantData, type Review } from "@/lib/applications";
 
 test("form dollar amounts", () => {
   expect(["1500", "$2,000", " 800.00 ", "0", "none", "", "$"].map(parseDollars)).toEqual([1500, 2000, 800, 0, null, null, null]);
@@ -31,6 +31,13 @@ test("Check Status is blank until all four check fields are filled in, then Sent
   // An unapproved team's saved Ask Period doesn't count.
   expect(checkStatus(r({ approved: "No" }), 500)).toBeNull();
   expect(checkStatus(r({ approved: null }), 500)).toBeNull();
+});
+
+test("mailing address shows the ZIP once and drops a stray comma", () => {
+  expect(mailingAddress("1742 Riviera Ln", "O'Fallon, IL", "62269")).toEqual(["1742 Riviera Ln", "O'Fallon, IL 62269"]);
+  expect(mailingAddress("95 State Street #6038, ", "Peoria, IL 61601", "61601")).toEqual(["95 State Street #6038", "Peoria, IL 61601"]);
+  expect(mailingAddress("1 Main St", "Peoria, IL 61601", "")).toEqual(["1 Main St", "Peoria, IL 61601"]);
+  expect(mailingAddress("", "", "")).toEqual([]);
 });
 
 test("duplicate check numbers are found across applications", () => {

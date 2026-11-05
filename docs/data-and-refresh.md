@@ -1,6 +1,6 @@
 # Data and Refresh Data
 
-> **Applies to:** every page · **Last updated:** October 23, 2026
+> **Applies to:** every page · **Last updated:** November 5, 2026
 
 Where the site's information comes from, what **Refresh Data** does, and what's saved where.
 
@@ -44,11 +44,11 @@ The site reads form answers by column position. Columns marked ✔ are checked o
 | L | Matching grant letter (upload) | **Letter ↗** link | |
 | M | Make the check out to | Check Addressee | |
 | N | School or community team | Form Responses only | |
-| O | Street Address | Check Status address | ✔ |
-| P | City State | Check Status City, State | ✔ |
+| O | Street Address | Check Status Mailing Address | ✔ |
+| P | City State | Check Status Mailing Address | ✔ |
 | Q | VRS screenshot (upload) | **Screenshot ↗** link | |
 | R | The VRS 6 Challenges | Form Responses only (VRS Task Completed is picked by hand) | |
-| S | Zip | Check Status Zip (added Oct 2026; earlier responses have the zip inside City State) | ✔ |
+| S | Zip | Check Status Mailing Address (added Oct 2026; earlier responses have the zip inside City State) | ✔ |
 
 If the form gains, loses or reorders questions, these positions must be updated in the code (`COL` in `src/lib/applications.ts` and the checks in `src/lib/sheets.ts`).
 
@@ -136,5 +136,6 @@ Dates use Central time (America/Chicago): "today" for Last Update, the Email Log
 
 ## Change history
 
+- **Nov 5, 2026:** Street Address, City State and Zip now show together as Mailing Address on Check Status.
 - **Oct 23, 2026:** Added Team Number answers that aren't a single number.
 - **Oct 22, 2026:** Document created.
