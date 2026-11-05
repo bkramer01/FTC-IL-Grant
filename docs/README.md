@@ -1,6 +1,6 @@
 # FTC IL Grant Site: Documentation
 
-> **Last updated:** October 23, 2026
+> **Last updated:** November 5, 2026
 
 The FTC Illinois Grant site is where the Grant Administrator reviews matching-grant applications, tracks team fundraising and checks, and follows the season's grant totals. These documents describe the site's structure, every feature, and the logic behind each one.
 
@@ -18,7 +18,7 @@ The FTC Illinois Grant site is where the Grant Administrator reviews matching-gr
 | Page | Address | What it's for |
 |---|---|---|
 | [Sign In](sign-in.md) | `/login` | Shared `FTCAdmin` login. Every other page requires it. |
-| [Dashboard](dashboard.md) | `/` | Grant Matching Totals with the Ask Period filter, Refresh Data and the Excel report; the Grant Ask Tracker; Fundraising and Check Status tabs with Ask Period subtotals and an Excel export; and the grant rules. |
+| [Dashboard](dashboard.md) | `/` | Grant Matching Totals with the Ask Period filter, Refresh Data and the Excel report; the Grant Ask Tracker; Fundraising and Check Status tabs with an Ask Period filter, subtotals and an Excel export; and the grant rules. |
 | [Applications](applications.md) | `/applications` | One row per grant form response, with the Grant Administrator's review columns. |
 | [Email Log](email-log.md) | `/emails` | Emails sent to coaches, entered by hand. |
 | [Form Responses](form-responses.md) | `/responses` | Read-only copy of the form's Google Sheet. |
@@ -42,8 +42,9 @@ The FTC Illinois Grant site is where the Grant Administrator reviews matching-gr
 | **Possible Grant Award** | Raised by Team, capped at the category's max fundraising target, × its multiplier. |
 | **Approved** | Grant Approved = Yes on Applications. Only approved teams count in the Dashboard totals (except Teams Applied). |
 | **Duplicate** | A team number that sent the form more than once. Each response stays and is flagged. |
+| **Duplicate check number** | A Check # on more than one application. It's flagged with a badge but allowed, since one check can cover more than one team. |
 | **Ask Period** | The Grant Ask Tracker ask an approved team's check is funded from, picked on Check Status. Asks need a start and end date to be picked. |
-| **Mailed check** | A check with both Check # and Date Check Mailed filled in. Its amount is locked, and it counts in Grants Distributed to Teams. Check Status also needs Amount of Check and Ask Period before it shows Sent/Paid. |
+| **Mailed check** | A check with both Check # and Date Check Mailed filled in. Its amount is locked, and it counts in Grants Distributed to Teams. Check Status also needs Amount of Check and Ask Period before it shows Sent/Paid; all four fields then lock until **Edit** is clicked. |
 
 ## Keeping these docs current
 

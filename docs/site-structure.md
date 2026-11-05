@@ -1,6 +1,6 @@
 # Site Structure
 
-> **Applies to:** every page · **Last updated:** October 23, 2026
+> **Applies to:** every page · **Last updated:** November 5, 2026
 
 How the grant site is laid out, how its pages connect, and the features every page shares.
 
@@ -16,7 +16,7 @@ Sign In  (/login)
     ├── Dashboard        (/)
     │     ├── Grant Matching Totals   + Ask Period filter, Refresh Data, ⤓ Grant Matching Report
     │     ├── Grant Ask Tracker
-    │     ├── Fundraising Status      tabs: Fundraising Status | Check Status, ⤓ Export
+    │     ├── Fundraising Status      tabs: Fundraising Status | Check Status, + Ask Period filter, ⤓ Export
     │     └── Grant Rules
     ├── Applications     (/applications)   ⤓ Export
     ├── Email Log        (/emails)
@@ -86,6 +86,7 @@ BioBuzz team list sheet ──────────────┘           
 
 ## Change history
 
+- **Nov 5, 2026:** Added the Fundraising Status Ask Period filter to the page map.
 - **Oct 23, 2026:** Ask Period subtotals; badges list updated.
 - **Oct 23, 2026:** Ask periods connect the Grant Ask Tracker, Check Status and Grant Matching Totals.
 - **Oct 22, 2026:** Document created.

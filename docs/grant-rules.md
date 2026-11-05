@@ -75,6 +75,7 @@ Entered on the Dashboard's **Check Status** tab.
 1. **Default:** the team's Possible Grant Award.
 2. **Typed amount:** the Grant Administrator can type a different amount. It holds only while Possible Grant Award stays the same. If Possible Grant Award changes later (for example, Raised by Team is edited, or Title 1 changes the category), the check goes back to the new Possible Grant Award. Clearing the box also goes back to the default.
 3. **Mailed (locked):** once **Check #** and **Date Check Mailed** are both filled in, the amount is frozen at what it was at that moment and shows in a blue-bordered, shaded box. Later changes to Possible Grant Award don't touch it. Once Ask Period is filled in too, **Edit** under Check Status opens the locked fields so the amount can be retyped; **Lock** closes them. Clearing Check # or Date Check Mailed unlocks it, and rules 1–2 apply again.
+4. **Check Status:** blank until the team is approved and **Check #**, **Date Check Mailed**, **Amount of Check** (above $0) and **Ask Period** are all filled in. It then reads **Sent**, the Grant Administrator can pick **Paid**, and all four fields lock until **Edit** is clicked. Check Status doesn't change any totals. Grants Distributed to Teams still depends only on Check # and Date Check Mailed.
 
 **Example timeline** for a Rookie 1 team:
 
@@ -123,6 +124,7 @@ One row per category (the five qualifying categories plus Not Qualified) and a T
 - **Cumulative Qualified Grants as of End Date** = this ask's Total Ask Amount + the Total Ask Amounts of every ask above it in the list.
 - **Total Ask for Year** = sum of all Total Ask Amounts (equal to the last ask's cumulative amount).
 - Filtering Grant Matching Totals to an ask gives the same teams, so its numbers line up with that ask's row.
+- The Ask Period filter on Fundraising Status is separate and can show several asks at once. It limits the rows, Total, breakdown and Export there, and doesn't change Grant Matching Totals or the Grant Ask Tracker.
 
 **Example:** Ask 1 has two teams with checks of $1,500 and $900; Ask 2 has one team with $3,000.
 
@@ -144,6 +146,7 @@ If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,
 
 ## Change history
 
+- **Nov 5, 2026:** Added the Check Status rule to section 5 and the Fundraising Status Ask Period filter to section 7.
 - **Nov 5, 2026:** A locked Amount of Check shows in a blue-bordered, shaded box instead of a lock symbol. **Edit** under Check Status opens it once Ask Period is filled in too.
 - **Oct 23, 2026:** Ask Period subtotals under Fundraising Status and Check Status.
 - **Oct 23, 2026:** Added ask periods: the Ask Period filter, Total Ask Amount and the running cumulative total.

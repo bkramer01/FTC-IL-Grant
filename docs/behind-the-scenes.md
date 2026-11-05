@@ -1,6 +1,6 @@
 # Behind the Scenes
 
-> **Applies to:** the whole site · **Last updated:** October 23, 2026
+> **Applies to:** the whole site · **Last updated:** November 5, 2026
 
 The technical setup, for whoever maintains the site. Step-by-step deployment instructions are in [DEPLOY.md](../DEPLOY.md); local development is in the project [README](../README.md).
 
@@ -86,6 +86,10 @@ The database also checks the allowed answers itself (for example, Grant Approved
 | Exports: Applications CSV and the Fundraising Status table's contents / the Excel files (Grant Matching Report, Fundraising Status) | `src/lib/export.ts` / `src/lib/report.ts` |
 | Ask Period subtotals (shared by the page and the Fundraising Status export) | `fundBreakdown` in `src/lib/applications.ts` |
 | Subtotal rows below a scroll box, lined up with its columns | `src/components/AlignedFooter.tsx` |
+| Fundraising Status Ask Period filter | `src/components/AskPeriodChecklist.tsx`; `askPeriods` and `matchesAskPicks` in `src/lib/applications.ts` |
+| Check Status rule, duplicate check numbers, Mailing Address lines | `checkStatus`, `duplicateCheckNumbers` and `mailingAddress` in `src/lib/applications.ts` |
+| Check field locking and Edit/Lock (not saved; resets on reload) | `src/app/(admin)/Dashboard.tsx` |
+| Boxes that save on leaving them | `CommitInput` and `MoneyInput` in `src/components/inputs.tsx` |
 | Sign in and sessions | `src/lib/auth.ts`, `src/lib/session.ts`, `src/proxy.ts` |
 | Pages | `src/app/(admin)/…` |
 
@@ -99,6 +103,7 @@ Run `npm audit --omit=dev` from time to time to check the site's software for kn
 
 ## Change history
 
+- **Nov 5, 2026:** Where the Ask Period filter, Check Status rule, check field locking, duplicate check numbers and Mailing Address live. The check field lock is enforced on the page only; the server checks that Check # is digits.
 - **Oct 23, 2026:** Next.js 16.4.3 security upgrade and how to check for advisories; where the Ask Period subtotals, aligned subtotal rows and Excel files live; test list updated.
 - **Oct 23, 2026:** Ask Period link (migration 0004); Grant Ask Tracker amounts no longer stored.
 - **Oct 22, 2026:** Document created.
