@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlignedFooter } from "@/components/AlignedFooter";
 import { AskPeriodChecklist } from "@/components/AskPeriodChecklist";
-import { HqAmountError, MoneyInput, TeamNumber } from "@/components/inputs";
+import { CommitInput, HqAmountError, MoneyInput, TeamNumber } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { ReportButton } from "@/components/ReportButton";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
@@ -15,6 +15,7 @@ import {
   buildApplications,
   CHECK_STATUSES,
   computeTotals,
+  duplicateCheckNumbers,
   EMPTY_REVIEW,
   fundBreakdown,
   isActiveAsk,
@@ -109,6 +110,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const [asks, setAsks] = useState<GrantAsk[]>(data.asks);
   const [askFilterChoice, setAskFilter] = useState<AskFilter>("all");
   const [fundAskChoice, setFundAskPicks] = useState<AskPick[]>([]);
+  // Rows opened with Edit on Check Status; everything locks again when the page reloads.
+  const [editingChecks, setEditingChecks] = useState<ReadonlySet<string>>(new Set());
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
   // Asks with both dates set: offered in Ask Period and the filter.
   const activeAsks = asks.filter((a): a is GrantAsk & { id: number } => isActiveAsk(a) && a.id !== undefined);
@@ -144,8 +147,8 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   }
 
   /**
-   * Check # or Date Check Mailed changed. Completing both locks the check at its current amount
-   * (and Check Status reads Sent); clearing either one also clears a Paid Check Status.
+   * Check # or Date Check Mailed changed. Completing both locks the check at its current amount;
+   * clearing either one also clears a Paid Check Status.
    */
   function updateCheck(a: Application, patch: Pick<Partial<Review>, "checkNumber" | "checkMailedOn">) {
     update(a.timestamp, patch);
@@ -154,6 +157,36 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       update(a.timestamp, { checkAmount: a.checkAmount, checkAmountFor: a.possibleAward });
     }
     if (!locked && a.review.checkPaid) update(a.timestamp, { checkPaid: false });
+  }
+
+  /** All four check fields are filled in (Check Status shows) and the row isn't open with Edit. */
+  const isRowLocked = (a: Application) => a.checkStatus !== null && !editingChecks.has(a.timestamp);
+
+  // Counted across every application, not just the rows shown.
+  const duplicateChecks = useMemo(() => duplicateCheckNumbers(apps), [apps]);
+  function duplicateCheckBadge(a: Application) {
+    const number = a.review.checkNumber?.trim() ?? "";
+    const others = (duplicateChecks.get(number) ?? []).filter((o) => o.timestamp !== a.timestamp);
+    if (others.length === 0) return null;
+    return (
+      <span
+        className="badge badge-warning mt-1 cursor-help"
+        title={`Check # ${number} is also on team ${others.map((o) => o.teamNumber).join(", team ")}. This is allowed if one check covers more than one team.`}
+      >
+        Duplicate
+      </span>
+    );
+  }
+
+  function toggleCheckEdit(a: Application) {
+    const opening = !editingChecks.has(a.timestamp);
+    if (opening && !window.confirm(`Unlock the check details for team ${a.teamNumber}? Changes save as you make them.`)) return;
+    setEditingChecks((s) => {
+      const next = new Set(s);
+      if (opening) next.add(a.timestamp);
+      else next.delete(a.timestamp);
+      return next;
+    });
   }
 
   /** An ask was removed from the Grant Ask Tracker: its teams no longer have an Ask Period. */
@@ -533,7 +566,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     </th>
                     <SortHeader
                       label={<>Amount<br />of Check <span className="text-muted">ⓘ</span></>}
-                      title="Defaults to the Possible Grant Award. The Grant Administrator can type a different amount, but if the Possible Grant Award changes, the check amount updates to match it again. If check number and date check mailed are filled out, then the check amount is no longer editable."
+                      title="Defaults to the Possible Grant Award. The Grant Administrator can type a different amount, but if the Possible Grant Award changes, the check amount updates to match it again. If check number and date check mailed are filled out, then the check amount is no longer editable and shows in a blue box. Once Check Status shows, use Edit in that column to change a locked field."
                       sortKey="checkAmount"
                       sort={sort}
                       onSort={onSort}
@@ -549,7 +582,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     />
                     <SortHeader
                       label={<>Check<br />Status</>}
-                      title="Blank until Check # and Date Check Mailed are filled in, then Sent. The Grant Administrator can change it to Paid once the check is paid. Clearing Check # or Date Check Mailed makes it blank again."
+                      title="Blank until Check #, Date Check Mailed, Amount of Check and Ask Period are all filled in, then Sent. The Grant Administrator can change it to Paid once the check is paid. All four fields then lock (blue boxes): click Edit to change them and Lock when done. Clearing any of them makes Check Status blank again; clearing Check # or Date Check Mailed also erases Paid."
                       sortKey="checkStatus"
                       sort={sort}
                       onSort={onSort}
@@ -587,12 +620,19 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     <tr key={a.timestamp}>
                       {teamCell(a)}
                       {nameCell(a)}
-                      <td className="min-w-44">{a.checkPayee}</td>
+                      <td className="min-w-40">{a.checkPayee}</td>
                       <td className="min-w-32">{a.street}</td>
                       <td className="w-24 min-w-24">{a.cityState}</td>
                       <td className="num whitespace-nowrap">{a.zip}</td>
                       <td>
-                        {a.review.approved === "Yes" && (
+                        {a.review.approved === "Yes" && isRowLocked(a) && (
+                          <div className="locked-field cursor-help whitespace-nowrap" title="Locked. Click Edit in the Check Status column to change it.">
+                            {askName(a.review.askId) ?? "?"}
+                            {!activeAsks.some((ask) => ask.id === a.review.askId) && " (no dates)"}
+                            <span className="sr-only"> (locked)</span>
+                          </div>
+                        )}
+                        {a.review.approved === "Yes" && !isRowLocked(a) && (
                           <select
                             aria-label={`Ask period for team ${a.teamNumber}`}
                             className="cell-input !w-auto"
@@ -611,53 +651,89 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                           </select>
                         )}
                       </td>
-                      {a.checkLocked ? (
-                        <td
-                          className="num cursor-help"
-                          title="Locked because Check # and Date Check Mailed are filled in. Clear either one to change the amount."
-                        >
-                          {money(a.checkAmount)} <span aria-hidden>🔒</span>
+                      {a.checkLocked && a.checkAmount && !editingChecks.has(a.timestamp) ? (
+                        <td className="w-28">
+                          <div
+                            className="locked-field cursor-help"
+                            title={
+                              a.checkStatus
+                                ? "Locked. Click Edit in the Check Status column to change it."
+                                : "Locked because Check # and Date Check Mailed are filled in. Clear either one to change the amount."
+                            }
+                          >
+                            {money(a.checkAmount)} <span className="sr-only">(locked)</span>
+                          </div>
                         </td>
                       ) : (
                         <td className="w-28">
                           <MoneyInput
                             label={`Check amount for team ${a.teamNumber}`}
                             value={a.checkAmount}
+                            commitOnBlur
                             onChange={(v) => update(a.timestamp, { checkAmount: v, checkAmountFor: a.possibleAward })}
                           />
                         </td>
                       )}
                       <td className="w-20">
-                        <input
-                          aria-label={`Check number for team ${a.teamNumber}`}
-                          className="cell-input !min-w-0 text-center"
-                          value={a.review.checkNumber ?? ""}
-                          onChange={(e) => updateCheck(a, { checkNumber: e.target.value || null })}
-                        />
+                        {isRowLocked(a) ? (
+                          <div className="locked-field cursor-help" title="Locked. Click Edit in the Check Status column to change it.">
+                            {a.review.checkNumber} <span className="sr-only">(locked)</span>
+                          </div>
+                        ) : (
+                          <CommitInput
+                            aria-label={`Check number for team ${a.teamNumber}`}
+                            className="cell-input !min-w-0 text-center"
+                            inputMode="numeric"
+                            value={a.review.checkNumber ?? ""}
+                            clean={(v) => v.replace(/\D/g, "")}
+                            onCommit={(v) => updateCheck(a, { checkNumber: v || null })}
+                          />
+                        )}
+                        {duplicateCheckBadge(a)}
                       </td>
                       <td>
-                        <input
-                          type="date"
-                          aria-label={`Date check mailed to team ${a.teamNumber}`}
-                          className="cell-input !w-[6.25rem] !min-w-0 !pl-1 !pr-0 !text-[0.75rem]"
-                          value={a.review.checkMailedOn ?? ""}
-                          onChange={(e) => updateCheck(a, { checkMailedOn: e.target.value || null })}
-                        />
+                        {isRowLocked(a) ? (
+                          <div
+                            className="locked-field cursor-help !w-[6.75rem] whitespace-nowrap !px-1"
+                            title="Locked. Click Edit in the Check Status column to change it."
+                          >
+                            {shortDate(a.review.checkMailedOn)} <span className="sr-only">(locked)</span>
+                          </div>
+                        ) : (
+                          <CommitInput
+                            type="date"
+                            aria-label={`Date check mailed to team ${a.teamNumber}`}
+                            className="cell-input !w-[6.75rem] !min-w-0 !pl-1 !pr-0"
+                            value={a.review.checkMailedOn ?? ""}
+                            onCommit={(v) => updateCheck(a, { checkMailedOn: v || null })}
+                          />
+                        )}
                       </td>
                       <td>
                         {a.checkStatus && (
-                          <select
-                            aria-label={`Check status for team ${a.teamNumber}`}
-                            className="cell-input !w-auto !min-w-0"
-                            value={a.checkStatus}
-                            onChange={(e) => update(a.timestamp, { checkPaid: e.target.value === "Paid" })}
-                          >
-                            {CHECK_STATUSES.map((s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="flex flex-col items-start gap-1">
+                            <select
+                              aria-label={`Check status for team ${a.teamNumber}`}
+                              className="cell-input !w-auto !min-w-0"
+                              value={a.checkStatus}
+                              onChange={(e) => update(a.timestamp, { checkPaid: e.target.value === "Paid" })}
+                            >
+                              {CHECK_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              className="cell-pill"
+                              aria-label={`${isRowLocked(a) ? "Edit" : "Lock"} check details for team ${a.teamNumber}`}
+                              title={isRowLocked(a) ? "Unlock Check #, Date Check Mailed, Amount of Check and Ask Period" : "Lock these check details again"}
+                              onClick={() => toggleCheckEdit(a)}
+                            >
+                              {isRowLocked(a) ? "Edit" : "Lock"}
+                            </button>
+                          </div>
                         )}
                       </td>
                       <td className="whitespace-nowrap">{shortDate(a.awardEmailOn)}</td>

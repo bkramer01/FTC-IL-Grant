@@ -29,7 +29,7 @@ const reviewPatch = z
     raisedSet: z.literal(true),
     checkAmount: dollars,
     checkAmountFor: dollars,
-    checkNumber: z.string().max(50).nullable(),
+    checkNumber: z.string().regex(/^\d+$/).max(50).nullable(),
     checkMailedOn: isoDate,
     checkPaid: z.boolean(),
     askId: z.number().int().positive().nullable(),

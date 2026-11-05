@@ -73,24 +73,73 @@ export function MoneyInput({
   value,
   onChange,
   label,
+  commitOnBlur = false,
 }: {
   value: number | null;
   onChange: (v: number | null) => void;
   label: string;
+  /** Report the amount on leaving the box instead of on every keystroke. */
+  commitOnBlur?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<number | null>(null);
+  const shown = commitOnBlur ? draft : value;
   return (
     <input
       type="text"
       inputMode="numeric"
       aria-label={label}
       className="cell-input text-center"
-      value={editing ? (value ?? "") : money(value)}
-      onFocus={() => setEditing(true)}
-      onBlur={() => setEditing(false)}
+      value={editing ? (shown ?? "") : money(value)}
+      onFocus={() => {
+        setEditing(true);
+        setDraft(value);
+      }}
+      onBlur={() => {
+        setEditing(false);
+        if (commitOnBlur && draft !== value) onChange(draft);
+      }}
+      onKeyDown={(e) => {
+        if (commitOnBlur && e.key === "Enter") e.currentTarget.blur();
+      }}
       onChange={(e) => {
         const digits = e.target.value.replace(/[^\d]/g, "");
-        onChange(digits === "" ? null : Number(digits));
+        const v = digits === "" ? null : Number(digits);
+        if (commitOnBlur) setDraft(v);
+        else onChange(v);
+      }}
+    />
+  );
+}
+
+/**
+ * A text or date box that reports its value on leaving the box (or Enter), so a half-typed
+ * value doesn't count as filled in.
+ */
+export function CommitInput({
+  value,
+  onCommit,
+  clean = (v) => v,
+  ...props
+}: {
+  value: string;
+  onCommit: (v: string) => void;
+  /** Applied to what's typed, e.g. to drop characters that aren't allowed. */
+  clean?: (v: string) => string;
+} & Omit<React.ComponentProps<"input">, "value" | "onChange" | "onFocus" | "onBlur" | "onKeyDown">) {
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      {...props}
+      value={draft ?? value}
+      onFocus={() => setDraft(value)}
+      onChange={(e) => setDraft(clean(e.target.value))}
+      onBlur={() => {
+        if (draft !== null && draft !== value) onCommit(draft);
+        setDraft(null);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.currentTarget.blur();
       }}
     />
   );

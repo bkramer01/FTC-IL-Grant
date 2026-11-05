@@ -43,7 +43,7 @@ export type Review = {
   checkAmountFor: number | null;
   checkNumber: string | null;
   checkMailedOn: string | null;
-  /** Check Status is Paid (only counts while the check is Sent: Check # and Date Check Mailed filled in). */
+  /** Check Status is Paid (only shows while Check Status does; see checkStatus). */
   checkPaid: boolean;
   /** Grant Ask Tracker ask this team's check is funded from (Ask Period on Check Status). */
   askId: number | null;
@@ -169,7 +169,7 @@ export type Application = {
   checkLocked: boolean;
   /** Amount of Check: the typed amount while it still applies, otherwise Possible Grant Award. */
   checkAmount: number | null;
-  /** Check Status: blank until Check # and Date Check Mailed are filled in, then Sent (or Paid). */
+  /** Check Status: blank until Check #, Date Check Mailed, Amount of Check and Ask Period are filled in, then Sent (or Paid). */
   checkStatus: CheckStatus | null;
   review: Review;
 };
@@ -204,10 +204,26 @@ export function effectiveCheckAmount(review: Review, possible: number | null, lo
 export const CHECK_STATUSES = ["Sent", "Paid"] as const;
 export type CheckStatus = (typeof CHECK_STATUSES)[number];
 
-/** Check Status: blank until the check is mailed (Check # and Date Check Mailed), then Sent or Paid. */
-export function checkStatus(review: Pick<Review, "checkNumber" | "checkMailedOn" | "checkPaid">): CheckStatus | null {
-  if (!isCheckLocked(review)) return null;
+/**
+ * Check Status: blank until Check #, Date Check Mailed, Amount of Check (above $0) and Ask Period
+ * (approved teams only) are all filled in, then Sent or Paid.
+ */
+export function checkStatus(
+  review: Pick<Review, "checkNumber" | "checkMailedOn" | "checkPaid" | "askId" | "approved">,
+  amount: number | null,
+): CheckStatus | null {
+  if (!isCheckLocked(review) || !amount || review.askId === null || review.approved !== "Yes") return null;
   return review.checkPaid ? "Paid" : "Sent";
+}
+
+/** Check numbers used on more than one application, with those applications. */
+export function duplicateCheckNumbers(apps: Application[]): Map<string, Application[]> {
+  const byNumber = new Map<string, Application[]>();
+  for (const a of apps) {
+    const n = a.review.checkNumber?.trim();
+    if (n) byNumber.set(n, [...(byNumber.get(n) ?? []), a]);
+  }
+  return new Map([...byNumber].filter(([, shared]) => shared.length > 1));
 }
 
 export function isCheckLocked(review: Pick<Review, "checkNumber" | "checkMailedOn">): boolean {
@@ -255,6 +271,7 @@ export function buildApplications(data: GrantData): Application[] {
     const category = grantCategory(age, review.title1);
     const possible = possibleAward(category, review.raised);
     const locked = isCheckLocked(review);
+    const checkAmount = effectiveCheckAmount(review, possible, locked);
     const hq = hqAmountFromRow(r);
     return {
       timestamp: r[COL.timestamp],
@@ -284,8 +301,8 @@ export function buildApplications(data: GrantData): Application[] {
       hqAmount: (r[COL.hqAmount] ?? "").trim(),
       raisedError: !review.raisedSet && review.raised === null && hq === "error",
       checkLocked: locked,
-      checkAmount: effectiveCheckAmount(review, possible, locked),
-      checkStatus: checkStatus(review),
+      checkAmount,
+      checkStatus: checkStatus(review, checkAmount),
       review,
     };
   });

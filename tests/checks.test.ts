@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { buildApplications, checkStatus, EMPTY_REVIEW, effectiveCheckAmount, parseDollars, type GrantData, type Review } from "@/lib/applications";
+import { buildApplications, checkStatus, duplicateCheckNumbers, EMPTY_REVIEW, effectiveCheckAmount, parseDollars, type Application, type GrantData, type Review } from "@/lib/applications";
 
 test("form dollar amounts", () => {
   expect(["1500", "$2,000", " 800.00 ", "0", "none", "", "$"].map(parseDollars)).toEqual([1500, 2000, 800, 0, null, null, null]);
@@ -16,16 +16,29 @@ test("Amount of Check follows Possible Grant Award unless typed for it or mailed
   expect(effectiveCheckAmount(r({}), null, false)).toBeNull();
 });
 
-test("Check Status is blank until the check is mailed, then Sent or Paid", () => {
-  const r = (p: Partial<Review>) => ({ ...EMPTY_REVIEW, ...p });
-  expect(checkStatus(r({}))).toBeNull();
-  expect(checkStatus(r({ checkNumber: "1001" }))).toBeNull();
-  expect(checkStatus(r({ checkMailedOn: "2026-10-29" }))).toBeNull();
-  expect(checkStatus(r({ checkNumber: " ", checkMailedOn: "2026-10-29" }))).toBeNull();
-  expect(checkStatus(r({ checkNumber: "1001", checkMailedOn: "2026-10-29" }))).toBe("Sent");
-  expect(checkStatus(r({ checkNumber: "1001", checkMailedOn: "2026-10-29", checkPaid: true }))).toBe("Paid");
-  // Paid without a mailed check doesn't show.
-  expect(checkStatus(r({ checkNumber: "1001", checkPaid: true }))).toBeNull();
+test("Check Status is blank until all four check fields are filled in, then Sent or Paid", () => {
+  const full: Partial<Review> = { checkNumber: "1001", checkMailedOn: "2026-10-29", askId: 1, approved: "Yes" };
+  const r = (p: Partial<Review>) => ({ ...EMPTY_REVIEW, ...full, ...p });
+  expect(checkStatus(r({}), 500)).toBe("Sent");
+  expect(checkStatus(r({ checkPaid: true }), 500)).toBe("Paid");
+  // Any one of the four missing: blank, even if Paid was picked earlier.
+  expect(checkStatus(r({ checkNumber: null }), 500)).toBeNull();
+  expect(checkStatus(r({ checkNumber: " " }), 500)).toBeNull();
+  expect(checkStatus(r({ checkMailedOn: null, checkPaid: true }), 500)).toBeNull();
+  expect(checkStatus(r({ askId: null, checkPaid: true }), 500)).toBeNull();
+  expect(checkStatus(r({}), null)).toBeNull();
+  expect(checkStatus(r({}), 0)).toBeNull();
+  // An unapproved team's saved Ask Period doesn't count.
+  expect(checkStatus(r({ approved: "No" }), 500)).toBeNull();
+  expect(checkStatus(r({ approved: null }), 500)).toBeNull();
+});
+
+test("duplicate check numbers are found across applications", () => {
+  const app = (timestamp: string, checkNumber: string | null) => ({ timestamp, review: { ...EMPTY_REVIEW, checkNumber } }) as Application;
+  const apps = [app("a", "100"), app("b", " 100 "), app("c", "200"), app("d", null), app("e", null)];
+  const dups = duplicateCheckNumbers(apps);
+  expect([...dups.keys()]).toEqual(["100"]);
+  expect(dups.get("100")!.map((a) => a.timestamp)).toEqual(["a", "b"]);
 });
 
 test("a non-numeric HQ grant amount shows as an error until Raised by Team is set", () => {

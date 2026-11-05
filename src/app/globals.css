@@ -285,6 +285,18 @@ select.form-control,
   box-shadow: 0 0 0 0.2rem rgb(13 110 253 / 0.25);
 }
 
+/* A value that can't be edited right now (a mailed Amount of Check): same box as .cell-input,
+   tinted with a blue border. */
+.locked-field {
+  width: 100%;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.85rem;
+  border: 1.5px solid var(--color-first-blue);
+  border-radius: 0.25rem;
+  background: #e6f0f8;
+  text-align: center;
+}
+
 /* Low-key row action (e.g. "Use current", "Remove"): small gray text on a soft gray pill,
    so the dates and amounts beside it stay the focus. */
 .cell-pill {

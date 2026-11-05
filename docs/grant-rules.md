@@ -1,6 +1,6 @@
 # Grant Rules and Calculations
 
-> **Applies to:** every page · **Last updated:** October 23, 2026
+> **Applies to:** every page · **Last updated:** November 5, 2026
 
 How the site works out each team's grant category and award, and every calculated number on the Dashboard. The rules are the 2026–27 season's, taken from the Goals tab of *FTC IL Grant Status.xlsx*. They're built into the site (`src/lib/grant.ts`); changing a threshold or amount is a code change, not a setting.
 
@@ -74,7 +74,7 @@ Entered on the Dashboard's **Check Status** tab.
 
 1. **Default:** the team's Possible Grant Award.
 2. **Typed amount:** the Grant Administrator can type a different amount. It holds only while Possible Grant Award stays the same. If Possible Grant Award changes later (for example, Raised by Team is edited, or Title 1 changes the category), the check goes back to the new Possible Grant Award. Clearing the box also goes back to the default.
-3. **Mailed (locked):** once **Check #** and **Date Check Mailed** are both filled in, the amount is frozen at what it was at that moment and shows a 🔒. Later changes to Possible Grant Award don't touch it. Clearing either field unlocks it, and rules 1–2 apply again.
+3. **Mailed (locked):** once **Check #** and **Date Check Mailed** are both filled in, the amount is frozen at what it was at that moment and shows in a blue-bordered, shaded box. Later changes to Possible Grant Award don't touch it. Once Ask Period is filled in too, **Edit** under Check Status opens the locked fields so the amount can be retyped; **Lock** closes them. Clearing Check # or Date Check Mailed unlocks it, and rules 1–2 apply again.
 
 **Example timeline** for a Rookie 1 team:
 
@@ -83,8 +83,8 @@ Entered on the Dashboard's **Check Status** tab.
 | Raised by Team set to $900 | $900 | $900 (default) |
 | Administrator types $850 | $900 | $850 (typed) |
 | Raised by Team changed to $1,000 | $1,000 | $1,000 (award changed, typed amount dropped) |
-| Check # and Date Check Mailed filled in | $1,000 | $1,000 🔒 |
-| Raised by Team changed to $1,200 | $1,200 | still $1,000 🔒 (mailed) |
+| Check # and Date Check Mailed filled in | $1,000 | $1,000 (locked) |
+| Raised by Team changed to $1,200 | $1,200 | still $1,000 (locked, mailed) |
 
 ## 6. Grant Matching Totals (Dashboard)
 
@@ -144,6 +144,7 @@ If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,
 
 ## Change history
 
+- **Nov 5, 2026:** A locked Amount of Check shows in a blue-bordered, shaded box instead of a lock symbol. **Edit** under Check Status opens it once Ask Period is filled in too.
 - **Oct 23, 2026:** Ask Period subtotals under Fundraising Status and Check Status.
 - **Oct 23, 2026:** Added ask periods: the Ask Period filter, Total Ask Amount and the running cumulative total.
 - **Oct 22, 2026:** Document created.
