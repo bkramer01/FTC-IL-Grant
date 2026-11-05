@@ -430,29 +430,51 @@ export function sumFundRows(rows: Application[]): FundTotals {
   return t;
 }
 
-export type FundGroup = { label: string; count: number; totals: FundTotals };
+/** One Ask Period an approved team can fall under: an ask (its id) or no ask at all. */
+export type AskPick = "unassigned" | number;
 
 /**
- * The Fundraising Status totals split by Ask Period: each active ask (even with no teams),
- * any other ask that still has approved teams ("(no dates)"), Unassigned (approved, no ask)
- * and, when unapproved rows are shown, Not approved. The groups always add up to the totals
- * of `rows`. Used under the table and at the bottom of its export.
+ * The Ask Periods of some rows, in display order: each active ask (even with no teams), any
+ * other ask that still has approved teams ("(no dates)"), then Unassigned.
  */
-export function fundBreakdown(rows: Application[], asks: GrantAsk[], includeNotApproved: boolean): FundGroup[] {
-  const approved = rows.filter((a) => a.review.approved === "Yes");
-  const active = asks.filter((a) => isActiveAsk(a) && a.id !== undefined);
+export function askPeriods(rows: Application[], asks: GrantAsk[]): { value: AskPick; label: string }[] {
+  const active = asks.filter((a): a is GrantAsk & { id: number } => isActiveAsk(a) && a.id !== undefined);
   const otherIds = [
     ...new Set(
-      approved.map((a) => a.review.askId).filter((id): id is number => id !== null && !active.some((ask) => ask.id === id)),
+      rows
+        .filter((a) => a.review.approved === "Yes")
+        .map((a) => a.review.askId)
+        .filter((id): id is number => id !== null && !active.some((ask) => ask.id === id)),
     ),
   ];
   return [
-    ...active.map((ask) => ({ label: ask.name, rows: approved.filter((a) => a.review.askId === ask.id) })),
-    ...otherIds.map((id) => ({
-      label: `${asks.find((ask) => ask.id === id)?.name ?? "?"} (no dates)`,
-      rows: approved.filter((a) => a.review.askId === id),
-    })),
-    { label: "Unassigned", rows: approved.filter((a) => a.review.askId === null) },
+    ...active.map((ask) => ({ value: ask.id, label: ask.name })),
+    ...otherIds.map((id) => ({ value: id, label: `${asks.find((ask) => ask.id === id)?.name ?? "?"} (no dates)` })),
+    { value: "unassigned" as const, label: "Unassigned" },
+  ];
+}
+
+/**
+ * Fundraising Status Ask Period filter: no picks shows every row; otherwise only approved
+ * teams under a picked Ask Period (an unapproved team's saved ask doesn't count).
+ */
+export function matchesAskPicks(a: Application, picks: AskPick[]): boolean {
+  return picks.length === 0 || (a.review.approved === "Yes" && picks.some((p) => matchesAsk(a, p)));
+}
+
+export type FundGroup = { label: string; count: number; totals: FundTotals };
+
+/**
+ * The Fundraising Status totals split by Ask Period (see askPeriods; only the picked ones when
+ * the filter is on) and, when unapproved rows are shown, Not approved. The groups always add
+ * up to the totals of `rows`. Used under the table and at the bottom of its export.
+ */
+export function fundBreakdown(rows: Application[], asks: GrantAsk[], includeNotApproved: boolean, picks: AskPick[] = []): FundGroup[] {
+  const approved = rows.filter((a) => a.review.approved === "Yes");
+  return [
+    ...askPeriods(rows, asks)
+      .filter((p) => picks.length === 0 || picks.includes(p.value))
+      .map((p) => ({ label: p.label, rows: approved.filter((a) => matchesAsk(a, p.value)) })),
     ...(includeNotApproved ? [{ label: "Not approved", rows: rows.filter((a) => a.review.approved !== "Yes") }] : []),
   ].map((g) => ({ label: g.label, count: g.rows.length, totals: sumFundRows(g.rows) }));
 }

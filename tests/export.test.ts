@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { buildApplications, fundBreakdown, sumFundRows, type GrantData } from "@/lib/applications";
+import { askPeriods, buildApplications, fundBreakdown, matchesAskPicks, sumFundRows, type AskPick, type GrantData } from "@/lib/applications";
 import ExcelJS from "exceljs";
 import { applicationsCsv, csvField, fundraisingTable } from "@/lib/export";
 import { fundraisingFileName, fundraisingWorkbook } from "@/lib/report";
@@ -45,6 +45,38 @@ test("fundraising export has both tabs' columns for the rows given", () => {
   expect([col("Rookie/Veteran Status"), col("Matching Multiplier"), col("Max Grant Award"), col("Team Target")]).toEqual(["Veteran Title 1", "1 to 2", 1200, 600]);
   expect([col("Raised by Team"), col("Possible Grant Award"), col("Unused Grant Match")]).toEqual([250, 500, 700]);
   expect(t.summary).toEqual([]);
+});
+
+test("Ask Period filter: picks limit the rows and the breakdown, and still add up", () => {
+  const apps = buildApplications(sample as GrantData);
+  const asks = [
+    { id: 1, name: "Ask 1", start: "2026-09-01", end: "2026-10-20" },
+    { id: 2, name: "Ask 2", start: "2026-10-21", end: "2026-11-20" },
+    { id: 3, name: "Ask 3", start: null, end: null }, // lost its dates, but a team is still on it
+  ];
+  const approved = apps.filter((a) => a.review.approved === "Yes");
+  const unapproved = apps.find((a) => a.review.approved !== "Yes")!;
+  const tags = new Map<typeof apps[number], number>([[approved[0], 1], [approved[1], 2], [approved[2], 3], [unapproved, 1]]);
+  const tagged = apps.map((a) => (tags.has(a) ? { ...a, review: { ...a.review, askId: tags.get(a)! } } : a));
+
+  expect(askPeriods(tagged, asks).map((o) => o.label)).toEqual(["Ask 1", "Ask 2", "Ask 3 (no dates)", "Unassigned"]);
+
+  // No picks: every row, every group.
+  expect(tagged.filter((a) => matchesAskPicks(a, [])).length).toBe(tagged.length);
+  expect(fundBreakdown(tagged, asks, true, []).map((g) => g.label)).toEqual(["Ask 1", "Ask 2", "Ask 3 (no dates)", "Unassigned", "Not approved"]);
+
+  // Several picks: only approved teams in them; an unapproved team's saved ask doesn't count.
+  const picks = [1, "unassigned"] as AskPick[];
+  const rows = tagged.filter((a) => matchesAskPicks(a, picks));
+  expect(rows.every((a) => a.review.approved === "Yes" && (a.review.askId === 1 || a.review.askId === null))).toBe(true);
+  expect(rows.some((a) => a.timestamp === unapproved.timestamp)).toBe(false);
+  const groups = fundBreakdown(rows, asks, false, picks);
+  expect(groups.map((g) => g.label)).toEqual(["Ask 1", "Unassigned"]);
+  expect(groups.reduce((s, g) => s + g.count, 0)).toBe(rows.length);
+  const total = sumFundRows(rows);
+  for (const k of Object.keys(total) as (keyof typeof total)[]) {
+    expect(groups.reduce((s, g) => s + g.totals[k], 0)).toBe(total[k]);
+  }
 });
 
 test("fundraising Excel file: whole-dollar amounts, then the Total and Ask Period rows", async () => {

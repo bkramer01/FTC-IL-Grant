@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlignedFooter } from "@/components/AlignedFooter";
+import { AskPeriodChecklist } from "@/components/AskPeriodChecklist";
 import { HqAmountError, MoneyInput, TeamNumber } from "@/components/inputs";
 import { RefreshButton } from "@/components/RefreshButton";
 import { ReportButton } from "@/components/ReportButton";
@@ -10,6 +11,7 @@ import { Alert, Card, ManualKey } from "@/components/SiteChrome";
 import { SaveStatus, useSaver } from "@/components/useSaver";
 import { compareValues, nextSort, SortHeader, type Sort as SortState } from "@/components/SortHeader";
 import {
+  askPeriods,
   buildApplications,
   CHECK_STATUSES,
   computeTotals,
@@ -18,8 +20,10 @@ import {
   isActiveAsk,
   sumFundRows,
   isCheckLocked,
+  matchesAskPicks,
   type Application,
   type AskFilter,
+  type AskPick,
   type FundTotals,
   type GrantAsk,
   type GrantData,
@@ -104,6 +108,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const [tab, setTab] = useState<Tab>("fundraising");
   const [asks, setAsks] = useState<GrantAsk[]>(data.asks);
   const [askFilterChoice, setAskFilter] = useState<AskFilter>("all");
+  const [fundAskChoice, setFundAskPicks] = useState<AskPick[]>([]);
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
   // Asks with both dates set: offered in Ask Period and the filter.
   const activeAsks = asks.filter((a): a is GrantAsk & { id: number } => isActiveAsk(a) && a.id !== undefined);
@@ -162,8 +167,14 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
     setSort((s) => nextSort(s, key));
   }
 
+  const fundAskOptions = askPeriods(apps, asks);
+  // A ticked Ask Period that no longer exists drops out of the filter.
+  const fundAskPicks = fundAskChoice.filter((p) => fundAskOptions.some((o) => o.value === p));
+  const fundAskLabels = fundAskOptions.filter((o) => fundAskPicks.includes(o.value)).map((o) => o.label).join(", ");
+  const fundFiltered = fundAskPicks.length > 0;
+
   const fundRows = apps
-    .filter((a) => !approvedOnly || a.review.approved === "Yes")
+    .filter((a) => (!approvedOnly || a.review.approved === "Yes") && matchesAskPicks(a, fundAskPicks))
     .sort(
       (a, b) =>
         compare(a, b, sort) || a.teamNumber - b.teamNumber || a.submittedAt - b.submittedAt,
@@ -172,13 +183,18 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   // Totals of the rows shown (blanks count as $0).
   const fundTotals = sumFundRows(fundRows);
   // The same totals split by Ask Period (always adds up to the Total row).
-  const breakdown = fundBreakdown(fundRows, asks, !approvedOnly);
+  const breakdown = fundBreakdown(fundRows, asks, !approvedOnly && !fundFiltered, fundAskPicks);
 
   /** Downloads the rows shown, with both tabs' columns and the subtotals, as an Excel file. */
   async function exportFundraising() {
     const now = new Date();
     const table = fundraisingTable(fundRows, askName, [{ label: "Total", count: fundRows.length, totals: fundTotals }, ...breakdown]);
-    const wb = await fundraisingWorkbook(table, now, approvedOnly ? "Approved teams only" : "All applications");
+    const shown = fundFiltered
+      ? `Approved teams only, ${fundAskLabels}`
+      : approvedOnly
+        ? "Approved teams only"
+        : "All applications";
+    const wb = await fundraisingWorkbook(table, now, shown);
     const buffer = await wb.xlsx.writeBuffer();
     downloadBlob(
       fundraisingFileName(now),
@@ -361,6 +377,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         title="Fundraising Status"
         actions={
           <div className="flex flex-wrap items-center gap-3 text-sm">
+            <AskPeriodChecklist options={fundAskOptions} picks={fundAskPicks} onChange={setFundAskPicks} />
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={approvedOnly} onChange={(e) => setApprovedOnly(e.target.checked)} />
               Approved teams only
@@ -376,6 +393,11 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
           </div>
         }
       >
+        {fundFiltered && (
+          <Alert tone="info" compact>
+            Showing approved teams in <strong>{fundAskLabels}</strong> only.
+          </Alert>
+        )}
         <div role="tablist" aria-label="Fundraising views" className="mb-3 flex gap-1 border-b-2 border-first-blue">
           {(
             [
@@ -541,7 +563,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 {fundRows.length === 0 && (
                   <tr>
                     <td colSpan={12} className="text-muted">
-                      No approved teams yet.
+                      {fundFiltered ? "No teams in the Ask Periods ticked." : "No approved teams yet."}
                     </td>
                   </tr>
                 )}
