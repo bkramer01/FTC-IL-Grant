@@ -42,6 +42,7 @@ The FTC Illinois Grant site is where the Grant Administrator reviews matching-gr
 | **Possible Grant Award** | Raised by Team, capped at the category's max fundraising target, × its multiplier. |
 | **Approved** | Grant Approved = Yes on Applications. Only approved teams count in the Dashboard totals (except Teams Applied). |
 | **Duplicate** | A team number that sent the form more than once. Each response stays and is flagged. |
+| **Test database** | A separate copy of the data on the administrator's computer, used by the local site. Changes there don't affect the live site. See [Behind the Scenes](behind-the-scenes.md#making-changes). |
 | **Duplicate check number** | A Check # on more than one application. It's flagged with a badge but allowed, since one check can cover more than one team. |
 | **Ask Period** | The Grant Ask Tracker ask an approved team's check is funded from, picked on Check Status. Asks need a start and end date to be picked. |
 | **Mailed check** | A check with both Check # and Date Check Mailed filled in. Its amount is locked, and it counts in Grants Distributed to Teams. Check Status also needs Amount of Check and Ask Period before it shows Sent/Paid; all four fields then lock until **Edit** is clicked. |

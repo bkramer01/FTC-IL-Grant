@@ -58,6 +58,7 @@ BioBuzz team list sheet ──────────────┘           
 - **Top bar:** "FIRST Tech Challenge · Illinois" and a link to firstillinoisrobotics.org.
 - **Blue menu bar:** Dashboard, Applications, Email Log, Form Responses (the current page is highlighted), "Signed in as FTCAdmin" and **Sign out**.
 - **Footer:** "Grant questions" with the contact email jweiland@firstillinoisrobotics.org.
+- **Database banner (local site only):** an orange **TEST DATABASE** banner above the top bar when the site uses the test database, or a red **LIVE DATABASE** one if the local site is pointed at production. The live site doesn't show one.
 
 ## Shared features
 
@@ -86,7 +87,7 @@ BioBuzz team list sheet ──────────────┘           
 
 ## Change history
 
-- **Nov 5, 2026:** Added the Fundraising Status Ask Period filter to the page map.
+- **Nov 5, 2026:** Added the Fundraising Status Ask Period filter to the page map, and the local site's database banner.
 - **Oct 23, 2026:** Ask Period subtotals; badges list updated.
 - **Oct 23, 2026:** Ask periods connect the Grant Ask Tracker, Check Status and Grant Matching Totals.
 - **Oct 22, 2026:** Document created.

@@ -1,11 +1,11 @@
 // Local development / testing only: loads the sample data in src/mock/sample-data.json
 // (a snapshot of both Google Sheets plus sample administrator entries) into the database
-// at DATABASE_URL. Don't run it against the production database.
+// at DATABASE_URL. It refuses to run against anything but a database on this computer.
 //   npm run db:seed            only fills empty tables (safe to re-run)
 //   npm run db:seed -- --reset empties them first
 import { config } from "dotenv";
 import { sql } from "drizzle-orm";
-import { createDb, createPool, type Db } from "../src/db";
+import { createDb, createPool, isLocalDatabaseUrl, type Db } from "../src/db";
 import { applicationReviews, emailLog, grantAsks, sheetSnapshots } from "../src/db/schema";
 import type { GrantData } from "../src/lib/applications";
 import sample from "../src/mock/sample-data.json";
@@ -61,6 +61,10 @@ export async function seed(db: Db, { reset = false } = {}) {
 }
 
 if (process.argv[1]?.endsWith("seed.ts")) {
+  if (!isLocalDatabaseUrl(process.env.DATABASE_URL)) {
+    console.error("Refusing to seed: DATABASE_URL isn't a database on this computer. Sample data must never go into production.");
+    process.exit(1);
+  }
   const pool = createPool(process.env.DATABASE_URL, 1);
   seed(createDb(pool), { reset: process.argv.includes("--reset") })
     .then((c) => console.log(`Seeded ${c.sheets} sheet snapshots, ${c.reviews} reviews, ${c.emails} emails, ${c.asks} asks (tables that already had rows were left alone).`))

@@ -4,11 +4,20 @@ import * as schema from "./schema";
 
 export type Db = NodePgDatabase<typeof schema>;
 
+/** True when the connection string points at a database on this computer. */
+export function isLocalDatabaseUrl(connectionString: string | undefined): boolean {
+  try {
+    return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(connectionString ?? "").hostname);
+  } catch {
+    return false;
+  }
+}
+
 export function createPool(connectionString = process.env.DATABASE_URL, max = 10) {
   if (!connectionString) throw new Error("DATABASE_URL is not set");
   // SSL for Supabase (DATABASE_SSL=true), never for a database on this computer (local
   // development and the tests' throwaway Postgres don't speak SSL).
-  const local = /@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(connectionString);
+  const local = isLocalDatabaseUrl(connectionString);
   return new Pool({
     connectionString,
     max,
@@ -20,13 +29,16 @@ export function createDb(pool: Pool): Db {
   return drizzle(pool, { schema });
 }
 
-// One pool per server process (survives dev hot reloads).
-const globalForDb = globalThis as unknown as { __ftcGrantPool?: Pool; __ftcGrantDb?: Db };
+// One pool per server process (survives dev hot reloads). A new one is made if DATABASE_URL
+// changes, so editing .env.local can't leave a running dev server on the old database.
+const globalForDb = globalThis as unknown as { __ftcGrantPool?: Pool; __ftcGrantDb?: Db; __ftcGrantUrl?: string };
 
 export function getDb(): Db {
-  if (!globalForDb.__ftcGrantDb) {
+  if (!globalForDb.__ftcGrantDb || globalForDb.__ftcGrantUrl !== process.env.DATABASE_URL) {
+    void globalForDb.__ftcGrantPool?.end();
     globalForDb.__ftcGrantPool = createPool();
     globalForDb.__ftcGrantDb = createDb(globalForDb.__ftcGrantPool);
+    globalForDb.__ftcGrantUrl = process.env.DATABASE_URL;
   }
   return globalForDb.__ftcGrantDb;
 }

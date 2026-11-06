@@ -22,6 +22,30 @@ npm run db:seed                   # loads the sample administrator entries
 npm run dev                       # http://localhost:3010
 ```
 
+### Test and production databases
+
+The local site uses its own database on this computer, and a **TEST DATABASE** banner shows at the
+top of every page. If the banner ever reads **LIVE DATABASE**, `.env.local` is pointing at production.
+
+Each time you restart the computer, start the test database again before the site:
+`npm run db:local` in one terminal (leave it running), then `npm run dev` in another.
+
+The production connection string lives only in `.env.prod-db` (not committed), in this format:
+
+```
+PROD_DATABASE_URL=postgresql://postgres.<ref>:<password>@...pooler.supabase.com:5432/postgres
+```
+
+- `npm run db:copy-prod` replaces the test database with a fresh copy of production. It only reads
+  from production, and it overwrites any local test edits, so it asks first.
+- `npm run db:migrate:prod` applies new table changes to production, after you type `production`.
+  Run it just before pushing code that needs them. Data stays in place.
+- `npm run db:seed` refuses to run against anything but a database on this computer.
+- Hostinger needs no change: production keeps its own `DATABASE_URL`.
+
+To test approved changes before release: work against the test database, then run
+`npm run db:migrate:prod` if there's a table change, then push to `main`.
+
 Sign in at http://localhost:3010 as **FTCAdmin** with the `ADMIN_PASSWORD` from `.env.local`.
 The pages are described in [docs/README.md](docs/README.md).
 
@@ -30,7 +54,7 @@ list from Google Sheets with a service account (`GOOGLE_SERVICE_ACCOUNT_KEY`, se
 and saves them in the `sheet_snapshots` table. Everything the Grant Administrator enters (reviews, fundraising and checks, the email log, grant asks) is saved to Postgres
 through server actions (`src/app/(admin)/actions.ts` → `src/lib/store.ts`). After `npm run db:migrate`,
 `npm run db:seed` loads `src/mock/sample-data.json` (a sample snapshot plus sample entries) for local
-development only (`-- --reset` to start over); never run it against production. The grant rules live in
+development only (`-- --reset` to start over); it refuses to run against production. The grant rules live in
 `src/lib/grant.ts` and `src/lib/applications.ts`.
 
 Ports 3010 and 54339 are chosen so this site can run alongside the Event Registration site
@@ -43,8 +67,10 @@ Ports 3010 and 54339 are chosen so this site can run alongside the Event Registr
 | `npm run dev` | Dev server on http://localhost:3010. |
 | `npm run db:local` | Embedded Postgres in `.local-pg/`. |
 | `npm run db:generate` | Creates a migration in `drizzle/` from `src/db/schema.ts`. |
-| `npm run db:migrate` | Applies migrations to `DATABASE_URL`. |
-| `npm run db:seed` | Loads the sample reviews, emails and grant asks into empty tables (`-- --reset` empties them first). |
+| `npm run db:migrate` | Applies migrations to `DATABASE_URL` (the test database, locally). |
+| `npm run db:migrate:prod` | Applies migrations to production, using `.env.prod-db`. Asks first. |
+| `npm run db:copy-prod` | Replaces the test database with a copy of production. Asks first (`-- --yes` skips that). |
+| `npm run db:seed` | Loads the sample reviews, emails and grant asks into empty tables (`-- --reset` empties them first). Local databases only. |
 | `npm test` | Vitest against a throwaway embedded Postgres. |
 | `npm run typecheck` / `npm run lint` | Type check / lint. |
 | `npm run build` | Production build into `.next/standalone`. |

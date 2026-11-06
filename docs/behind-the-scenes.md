@@ -47,7 +47,7 @@ The database also checks the allowed answers itself (for example, Grant Approved
 - **Every page and every save** checks the session on the server. Only the sign-in page is open without it.
 - **Database:** only the site's server talks to the database, through `DATABASE_URL`. Every table has Supabase row-level security turned on with no access rules, so Supabase's public API (and the publishable key) can't read or change anything.
 - **Google:** the service account can only read, and only the sheets shared with it.
-- **Secrets** (database password, `ADMIN_PASSWORD`, `SESSION_SECRET`, the Google key file `google-service-account.json`) live only in Hostinger's environment variables and the local `.env.local`. They're never committed to GitHub.
+- **Secrets** (database password, `ADMIN_PASSWORD`, `SESSION_SECRET`, the Google key file `google-service-account.json`) live only in Hostinger's environment variables and the local `.env.local`; on the administrator's computer, the production database password is only in `.env.prod-db`. They're never committed to GitHub.
 
 ## Server settings (environment variables)
 
@@ -63,9 +63,9 @@ The database also checks the allowed answers itself (for example, Grant Approved
 
 ## Making changes
 
-1. Change and test locally (`npm run dev`, against a local database or Supabase). Run `npm test`, `npm run typecheck` and `npm run lint`.
+1. Change and test locally (`npm run db:local` and `npm run dev`), against the test database on this computer. The **TEST DATABASE** banner confirms which database is in use, and `npm run db:copy-prod` refreshes it with a read-only copy of production. Run `npm test`, `npm run typecheck` and `npm run lint`.
 2. Update the page documents in `docs/` in the same change (see [AGENTS.md](../AGENTS.md)).
-3. **Database changes:** edit `src/db/schema.ts`, run `npm run db:generate`, and apply the new migration to Supabase with `npm run db:migrate` **before** deploying the code that needs it. Migrations so far:
+3. **Database changes:** edit `src/db/schema.ts`, run `npm run db:generate`, and apply the new migration to Supabase with `npm run db:migrate:prod` **before** deploying the code that needs it (`npm run db:migrate` only updates the test database). Migrations so far:
    - `0000` the first tables
    - `0001` Grant Administrator entries
    - `0002` sheet snapshots
@@ -88,6 +88,7 @@ The database also checks the allowed answers itself (for example, Grant Approved
 | Subtotal rows below a scroll box, lined up with its columns | `src/components/AlignedFooter.tsx` |
 | Fundraising Status Ask Period filter | `src/components/AskPeriodChecklist.tsx`; `askPeriods` and `matchesAskPicks` in `src/lib/applications.ts` |
 | Check Status rule, duplicate check numbers, Mailing Address lines | `checkStatus`, `duplicateCheckNumbers` and `mailingAddress` in `src/lib/applications.ts` |
+| Test database and copying from production (production's connection string is in `.env.prod-db`, never `.env.local`) | `scripts/local-db.ts`, `scripts/copy-prod.ts`, `scripts/migrate-prod.ts` |
 | Check field locking and Edit/Lock (not saved; resets on reload) | `src/app/(admin)/Dashboard.tsx` |
 | Boxes that save on leaving them | `CommitInput` and `MoneyInput` in `src/components/inputs.tsx` |
 | Sign in and sessions | `src/lib/auth.ts`, `src/lib/session.ts`, `src/proxy.ts` |
@@ -103,6 +104,7 @@ Run `npm audit --omit=dev` from time to time to check the site's software for kn
 
 ## Change history
 
+- **Nov 5, 2026:** Local work now uses a separate test database, with a banner, `npm run db:copy-prod` and `npm run db:migrate:prod`. `npm run db:seed` refuses to run against production.
 - **Nov 5, 2026:** Where the Ask Period filter, Check Status rule, check field locking, duplicate check numbers and Mailing Address live. The check field lock is enforced on the page only; the server checks that Check # is digits.
 - **Oct 23, 2026:** Next.js 16.4.3 security upgrade and how to check for advisories; where the Ask Period subtotals, aligned subtotal rows and Excel files live; test list updated.
 - **Oct 23, 2026:** Ask Period link (migration 0004); Grant Ask Tracker amounts no longer stored.

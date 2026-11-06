@@ -113,13 +113,15 @@ A team number that appears on more than one form response is a duplicate. Every 
 
 ## Saving as you go
 
-There's no Save button. Every change typed or picked on a page is saved to the database about half a second after you stop typing. The note near the page title shows:
+There's no Save button. Every change typed or picked on a page is saved to the database about half a second after you stop typing. On Check Status, Check #, Date Check Mailed and Amount of Check save once you leave the box or press Enter. The note near the page title shows:
 
 - **Saving…** while a change is on its way.
 - **All changes saved** once it's stored.
 - **Couldn't save the last change. Check your connection and try again.** (in red) if it failed. Re-enter the change.
 
 The browser warns you if you try to leave the page while a save is still on its way.
+
+On the local site, saves and Refresh Data go to the test database on the administrator's computer, not to the live site. `npm run db:copy-prod` replaces the test data with a fresh copy of production, which it only reads.
 
 ## Fields saved but not shown
 
@@ -136,6 +138,7 @@ Dates use Central time (America/Chicago): "today" for Last Update, the Email Log
 
 ## Change history
 
+- **Nov 5, 2026:** Check Status check fields save on leaving the box. The local site saves to its own test database.
 - **Nov 5, 2026:** Street Address, City State and Zip now show together as Mailing Address on Check Status.
 - **Oct 23, 2026:** Added Team Number answers that aren't a single number.
 - **Oct 22, 2026:** Document created.

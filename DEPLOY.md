@@ -18,7 +18,6 @@ but with its **own** Supabase project, mailbox and Hostinger website.
    DATABASE_SSL=true
 
    npm run db:migrate
-   npm run db:seed       # loads the sample entries; skip for a clean start
    ```
 
    The site saves through this server-side connection only. Every table has row-level security on
@@ -66,7 +65,8 @@ full email address. Check SPF/DKIM in hPanel → Emails → DNS settings.
 ## Notes
 
 - Schema changes: edit `src/db/schema.ts`, run `npm run db:generate`, commit the new file in
-  `drizzle/`, and run `npm run db:migrate` against Supabase **before** deploying the new code.
+  `drizzle/`, and run `npm run db:migrate:prod` **before** deploying the new code. It uses the
+  production connection string in `.env.prod-db`, not `.env.local` (see the README).
 
 ## Google Sheets access (Refresh Data)
 
