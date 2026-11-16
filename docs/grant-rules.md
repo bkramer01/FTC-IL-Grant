@@ -32,17 +32,19 @@ Until Title 1 is entered, the category is **Title 1 status needed**. A team in t
 
 ## 3. Category settings
 
-| Category | Matching multiplier | Max fundraising target | Grantor match per team (= Max Grant Award) |
-|---|---|---|---|
-| Rookie 1 | 1 to 1 | $1,500 | $1,500 |
-| Rookie 1 title 1 | 1 to 3 | $1,000 | $3,000 |
-| Second Year | 1 to 1 | $750 | $750 |
-| Second Year Title 1 | 1 to 3 | $500 | $1,500 |
-| Veteran Title 1 | 1 to 2 | $600 | $1,200 |
-| Not Qualified | — | $0 | $0 |
+| Category | Matching multiplier | Max fundraising target | Grantor match per team (= Max Grant Award) | Team support (most teams) |
+|---|---|---|---|---|
+| Rookie 1 | 1 to 1 | $1,500 | $1,500 | 12 |
+| Rookie 1 title 1 | 1 to 3 | $1,000 | $3,000 | 12 |
+| Second Year | 1 to 1 | $750 | $750 | 8 |
+| Second Year Title 1 | 1 to 3 | $500 | $1,500 | 16 |
+| Veteran Title 1 | 1 to 2 | $600 | $1,200 | 16 |
+| Not Qualified | — | $0 | $0 | — |
+| **Total** | | | | **64** |
 
 - **Max fundraising target** (called **Team Target** on Fundraising Status) is the most of a team's own fundraising that gets matched.
 - **Grantor match per team** = max fundraising target × multiplier. It's the most grant money one team in the category can receive, shown as **Max Grant Award** on Fundraising Status.
+- **Team support** is the most teams the grant can support in the category. It's set in the code (`CATEGORY_CAPACITY` in `src/lib/grant.ts`), next to the other category settings.
 
 ## 4. One team's award
 
@@ -102,7 +104,7 @@ One row per category (the five qualifying categories plus Not Qualified) and a T
 | Column | Formula |
 |---|---|
 | Teams Applied | Number of applications in the category. |
-| Teams Awarded Grants | Number of approved teams in the category. |
+| Teams Awarded Grants | Number of approved teams in the category, out of its team support, e.g. "6 of 12" (Not Qualified shows just the count). The Total row shows the total out of 64. A cell turns light amber when more teams are approved than the category can support. |
 | Matching Multiplier, Grantor Match per Team, Max Fundraising Target | The category settings (section 3). |
 | Total Possible Grant Amount | Teams Awarded × Grantor Match per Team. The most the category could pay out if every approved team raised its target. |
 | Total Team Fundraising as of *today* | Sum of Raised by Team for approved teams: everything they raised, not capped at the target. |
@@ -146,6 +148,7 @@ If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,
 
 ## Change history
 
+- **Nov 16, 2026:** Added team support (most teams per category, 64 in all) to section 3; Teams Awarded Grants shows "X of N" and turns amber when a category is over.
 - **Nov 5, 2026:** Added the Check Status rule to section 5 and the Fundraising Status Ask Period filter to section 7.
 - **Nov 5, 2026:** A locked Amount of Check shows in a blue-bordered, shaded box instead of a lock symbol. **Edit** under Check Status opens it once Ask Period is filled in too.
 - **Oct 23, 2026:** Ask Period subtotals under Fundraising Status and Check Status.

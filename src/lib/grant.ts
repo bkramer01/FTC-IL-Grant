@@ -32,6 +32,24 @@ export const CATEGORY_RULES: Record<TotalsCategory, { multiplier: number; maxFun
   "Not Qualified": { multiplier: 0, maxFundraising: 0 },
 };
 
+/**
+ * Most teams the grant can support in each category (Team Support table, Goals tab).
+ * Not Qualified has no limit (null).
+ */
+export const CATEGORY_CAPACITY: Record<TotalsCategory, number | null> = {
+  "Rookie 1": 12,
+  "Rookie 1 title 1": 12,
+  "Second Year": 8,
+  "Second Year Title 1": 16,
+  "Veteran Title 1": 16,
+  "Not Qualified": null,
+};
+
+/** "6 of 12" style label for teams awarded against a capacity; just the count when there is none. */
+export function awardedLabel(awarded: number, capacity: number | null) {
+  return capacity === null ? String(awarded) : `${awarded} of ${capacity}`;
+}
+
 export function grantorMatch(category: TotalsCategory) {
   const r = CATEGORY_RULES[category];
   return r.multiplier * r.maxFundraising;

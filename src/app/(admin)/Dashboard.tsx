@@ -36,6 +36,7 @@ import { fundraisingFileName, fundraisingWorkbook } from "@/lib/report";
 import { money, shortDate } from "@/lib/format";
 import {
   AGE_CUTOFFS,
+  awardedLabel,
   maxFundraisingTarget,
   maxGrantAward,
   multiplierLabel,
@@ -61,6 +62,7 @@ type Tab = "fundraising" | "checks";
 
 const GREEN_NOTE =
   "Shows green if all teams in this Rookie/Veteran Status have achieved the maximum matching fundraising amounts.";
+const OVER_CAPACITY = "More teams awarded than the grant can support in this category";
 const MAXED_OUT ="Every approved team in this category raised the max fundraising target";
 
 const APPROVED_ORDER = { Yes: 0, "Under Review": 1, No: 2 } as const;
@@ -374,7 +376,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                 <tr key={r.category}>
                   <td className="whitespace-nowrap font-medium">{r.category}</td>
                   <td className="num">{r.applied}</td>
-                  <td className="num">{r.awarded}</td>
+                  <td
+                    className={`num whitespace-nowrap ${r.overCapacity ? "bg-warning-bg" : ""}`}
+                    title={r.overCapacity ? OVER_CAPACITY : undefined}
+                  >
+                    {awardedLabel(r.awarded, r.capacity)}
+                  </td>
                   <td className="num">{r.multiplier ? `1 to ${r.multiplier}` : "—"}</td>
                   <td className="num">{money(r.grantorMatch)}</td>
                   <td className="num">{money(r.totalPossible)}</td>
@@ -391,7 +398,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
               <tr>
                 <td>Total</td>
                 <td className="num">{total.applied}</td>
-                <td className="num">{total.awarded}</td>
+                <td
+                  className={`num whitespace-nowrap ${total.awarded > total.capacity ? "bg-warning-bg" : ""}`}
+                  title={total.awarded > total.capacity ? OVER_CAPACITY : undefined}
+                >
+                  {awardedLabel(total.awarded, total.capacity)}
+                </td>
                 <td />
                 <td />
                 <td className="num">{money(total.totalPossible)}</td>

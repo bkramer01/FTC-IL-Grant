@@ -21,10 +21,11 @@ test("Grant Matching Report matches the totals table", async () => {
   expect(ws.getCell("H3").value).toBe("Total Team Fundraising as of Oct 20, 2026");
 
   const row = (r: number) => (ws.getRow(r).values as unknown[]).slice(1);
-  expect(row(4)).toEqual(["Rookie 1", 4, 3, "1 to 1", 1500, 4500, 1500, 3900, 3600, 900]);
-  expect(row(7)).toEqual(["Second Year Title 1", 3, 2, "1 to 3", 1500, 3000, 500, 1000, 3000, 1050]);
+  expect(row(4)).toEqual(["Rookie 1", 4, "3 of 12", "1 to 1", 1500, 4500, 1500, 3900, 3600, 900]);
+  expect(row(7)).toEqual(["Second Year Title 1", 3, "2 of 16", "1 to 3", 1500, 3000, 500, 1000, 3000, 1050]);
   expect(row(9)).toEqual(["Not Qualified", 5, 0, "—", 0, 0, 0, 0, 0, 0]);
   expect(ws.getCell("A10").value).toBe("Total");
+  expect(ws.getCell("C10").value).toBe("18 of 64");
   expect([ws.getCell("B10").value, ws.getCell("F10").value, ws.getCell("H10").value, ws.getCell("J10").value]).toEqual([
     30, 25350, 12800, 9350,
   ]);

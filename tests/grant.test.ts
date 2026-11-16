@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { askRows, buildApplications, computeTotals, parseTimestamp, type GrantData } from "@/lib/applications";
-import { grantCategory, maxFundraisingTarget, maxGrantAward, multiplierLabel, possibleAward, teamAge, unusedMatch } from "@/lib/grant";
+import { awardedLabel, grantCategory, maxFundraisingTarget, maxGrantAward, multiplierLabel, possibleAward, teamAge, unusedMatch } from "@/lib/grant";
 import sample from "@/mock/sample-data.json";
 
 const data = sample as GrantData;
@@ -135,5 +135,29 @@ describe("sample data", () => {
     const maxed = computeTotals(apps).rows.filter((r) => r.maxedOut).map((r) => r.category);
     // Second Year Title 1: both approved teams raised $500. Not Qualified has no awards.
     expect(maxed).toEqual(["Second Year Title 1"]);
+  });
+
+  test("shows teams awarded out of each category's capacity", () => {
+    const { rows, total } = computeTotals(apps);
+    expect(rows.map((r) => awardedLabel(r.awarded, r.capacity))).toEqual([
+      "3 of 12",
+      "2 of 12",
+      "3 of 8",
+      "2 of 16",
+      "8 of 16",
+      "0",
+    ]);
+    expect(awardedLabel(total.awarded, total.capacity)).toBe("18 of 64");
+    expect(rows.some((r) => r.overCapacity)).toBe(false);
+  });
+
+  test("flags a category with more teams awarded than it can support", () => {
+    // Approve 9 Second Year (capacity 8) teams by copying an approved one.
+    const one = apps.find((a) => a.category === "Second Year" && a.review.approved === "Yes")!;
+    const extra = Array.from({ length: 9 }, (_, i) => ({ ...one, teamNumber: 30000 + i }));
+    const row = computeTotals([...apps.filter((a) => a.category !== "Second Year"), ...extra]).rows.find(
+      (r) => r.category === "Second Year",
+    )!;
+    expect([row.awarded, row.overCapacity]).toEqual([9, true]);
   });
 });
