@@ -1,21 +1,24 @@
 // Grant Matching Report: the Grant Matching Totals table as a formatted Excel workbook.
 import type { TotalsRow } from "./applications";
+import { awardedLabel } from "./grant";
 import { FUNDRAISING_TOTALS, type FundraisingTable } from "./export";
 import { centralDateTime, shortDate, todayCentral } from "./format";
 
 type Totals = {
   rows: TotalsRow[];
-  total: { applied: number; awarded: number; totalPossible: number; raised: number; qualified: number; distributed: number };
+  total: { applied: number; awarded: number; capacity: number; totalPossible: number; raised: number; qualified: number; distributed: number };
 };
 
 const MONEY = '"$"#,##0';
 const GREEN = "FFD1E7DD"; // same light green as the page (--color-success-bg)
+const AMBER = "FFFFF3CD"; // same light amber as the page (--color-warning-bg)
 const HEAD_FILL = "FFF8F9FA";
 
 /**
  * Builds the workbook: a title row with the as-of date and time, a blank row, then the
  * same columns, category rows and Total row as Grant Matching Totals. Amounts are real
- * numbers with dollar formatting; a category whose approved teams all raised the max gets
+ * numbers with dollar formatting and Teams Awarded Grants reads "6 of 12" (amber when a
+ * category is over its capacity). A category whose approved teams all raised the max gets
  * the light green fill on Total Team Fundraising, as on the page.
  */
 export async function grantMatchingReport({ rows, total }: Totals, now = new Date(), askPeriod: string | null = null) {
@@ -60,7 +63,7 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
     row.values = [
       r.category,
       r.applied,
-      r.awarded,
+      r.capacity === null ? r.awarded : awardedLabel(r.awarded, r.capacity),
       r.multiplier ? `1 to ${r.multiplier}` : "—",
       r.grantorMatch,
       r.totalPossible,
@@ -74,11 +77,12 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
       if (col >= 5) c.numFmt = MONEY;
       c.border = { bottom: { style: "thin", color: { argb: "FFDEE2E6" } } };
     });
+    if (r.overCapacity) row.getCell(3).fill = { type: "pattern", pattern: "solid", fgColor: { argb: AMBER } };
     if (r.maxedOut) row.getCell(8).fill = { type: "pattern", pattern: "solid", fgColor: { argb: GREEN } };
   });
 
   const foot = ws.getRow(4 + rows.length);
-  foot.values = ["Total", total.applied, total.awarded, null, null, total.totalPossible, null, total.raised, total.qualified, total.distributed];
+  foot.values = ["Total", total.applied, awardedLabel(total.awarded, total.capacity), null, null, total.totalPossible, null, total.raised, total.qualified, total.distributed];
   for (let col = 1; col <= headers.length; col++) {
     const c = foot.getCell(col);
     c.font = { bold: true };
@@ -86,6 +90,7 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
     if (col >= 5) c.numFmt = MONEY;
     c.border = { top: { style: "medium" } };
   }
+  if (total.awarded > total.capacity) foot.getCell(3).fill = { type: "pattern", pattern: "solid", fgColor: { argb: AMBER } };
 
   return wb;
 }

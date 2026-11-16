@@ -1,6 +1,7 @@
 // Turns the two Google Sheets (form responses + BioBuzz team list) and the Grant
 // Administrator's entries into application rows, and summarizes them by category.
 import {
+  CATEGORY_CAPACITY,
   CATEGORY_RULES,
   grantCategory,
   grantorMatch,
@@ -325,6 +326,10 @@ export type TotalsRow = {
   category: TotalsCategory;
   applied: number;
   awarded: number;
+  /** Most teams the grant can support in this category; null when there is no limit. */
+  capacity: number | null;
+  /** More teams awarded than the category can support. */
+  overCapacity: boolean;
   multiplier: number;
   grantorMatch: number;
   totalPossible: number;
@@ -366,6 +371,8 @@ export function computeTotals(apps: Application[], askFilter: AskFilter = "all")
     category,
     applied: 0,
     awarded: 0,
+    capacity: CATEGORY_CAPACITY[category],
+    overCapacity: false,
     multiplier: CATEGORY_RULES[category].multiplier,
     grantorMatch: grantorMatch(category),
     totalPossible: 0,
@@ -397,10 +404,12 @@ export function computeTotals(apps: Application[], askFilter: AskFilter = "all")
     // Each team's qualified grant is capped at the grantor match, so the sum only reaches
     // Total Possible when every awarded team raised the max.
     row.maxedOut = row.awarded > 0 && row.grantorMatch > 0 && row.qualified >= row.totalPossible;
+    row.overCapacity = row.capacity !== null && row.awarded > row.capacity;
   }
   const total = {
     applied: sum(rows, "applied"),
     awarded: sum(rows, "awarded"),
+    capacity: rows.reduce((n, r) => n + (r.capacity ?? 0), 0),
     totalPossible: sum(rows, "totalPossible"),
     raised: sum(rows, "raised"),
     qualified: sum(rows, "qualified"),
