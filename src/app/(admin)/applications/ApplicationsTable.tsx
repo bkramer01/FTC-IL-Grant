@@ -152,15 +152,15 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
               onClick={() => exportCsv(apps)}
               title="Download every application (all rows, ignoring search and filter) as a CSV file for Excel"
             >
-              â¤“ Export
+              ⤓ Export
             </button>
           </div>
         }
       >
         <ManualKey />
         <Alert tone="warning" compact>
-          <strong>Total applications</strong> = {apps.length} Â· <strong>Grants approved</strong> = {counts.approved} Â· <strong>Rejected</strong> = {counts.rejected} Â·{" "}
-          <strong>Not reviewed</strong> = {counts.notReviewed} Â· <strong>Under review</strong> = {counts.underReview}
+          <strong>Total applications</strong> = {apps.length} · <strong>Grants approved</strong> = {counts.approved} · <strong>Rejected</strong> = {counts.rejected} ·{" "}
+          <strong>Not reviewed</strong> = {counts.notReviewed} · <strong>Under review</strong> = {counts.underReview}
         </Alert>
         <div className="max-h-[calc(100vh-7rem)] overflow-auto" ref={scrollerRef}>
           <table
@@ -183,7 +183,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                     <>
                       Calculated
                       <br />
-                      Team Age <span className="text-muted">â“˜</span>
+                      Team Age <span className="text-muted">ⓘ</span>
                     </>
                   }
                   title="Checks the team age calculated by team number against what is reported on the grant form."
@@ -194,7 +194,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 <th className="manual cursor-help" title="Defaults to Amount Received from HQ from grant application">
                   Raised by
                   <br />
-                  Team <span className="text-muted">â“˜</span>
+                  Team <span className="text-muted">ⓘ</span>
                 </th>
                 <th className="num">
                   Possible
@@ -231,7 +231,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 >
                   Teams Awarded
                   <br />
-                  Grants <span className="text-muted">â“˜</span>
+                  Grants <span className="text-muted">ⓘ</span>
                 </th>
                 <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
                 <th className="manual">Review Notes</th>
@@ -255,7 +255,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       <TeamNumber app={a} />
                       {a.duplicateCount > 1 && (
                         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
-                          Dup Ã—{a.duplicateCount}
+                          Dup ×{a.duplicateCount}
                         </span>
                       )}
                     </td>
@@ -337,7 +337,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                           className={`num whitespace-nowrap ${r?.overCapacity ? "bg-warning-bg" : ""}`}
                           title={r?.overCapacity ? "More teams awarded than the grant can support in this category" : undefined}
                         >
-                          {r ? awardedLabel(r.awarded, r.capacity) : "â€”"}
+                          {r ? awardedLabel(r.awarded, r.capacity) : "—"}
                         </td>
                       );
                     })()}
