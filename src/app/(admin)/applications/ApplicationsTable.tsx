@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { HeaderScrollbar } from "@/components/HeaderScrollbar";
 import { ChoiceSelect, FileLink, HqAmountError, MoneyInput, TeamNumber, YesNoBadge, YesNoSelect } from "@/components/inputs";
 import { Alert, Card, ManualKey } from "@/components/SiteChrome";
@@ -10,6 +10,7 @@ import { APP_FILTERS, LINK_FILTERS, matchesFilter, type AppFilter } from "@/lib/
 import {
   APPROVAL_OPTIONS,
   buildApplications,
+  computeTotals,
   EMPTY_REVIEW,
   VRS_OPTIONS,
   type Application,
@@ -18,7 +19,7 @@ import {
 } from "@/lib/applications";
 import { applicationsCsv, downloadCsv } from "@/lib/export";
 import { formDate, formDateTime, money, shortDate, todayCentral } from "@/lib/format";
-import { TITLE1_NEEDED, type TeamAge } from "@/lib/grant";
+import { awardedLabel, TITLE1_NEEDED, type GrantCategory, type TeamAge } from "@/lib/grant";
 import { saveReviewAction } from "../actions";
 
 /** The team age the coach picked on the form, if it names one. */
@@ -62,6 +63,22 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
   // Newest first until a heading is clicked.
   const [sort, setSort] = useState<Sort<SortKey>>({ key: "timestamp", dir: -1 });
   const apps = useMemo(() => buildApplications({ ...data, reviews }), [data, reviews]);
+  // Teams Awarded Grants by Rookie/Veteran Status, all ask periods (as in Grant Matching Totals).
+  const awardedByCategory = useMemo(
+    () => new Map(computeTotals(apps).rows.map((r) => [r.category as GrantCategory, r])),
+    [apps],
+  );
+
+  // Team Name is frozen just right of Team #, so it needs Team #'s width as its left offset.
+  const tableRef = useRef<HTMLTableElement>(null);
+  const [teamColWidth, setTeamColWidth] = useState(0);
+  useEffect(() => {
+    const el = tableRef.current?.querySelector("thead th");
+    if (!el) return;
+    const ro = new ResizeObserver(() => setTeamColWidth(el.getBoundingClientRect().width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const saver = useSaver();
 
@@ -135,22 +152,26 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
               onClick={() => exportCsv(apps)}
               title="Download every application (all rows, ignoring search and filter) as a CSV file for Excel"
             >
-              ⤓ Export
+              â¤“ Export
             </button>
           </div>
         }
       >
         <ManualKey />
         <Alert tone="warning" compact>
-          <strong>Total applications</strong> = {apps.length} · <strong>Grants approved</strong> = {counts.approved} · <strong>Rejected</strong> = {counts.rejected} ·{" "}
-          <strong>Not reviewed</strong> = {counts.notReviewed} · <strong>Under review</strong> = {counts.underReview}
+          <strong>Total applications</strong> = {apps.length} Â· <strong>Grants approved</strong> = {counts.approved} Â· <strong>Rejected</strong> = {counts.rejected} Â·{" "}
+          <strong>Not reviewed</strong> = {counts.notReviewed} Â· <strong>Under review</strong> = {counts.underReview}
         </Alert>
         <div className="max-h-[calc(100vh-7rem)] overflow-auto" ref={scrollerRef}>
-          <table className="data-table sticky-head">
+          <table
+            className="data-table sticky-head"
+            ref={tableRef}
+            style={{ "--freeze-2-left": `${teamColWidth}px` } as CSSProperties}
+          >
             <thead>
               <tr>
                 <SortHeader label="Team #" sortKey="team" sort={sort} onSort={onSort} className="freeze" />
-                <th>Team Name</th>
+                <th className="freeze freeze-2">Team Name</th>
                 <th>Coach Name</th>
                 <th>
                   Rookie/Veteran
@@ -162,7 +183,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                     <>
                       Calculated
                       <br />
-                      Team Age <span className="text-muted">ⓘ</span>
+                      Team Age <span className="text-muted">â“˜</span>
                     </>
                   }
                   title="Checks the team age calculated by team number against what is reported on the grant form."
@@ -173,7 +194,7 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                 <th className="manual cursor-help" title="Defaults to Amount Received from HQ from grant application">
                   Raised by
                   <br />
-                  Team <span className="text-muted">ⓘ</span>
+                  Team <span className="text-muted">â“˜</span>
                 </th>
                 <th className="num">
                   Possible
@@ -204,16 +225,24 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                   <br />
                   Email Sent
                 </th>
+                <th
+                  className="num cursor-help"
+                  title="Teams Awarded Grants from Grant Matching Totals for this row's Rookie/Veteran Status for Grant, counting every ask period."
+                >
+                  Teams Awarded
+                  <br />
+                  Grants <span className="text-muted">â“˜</span>
+                </th>
                 <SortHeader label="Grant Approved" sortKey="approved" sort={sort} onSort={onSort} className="manual yn" />
                 <th className="manual">Review Notes</th>
                 <SortHeader label="Timestamp" sortKey="timestamp" sort={sort} onSort={onSort} />
               </tr>
-              <HeaderScrollbar scrollerRef={scrollerRef} colSpan={18} />
+              <HeaderScrollbar scrollerRef={scrollerRef} colSpan={19} />
             </thead>
             <tbody>
               {shown.length === 0 && (
                 <tr>
-                  <td colSpan={18} className="text-muted">
+                  <td colSpan={19} className="text-muted">
                     No applications match.
                   </td>
                 </tr>
@@ -226,11 +255,11 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       <TeamNumber app={a} />
                       {a.duplicateCount > 1 && (
                         <span className="badge badge-warning ml-1" title="This team sent the grant form more than once">
-                          Dup ×{a.duplicateCount}
+                          Dup Ã—{a.duplicateCount}
                         </span>
                       )}
                     </td>
-                    <td className="min-w-36">{a.teamName ?? <span className="badge badge-danger" title="Team number not found in the BioBuzz team list">not found</span>}</td>
+                    <td className="freeze freeze-2 min-w-36">{a.teamName ?? <span className="badge badge-danger" title="Team number not found in the BioBuzz team list">not found</span>}</td>
                     <td className="min-w-32">
                       {a.coach}
                       <div className="text-xs">
@@ -301,6 +330,17 @@ export function ApplicationsTable({ data, initialFilter }: { data: GrantData; in
                       </div>
                     </td>
                     <td className="whitespace-nowrap">{shortDate(a.additionalInfoEmailOn)}</td>
+                    {(() => {
+                      const r = awardedByCategory.get(a.category);
+                      return (
+                        <td
+                          className={`num whitespace-nowrap ${r?.overCapacity ? "bg-warning-bg" : ""}`}
+                          title={r?.overCapacity ? "More teams awarded than the grant can support in this category" : undefined}
+                        >
+                          {r ? awardedLabel(r.awarded, r.capacity) : "â€”"}
+                        </td>
+                      );
+                    })()}
                     <td>
                       <ChoiceSelect
                         options={APPROVAL_OPTIONS}

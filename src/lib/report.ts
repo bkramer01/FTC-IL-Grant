@@ -18,7 +18,7 @@ const HEAD_FILL = "FFF8F9FA";
  * Builds the workbook: a title row with the as-of date and time, a blank row, then the
  * same columns, category rows and Total row as Grant Matching Totals. Amounts are real
  * numbers with dollar formatting and Teams Awarded Grants reads "6 of 12" (amber when a
- * category is over its capacity). A category whose approved teams all raised the max gets
+ * category is over its capacity) and always counts every ask period. A category whose approved teams all raised the max gets
  * the light green fill on Total Team Fundraising, as on the page.
  */
 export async function grantMatchingReport({ rows, total }: Totals, now = new Date(), askPeriod: string | null = null) {
@@ -31,7 +31,8 @@ export async function grantMatchingReport({ rows, total }: Totals, now = new Dat
   const headers = [
     "Rookie/Veteran Status",
     "Teams Applied",
-    "Teams Awarded Grants",
+    // Always counts every ask period, so say so when the report is for one ask period.
+    askPeriod ? "Teams Awarded Grants (all ask periods)" : "Teams Awarded Grants",
     "Matching Multiplier",
     "Grantor Match per Team",
     "Total Possible Grant Amount",

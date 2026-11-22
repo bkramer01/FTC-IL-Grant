@@ -1,6 +1,6 @@
 # Grant Rules and Calculations
 
-> **Applies to:** every page · **Last updated:** November 5, 2026
+> **Applies to:** every page · **Last updated:** November 22, 2026
 
 How the site works out each team's grant category and award, and every calculated number on the Dashboard. The rules are the 2026–27 season's, taken from the Goals tab of *FTC IL Grant Status.xlsx*. They're built into the site (`src/lib/grant.ts`); changing a threshold or amount is a code change, not a setting.
 
@@ -93,7 +93,7 @@ Entered on the Dashboard's **Check Status** tab.
 
 One row per category (the five qualifying categories plus Not Qualified) and a Total row.
 
-**Ask Period filter:** with an ask picked, every column except Teams Applied counts only the approved teams assigned to that ask; **Unassigned** counts approved teams with no ask. Teams Applied always counts every application.
+**Ask Period filter:** with an ask picked, every column except Teams Applied and Teams Awarded Grants counts only the approved teams assigned to that ask; **Unassigned** counts approved teams with no ask. Teams Applied always counts every application, and Teams Awarded Grants always counts approved teams in every ask period. Total Possible Grant Amount uses the approved teams in the picked ask.
 
 **Which applications count:**
 
@@ -148,6 +148,7 @@ If the $900 team's Raised by Team goes up and its Amount of Check follows to $1,
 
 ## Change history
 
+- **Nov 22, 2026:** Teams Awarded Grants ignores the Ask Period filter; Total Possible Grant Amount still follows it.
 - **Nov 16, 2026:** Added team support (most teams per category, 64 in all) to section 3; Teams Awarded Grants shows "X of N" and turns amber when a category is over.
 - **Nov 5, 2026:** Added the Check Status rule to section 5 and the Fundraising Status Ask Period filter to section 7.
 - **Nov 5, 2026:** A locked Amount of Check shows in a blue-bordered, shaded box instead of a lock symbol. **Edit** under Check Status opens it once Ask Period is filled in too.

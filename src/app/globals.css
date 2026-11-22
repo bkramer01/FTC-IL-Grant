@@ -249,6 +249,11 @@ select.form-control,
   background: #fff;
   box-shadow: inset -1px 0 0 var(--color-line);
 }
+/* Second frozen column: sits just right of the first; the table sets --freeze-2-left to the
+   first column's width. */
+.data-table .freeze-2 {
+  left: var(--freeze-2-left, 0);
+}
 .data-table tbody tr:nth-child(odd) > .freeze {
   background: #f7f7f7;
 }

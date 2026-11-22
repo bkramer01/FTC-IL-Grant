@@ -1,6 +1,6 @@
 # Dashboard
 
-> **Address:** `/` · **Last updated:** November 5, 2026
+> **Address:** `/` · **Last updated:** November 22, 2026
 
 The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has four sections: Grant Matching Totals, Grant Ask Tracker, Fundraising Status (with a Check Status tab) and Grant Rules.
 
@@ -8,7 +8,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 - **Refresh Data** (top right) reads the latest grant form responses and the BioBuzz team list from Google Sheets, saves them, and reloads the page. It shows when data was last refreshed ("never" before the first refresh). Responses deleted from the sheet disappear on the next refresh; the administrator's entries stay linked to each response by its timestamp. Each refresh also copies the form's HQ grant amount (column I) into **Raised by Team** for any response that doesn't have one yet (see Applications); amounts already copied or typed in are never overwritten. If a sheet can't be read (not shared with the service account, or a key column moved), nothing changes and the reason appears under the button.
 - Every formula on this page, with worked examples, is in [Grant Rules and Calculations](grant-rules.md). Where the data comes from and what Refresh Data changes is in [Data and Refresh Data](data-and-refresh.md).
-- **Ask Period** filter (top right, next to Refresh Data): **All Ask Periods** (the default), one ask, or **Unassigned**. Picking an ask limits every column except Teams Applied to the approved teams assigned to that ask on Check Status; **Unassigned** shows approved teams with no ask yet. A blue note under the title says what's shown. Asks appear in the list once they have both a start and end date. If the chosen ask is removed or loses a date, the filter goes back to All Ask Periods. The filter isn't saved: the page always opens on All Ask Periods.
+- **Ask Period** filter (top right, next to Refresh Data): **All Ask Periods** (the default), one ask, or **Unassigned**. Picking an ask limits every column except Teams Applied and Teams Awarded Grants to the approved teams assigned to that ask on Check Status; **Unassigned** shows approved teams with no ask yet. A blue note under the title says what's shown. Asks appear in the list once they have both a start and end date. If the chosen ask is removed or loses a date, the filter goes back to All Ask Periods. The filter isn't saved: the page always opens on All Ask Periods.
 - One row per category, plus a Total row. Hover the **Teams Applied ⓘ** heading for how teams are counted. The asterisk (*) on **Rookie/Veteran Status** links to the explanation in Grant Rules.
 
 | Column | How it's worked out |
@@ -23,7 +23,7 @@ The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has
 
 - When every approved team in a category has raised at least that category's Max Fundraising Target, its **Total Team Fundraising** cell turns light green. Hover the heading (ⓘ) or a green cell for an explanation. One team raising extra can't make up for another team that is short, and categories with no awarded teams never turn green.
 
-- **⤓ Grant Matching Report** (top right, next to Refresh Data) downloads the table, as currently filtered, as an Excel file, `grant-matching-report-YYYY-MM-DD.xlsx`: a "Grant Matching Report - as of" title row (with the ask name, e.g. "Grant Matching Report - Ask 2 - as of", when the Ask Period filter is set) with the date and time, then the same columns, category rows and Total row. Headings and the Total row are bold, amounts are real numbers with dollar formatting, the heading row stays frozen when scrolling, Teams Awarded Grants reads "6 of 12" as on the page, and Total Team Fundraising has the same light green fill as the page. The note, Grant Rules and other sections aren't included. Unsaved edits on the page are included.
+- **⤓ Grant Matching Report** (top right, next to Refresh Data) downloads the table, as currently filtered, as an Excel file, `grant-matching-report-YYYY-MM-DD.xlsx`: a "Grant Matching Report - as of" title row (with the ask name, e.g. "Grant Matching Report - Ask 2 - as of", when the Ask Period filter is set) with the date and time, then the same columns, category rows and Total row. Headings and the Total row are bold, amounts are real numbers with dollar formatting, the heading row stays frozen when scrolling, Teams Awarded Grants reads "6 of 12" as on the page and always counts every ask period (its heading says "(all ask periods)" when the report is for one ask), and Total Team Fundraising has the same light green fill as the page. The note, Grant Rules and other sections aren't included. Unsaved edits on the page are included.
 - Under the title, a small yellow note reads "XX applications not fully reviewed/complete.": XX counts every submission whose Grant Approved is blank or Under Review. The count links to Applications filtered to those rows. Teams still missing a School Title 1 Status are left out of the table.
 
 ## Grant Ask Tracker
@@ -82,6 +82,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Nov 22, 2026:** Teams Awarded Grants always counts every ask period, whatever the Ask Period filter is set to (hover note on the heading; the blue filter note says so); the Grant Matching Report matches. Total Possible Grant Amount and the dollar columns still follow the filter.
 - **Nov 16, 2026:** Teams Awarded Grants shows approved teams out of each category's team support (e.g. "6 of 12", Total "21 of 64"), with a light amber cell when a category is over; the Grant Matching Report matches.
 - **Nov 5, 2026:** Date Check Mailed uses the same font size and box height as the other check fields.
 - **Nov 5, 2026:** On Check Status, Street Address, City, State and Zip are combined into one **Mailing Address** column, and Rookie/Veteran Status is added before Ask Period (sortable). The Excel export keeps its separate address columns.

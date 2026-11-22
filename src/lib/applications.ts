@@ -325,7 +325,10 @@ export function buildApplications(data: GrantData): Application[] {
 export type TotalsRow = {
   category: TotalsCategory;
   applied: number;
+  /** Teams Awarded Grants: approved teams in every ask period (ignores the ask filter). */
   awarded: number;
+  /** Approved teams the ask filter picks (Total Possible and the dollar columns count these). */
+  awardedInAsk: number;
   /** Most teams the grant can support in this category; null when there is no limit. */
   capacity: number | null;
   /** More teams awarded than the category can support. */
@@ -344,7 +347,8 @@ export type TotalsRow = {
 /**
  * One row per category. Applied counts every application (a team that sent the form twice
  * counts twice) and ignores the ask filter. The other columns count each approved team
- * once, using its latest approved application, limited to the teams the ask filter picks.
+ * once, using its latest approved application. Awarded counts every ask period; the rest
+ * are limited to the teams the ask filter picks.
  * Applications still missing a Title 1 status are left out of every column;
  * `title1Needed` counts those teams.
  */
@@ -371,6 +375,7 @@ export function computeTotals(apps: Application[], askFilter: AskFilter = "all")
     category,
     applied: 0,
     awarded: 0,
+    awardedInAsk: 0,
     capacity: CATEGORY_CAPACITY[category],
     overCapacity: false,
     multiplier: CATEGORY_RULES[category].multiplier,
@@ -392,18 +397,21 @@ export function computeTotals(apps: Application[], askFilter: AskFilter = "all")
       continue;
     }
     const row = rows.find((r) => r.category === a.category)!;
-    if (a.review.approved !== "Yes" || !matchesAsk(a, askFilter)) continue;
+    if (a.review.approved !== "Yes") continue;
+    // Teams Awarded Grants always counts every ask period.
     row.awarded++;
+    if (!matchesAsk(a, askFilter)) continue;
+    row.awardedInAsk++;
     row.raised += a.review.raised ?? 0;
     row.qualified += a.possibleAward ?? 0;
     // Only checks that went out (Check # and Date Check Mailed filled in).
     if (a.checkLocked) row.distributed += a.checkAmount ?? 0;
   }
   for (const row of rows) {
-    row.totalPossible = row.awarded * row.grantorMatch;
+    row.totalPossible = row.awardedInAsk * row.grantorMatch;
     // Each team's qualified grant is capped at the grantor match, so the sum only reaches
     // Total Possible when every awarded team raised the max.
-    row.maxedOut = row.awarded > 0 && row.grantorMatch > 0 && row.qualified >= row.totalPossible;
+    row.maxedOut = row.awardedInAsk > 0 && row.grantorMatch > 0 && row.qualified >= row.totalPossible;
     row.overCapacity = row.capacity !== null && row.awarded > row.capacity;
   }
   const total = {

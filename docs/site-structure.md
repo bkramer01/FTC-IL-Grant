@@ -1,6 +1,6 @@
 # Site Structure
 
-> **Applies to:** every page · **Last updated:** November 5, 2026
+> **Applies to:** every page · **Last updated:** November 22, 2026
 
 How the grant site is laid out, how its pages connect, and the features every page shares.
 
@@ -68,7 +68,7 @@ BioBuzz team list sheet ──────────────┘           
 | **Saving as you go** | No Save button. Changes save about half a second after you stop typing. "Saving… / All changes saved" shows near the page title, or a red message if a save failed. | Dashboard, Applications, Email Log |
 | **Sorting** | Headings with ↕ sort when clicked; click again to reverse. Blank values sort last. | Applications, Fundraising Status, Check Status |
 | **Frozen headings** | Wide tables scroll inside their own box, no taller than the window. Headings stay at the top, with an extra sideways scrollbar under them. | Applications, Fundraising Status, Form Responses |
-| **Frozen Team #** | Team # stays at the left when scrolling sideways. | Applications |
+| **Frozen Team # and Team Name** | Team # and Team Name stay at the left when scrolling sideways. | Applications |
 | **Frozen Total row** | The Total row stays at the bottom of the box. | Fundraising Status, Check Status |
 | **Ask Period subtotals** | Below the box, outside the scrolling: the Total split by ask, lined up under the Total's amounts. The box leaves room so the headings and every subtotal fit on screen. | Fundraising Status, Check Status |
 | **Row counts** | "*N* rows" under the table, counting what's shown after search and filters. | Applications, Fundraising Status |

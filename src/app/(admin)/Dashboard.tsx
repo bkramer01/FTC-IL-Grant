@@ -301,7 +301,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                   const v = e.target.value;
                   setAskFilter(v === "all" || v === "unassigned" ? v : Number(v));
                 }}
-                title="Show totals for the approved teams assigned to one ask period. Teams Applied always counts every application."
+                title="Show totals for the approved teams assigned to one ask period. Teams Applied always counts every application, and Teams Awarded Grants always counts every ask period."
               >
                 <option value="all">All Ask Periods</option>
                 {activeAsks.map((a) => (
@@ -328,7 +328,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
         {filterLabel && (
           <Alert tone="info" compact>
             Showing approved teams {askFilter === "unassigned" ? "with no Ask Period" : <>assigned to <strong>{filterLabel}</strong></>}.
-            Teams Applied still counts every application.
+            Teams Applied still counts every application, and Teams Awarded Grants still counts every ask period.
           </Alert>
         )}
         <div className="overflow-x-auto">
@@ -351,7 +351,9 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     Applied <span className="text-muted">ⓘ</span>
                   </span>
                 </th>
-                <th className="num">Teams Awarded Grants</th>
+                <th className="num cursor-help" title="Approved teams in every ask period, whatever Ask Period is picked above.">
+                  Teams Awarded Grants <span className="text-muted">ⓘ</span>
+                </th>
                 <th className="num">Matching Multiplier</th>
                 <th className="num">Grantor Match per Team</th>
                 <th className="num">Total Possible Grant Amount</th>

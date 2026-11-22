@@ -1,6 +1,6 @@
 # Applications
 
-> **Address:** `/applications` · **Last updated:** October 23, 2026
+> **Address:** `/applications` · **Last updated:** November 22, 2026
 
 One row per grant form response, newest first. This is where the Grant Administrator reviews each application. How categories and awards are worked out is in [Grant Rules and Calculations](grant-rules.md); where each form column comes from is in [Data and Refresh Data](data-and-refresh.md#form-columns-the-site-uses).
 
@@ -10,7 +10,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 - A small yellow box above the table shows **Total applications** and counts the Grant Approved answers across all applications: **Grants approved** (Yes), **Rejected** (No), **Not reviewed** (blank) and **Under review**. It updates as answers change and ignores search and filter.
 - Click the **Team #**, **Calculated Team Age**, **Grant Approved** or **Timestamp** heading to sort; click again to reverse. The table starts newest first. Team age sorts Rookie, Second Year, Veteran; Grant Approved sorts Yes, Under Review, No, Not reviewed.
 - **Show** filter: All applications, or one Grant Approved status (Yes, Under Review, No, Not reviewed). The Dashboard's "not fully reviewed/complete" link opens the page filtered to Not reviewed or Under Review; that choice appears in the list only while it's active.
-- The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down. **Team #** stays frozen at the left as you scroll sideways. Scroll sideways with the scrollbar just under the headings or the one at the bottom of the box. The number of rows shown (after search and filter) appears under the table.
+- The table scrolls inside its own box, no taller than the window, so the column headings stay frozen at the top as you scroll down. **Team #** and **Team Name** stay frozen at the left as you scroll sideways. Scroll sideways with the scrollbar just under the headings or the one at the bottom of the box. The number of rows shown (after search and filter) appears under the table.
 - **Export** downloads every application (all rows, ignoring search and filter) as a CSV file that opens in Excel, named `grant-applications-YYYY-MM-DD.csv`. It has the table's columns, in the same order, plus Coach Email, the letter and VRS screenshot links, and how many times the team submitted. It includes changes made on the page that haven't been saved. Applications with no Grant Approved decision export as "Not reviewed".
 
 ## Flags
@@ -23,7 +23,7 @@ One row per grant form response, newest first. This is where the Grant Administr
 
 ## Columns
 
-In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calculated Team Age, **Raised by Team**, Possible Grant Award, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Fundraising Letter Rec'd**, List of Volunteers, Fully Registered?, End of Season Survey Completed?, **VRS Task Completed**, Add'l Info Email Sent, **Grant Approved**, **Review Notes**, Timestamp. Columns in bold have yellow headings: the Grant Administrator fills them in.
+In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calculated Team Age, **Raised by Team**, Possible Grant Award, Rookie/Veteran Status for Grant, **School Title 1 Status**, **Fundraising Letter Rec'd**, List of Volunteers, Fully Registered?, End of Season Survey Completed?, **VRS Task Completed**, Add'l Info Email Sent, Teams Awarded Grants, **Grant Approved**, **Review Notes**, Timestamp. Columns in bold have yellow headings: the Grant Administrator fills them in.
 
 | Column | Source |
 |---|---|
@@ -38,6 +38,7 @@ In order: Team #, Team Name, Coach Name, Rookie/Veteran Status Provided, Calcula
 | Fully Registered? | Form ("Team is in the green") |
 | End of Season Survey Completed? | Form question 2 ("rookie Biobuzz" shows as N/A) |
 | Add'l Info Email Sent | Latest "Additional Info Needed" entry in the Email Log |
+| Teams Awarded Grants | The Teams Awarded Grants count from the Dashboard's Grant Matching Totals for this row's Rookie/Veteran Status for Grant, always across every ask period, e.g. "6 of 12" (Not Qualified shows just the count). Light amber when that category has more approved teams than the grant can support. "—" while the status is "Title 1 status needed". Updates as soon as Grant Approved or School Title 1 Status changes. Hover the heading (ⓘ) for a reminder. Not in the export. |
 | Grant Approved | Grant Administrator: Yes, Under Review or No ("Not reviewed" until one is picked) |
 | VRS Task Completed | Grant Administrator: Yes, In Progress or No |
 | Raised by Team | Starts as the form's HQ grant amount (column I, "how much did your team receive as credit from FIRST Headquarters"), copied by Refresh Data with that day as the Last Update date. "$" and commas are fine; anything else that isn't a number shows **error** (hover for the form's answer) and counts as $0 in totals: fix it in the sheet and the next refresh copies it, or type the amount here. A blank answer stays blank until the sheet has one. Once an amount is copied or typed, refreshes never change it. Hover the heading (ⓘ): "Defaults to Amount Received from HQ from grant application". The Grant Administrator can edit it on any row (shows as dollars; click to type a plain number); changing it sets the Last Update date to today. This is the only place it's edited; the Dashboard's Fundraising Status shows the same amount. |
@@ -51,6 +52,7 @@ The **Letter ↗** and **Screenshot ↗** links open the files the coach uploade
 
 ## Change history
 
+- **Nov 22, 2026:** Team Name stays frozen next to Team # when scrolling sideways. New Teams Awarded Grants column (all ask periods, as on Grant Matching Totals) just before Grant Approved.
 - **Oct 23, 2026:** A Team Number answer that isn't a single number shows as typed with a red "not one team #" badge (instead of "NaN"), also in the export.
 - **Oct 23, 2026:** Raised by Team heading has a hover note: "Defaults to Amount Received from HQ from grant application".
 - **Oct 22, 2026:** Links to the new Grant Rules and Data documents; every review column described; hidden fields noted.
