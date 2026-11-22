@@ -87,10 +87,16 @@ describe("sample data", () => {
       ]);
       expect(total).toBe(sumChecks(1) + sumChecks(2));
       expect(rows.map((r) => r.assigned)).toEqual([2, approved.length - 2 + 1, 0]);
-      // The filter splits the awarded teams; Teams Applied ignores it.
-      expect(ask1.total.awarded + ask2.total.awarded).toBe(all.total.awarded);
+      // The filter splits the awarded teams behind Total Possible and the dollar columns;
+      // Teams Applied and Teams Awarded Grants ignore it.
+      const inAsk = (t: ReturnType<typeof computeTotals>) => t.rows.reduce((n, r) => n + r.awardedInAsk, 0);
+      expect(inAsk(ask1) + inAsk(ask2)).toBe(all.total.awarded);
+      expect(ask1.total.awarded).toBe(all.total.awarded);
+      expect(ask2.total.awarded).toBe(all.total.awarded);
       expect(ask1.total.applied).toBe(all.total.applied);
-      expect(computeTotals(tagged, "unassigned").total.awarded).toBe(0);
+      const unassigned = computeTotals(tagged, "unassigned");
+      expect(inAsk(unassigned)).toBe(0);
+      expect(unassigned.total.awarded).toBe(all.total.awarded);
       expect(computeTotals(apps, "unassigned").total).toEqual(computeTotals(apps).total);
     });
   });
