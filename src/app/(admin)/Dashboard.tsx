@@ -126,6 +126,9 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   const filterLabel =
     askFilter === "all" ? null : askFilter === "unassigned" ? "Unassigned" : (askName(askFilter) ?? null);
   const { rows, total } = totals;
+  // Teams Awarded Grants by Rookie/Veteran Status for the Check Status tab. `awarded` always
+  // counts every ask period, whatever the Ask Period filter above says.
+  const awardedByCategory = new Map(rows.map((r) => [r.category as GrantCategory, r]));
   // Every submission whose Grant Approved is still blank or Under Review.
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
@@ -259,7 +262,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
       </tr>
     ) : (
       <tr key={g.label} className={total ? "total-row" : "breakdown-row"}>
-        <td colSpan={6}>{label}</td>
+        <td colSpan={7}>{label}</td>
         <td className="num">{money(g.totals.checks)}</td>
         <td colSpan={4} />
       </tr>
@@ -578,6 +581,14 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       onSort={onSort}
                     />
                     <th
+                      className="num cursor-help"
+                      title="Teams Awarded Grants from Grant Matching Totals for this row's Rookie/Veteran Status, counting every ask period."
+                    >
+                      Teams Awarded
+                      <br />
+                      Grants <span className="text-muted">ⓘ</span>
+                    </th>
+                    <th
                       className="manual cursor-help"
                       title="The Grant Ask Tracker ask this team's check is funded from. Only approved teams; asks need a start and end date to be listed."
                     >
@@ -648,6 +659,17 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                         ))}
                       </td>
                       <td className="text-balance">{a.category}</td>
+                      {(() => {
+                        const r = awardedByCategory.get(a.category);
+                        return (
+                          <td
+                            className={`num whitespace-nowrap ${r?.overCapacity ? "bg-warning-bg" : ""}`}
+                            title={r?.overCapacity ? OVER_CAPACITY : undefined}
+                          >
+                            {r ? awardedLabel(r.awarded, r.capacity) : "—"}
+                          </td>
+                        );
+                      })()}
                       <td>
                         {a.review.approved === "Yes" && isRowLocked(a) && (
                           <div className="locked-field cursor-help whitespace-nowrap" title="Locked. Click Edit in the Check Status column to change it.">

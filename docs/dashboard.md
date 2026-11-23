@@ -1,6 +1,6 @@
 # Dashboard
 
-> **Address:** `/` · **Last updated:** November 22, 2026
+> **Address:** `/` · **Last updated:** November 23, 2026
 
 The home page, titled **FTC Illinois Matching Grants, 2026–27 season**. It has four sections: Grant Matching Totals, Grant Ask Tracker, Fundraising Status (with a Check Status tab) and Grant Rules.
 
@@ -51,7 +51,7 @@ Tracks requests for funds from the Donor Fund during the season. The Grant Admin
 - A team number that isn't on the BioBuzz list shows a red **not in BioBuzz** badge instead of a team name.
 - Two tabs, each starting with Team # and Team Name:
   - **Fundraising Status:** Coach Name, Approved, Rookie/Veteran Status, Matching Multiplier, Max Grant Award (max fundraising target × multiplier, the grantor match per team; blank until Title 1 is entered), Team Target (the category's Max Fundraising Target: the most of a team's fundraising that gets matched, from the category settings), Raised by Team (read-only; shows **error** when the form's HQ grant amount isn't a number, and counts as $0 in the totals), Possible Grant Award, Unused Grant Match, Last Update (date the amount raised was last changed).
-  - **Check Status:** Check Addressee, Mailing Address (street on one line, then city, state and ZIP, with the ZIP shown once even if the form repeats it), Rookie/Veteran Status, **Ask Period**, **Amount of Check**, **Check #**, **Date Check Mailed**, **Check Status**, Grant Award Email Sent.
+  - **Check Status:** Check Addressee, Mailing Address (street on one line, then city, state and ZIP, with the ZIP shown once even if the form repeats it), Rookie/Veteran Status, Teams Awarded Grants (the row's Rookie/Veteran Status value from Grant Matching Totals, e.g. "6 of 12", always counting every ask period whatever either Ask Period filter is set to; light amber when the category has more teams approved than it can support; hover the heading (ⓘ) for a reminder), **Ask Period**, **Amount of Check**, **Check #**, **Date Check Mailed**, **Check Status**, Grant Award Email Sent.
   - **Ask Period** tags an approved team with the Grant Ask Tracker ask its check is funded from. The dropdown lists the active asks (both dates set) and a blank (—) for none. It appears only on approved rows; if a team is later un-approved, its Ask Period stays saved but no longer counts. A team assigned to an ask that later loses a date shows that ask with "(no dates)" until it's changed. Hover the heading (ⓘ) for a reminder.
   - **Amount of Check** starts at the team's Possible Grant Award. The Grant Administrator can change it, but if Possible Grant Award changes later (for example, Raised by Team is edited), the check goes back to the new Possible Grant Award. Once **Check #** and **Date Check Mailed** are both filled in, the amount is locked (shown in a shaded box with a blue border) and stays as mailed, even if Possible Grant Award changes. To edit it again, use **Edit** under Check Status, or clear either field if Check Status isn't showing yet. A blank or $0 amount stays editable so it can be filled in. Hover the heading (ⓘ) for a summary of these rules.
   - **Check Status** is blank until **Check #**, **Date Check Mailed**, **Amount of Check** (above $0) and **Ask Period** are all filled in, then shows a dropdown reading **Sent**. The Grant Administrator can change it to **Paid** (or back to Sent). Unapproved rows stay blank. If Check # or Date Check Mailed is cleared, Check Status goes blank and a Paid status is erased, so it starts again at Sent once they're refilled. If Ask Period is cleared, Check Status goes blank but a Paid status is kept and comes back when an ask is picked again. Hover the heading for a reminder.
@@ -82,6 +82,7 @@ A starred (*) note explains how Rookie/Veteran Status is worked out: team age fr
 
 ## Change history
 
+- **Nov 23, 2026:** Check Status has a Teams Awarded Grants column right of Rookie/Veteran Status: the row's category value from Grant Matching Totals (e.g. "6 of 12"), always counting every ask period, light amber when the category is over.
 - **Nov 22, 2026:** Teams Awarded Grants always counts every ask period, whatever the Ask Period filter is set to (hover note on the heading; the blue filter note says so); the Grant Matching Report matches. Total Possible Grant Amount and the dollar columns still follow the filter.
 - **Nov 16, 2026:** Teams Awarded Grants shows approved teams out of each category's team support (e.g. "6 of 12", Total "21 of 64"), with a light amber cell when a category is over; the Grant Matching Report matches.
 - **Nov 5, 2026:** Date Check Mailed uses the same font size and box height as the other check fields.
