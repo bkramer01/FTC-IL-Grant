@@ -129,6 +129,10 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   // Teams Awarded Grants by Rookie/Veteran Status for the Check Status tab. `awarded` always
   // counts every ask period, whatever the Ask Period filter above says.
   const awardedByCategory = new Map(rows.map((r) => [r.category as GrantCategory, r]));
+  const awardedFor = (a: Application) => {
+    const r = awardedByCategory.get(a.category);
+    return r ? awardedLabel(r.awarded, r.capacity) : null;
+  };
   // Every submission whose Grant Approved is still blank or Under Review.
   const notReviewed = apps.filter((a) => a.review.approved === null || a.review.approved === "Under Review").length;
 
@@ -227,7 +231,12 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
   /** Downloads the rows shown, with both tabs' columns and the subtotals, as an Excel file. */
   async function exportFundraising() {
     const now = new Date();
-    const table = fundraisingTable(fundRows, askName, [{ label: "Total", count: fundRows.length, totals: fundTotals }, ...breakdown]);
+    const table = fundraisingTable(
+      fundRows,
+      askName,
+      [{ label: "Total", count: fundRows.length, totals: fundTotals }, ...breakdown],
+      awardedFor,
+    );
     const shown = fundFiltered
       ? `Approved teams only, ${fundAskLabels}`
       : approvedOnly
@@ -571,7 +580,9 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     <SortHeader
                       label={
                         <>
-                          Rookie/Veteran
+                          Rookie/
+                          <br />
+                          Veteran
                           <br />
                           Status
                         </>
@@ -584,7 +595,9 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                       className="num cursor-help"
                       title="Teams Awarded Grants from Grant Matching Totals for this row's Rookie/Veteran Status, counting every ask period."
                     >
-                      Teams Awarded
+                      Teams
+                      <br />
+                      Awarded
                       <br />
                       Grants <span className="text-muted">ⓘ</span>
                     </th>
@@ -652,7 +665,7 @@ export function Dashboard({ data, today }: { data: GrantData; today: string }) {
                     <tr key={a.timestamp}>
                       {teamCell(a)}
                       {nameCell(a)}
-                      <td className="min-w-40">{a.checkPayee}</td>
+                      <td className="min-w-32">{a.checkPayee}</td>
                       <td className="min-w-36">
                         {mailingAddress(a.street, a.cityState, a.zip).map((line) => (
                           <div key={line}>{line}</div>

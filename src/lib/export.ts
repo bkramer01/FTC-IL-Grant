@@ -5,12 +5,14 @@ import { shortDate } from "./format";
 import { maxFundraisingTarget, maxGrantAward, multiplierLabel } from "./grant";
 
 type AskName = (id: number | null) => string | null;
+/** Teams Awarded Grants for an application's Rookie/Veteran Status, e.g. "6 of 12". */
+type AwardedFor = (a: Application) => string | number | null;
 
 /** Team # as a number, or as typed on the form when it isn't a single number. */
 function teamNumberValue(a: Application): string | number {
   return Number.isFinite(a.teamNumber) ? a.teamNumber : a.teamNumberText;
 }
-type Column = [string, (a: Application, askName: AskName) => string | number | null];
+type Column = [string, (a: Application, askName: AskName, awardedFor?: AwardedFor) => string | number | null];
 
 const APPLICATION_COLUMNS: Column[] = [
   ["Team #", (a) => teamNumberValue(a)],
@@ -55,6 +57,7 @@ const FUNDRAISING_COLUMNS: Column[] = [
   ["Street Address", (a) => a.street],
   ["City, State", (a) => a.cityState],
   ["Zip", (a) => a.zip],
+  ["Teams Awarded Grants", (a, _askName, awardedFor) => awardedFor?.(a) ?? null],
   ["Ask Period", (a, askName) => (a.review.approved === "Yes" ? askName(a.review.askId) : null)],
   ["Amount of Check", (a) => a.checkAmount],
   ["Check #", (a) => a.review.checkNumber],
@@ -101,10 +104,15 @@ export type FundraisingTable = { headers: string[]; rows: CellValue[][]; summary
  * tabs, plus `summary` rows (the Total, then each Ask Period) with the label in the first
  * column and each amount in its own column, as under the table.
  */
-export function fundraisingTable(rows: Application[], askName: AskName = () => null, summary: FundGroup[] = []): FundraisingTable {
+export function fundraisingTable(
+  rows: Application[],
+  askName: AskName = () => null,
+  summary: FundGroup[] = [],
+  awardedFor: AwardedFor = () => null,
+): FundraisingTable {
   return {
     headers: FUNDRAISING_COLUMNS.map(([h]) => h),
-    rows: rows.map((a) => FUNDRAISING_COLUMNS.map(([, get]) => get(a, askName))),
+    rows: rows.map((a) => FUNDRAISING_COLUMNS.map(([, get]) => get(a, askName, awardedFor))),
     summary: summary.map((g, i) =>
       FUNDRAISING_COLUMNS.map(([h], c) => {
         if (c === 0) return i === 0 ? g.label : `${g.label} (${g.count})`;

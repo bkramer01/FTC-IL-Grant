@@ -37,7 +37,7 @@ test("fundraising export has both tabs' columns for the rows given", () => {
   const t = fundraisingTable(approved);
   expect(t.headers.join(",")).toBe(
     "Team #,Team Name,Coach Name,Approved,Rookie/Veteran Status,Matching Multiplier,Max Grant Award,Team Target,Raised by Team,Possible Grant Award,Unused Grant Match," +
-      "Last Update,Check Addressee,Street Address,City, State,Zip,Ask Period,Amount of Check,Check #,Date Check Mailed,Check Status,Grant Award Email Sent",
+      "Last Update,Check Addressee,Street Address,City, State,Zip,Teams Awarded Grants,Ask Period,Amount of Check,Check #,Date Check Mailed,Check Status,Grant Award Email Sent",
   );
   expect(t.rows).toHaveLength(approved.length);
   const team3640 = t.rows.find((r) => r[0] === 3640)!;
@@ -45,6 +45,10 @@ test("fundraising export has both tabs' columns for the rows given", () => {
   expect([col("Rookie/Veteran Status"), col("Matching Multiplier"), col("Max Grant Award"), col("Team Target")]).toEqual(["Veteran Title 1", "1 to 2", 1200, 600]);
   expect([col("Raised by Team"), col("Possible Grant Award"), col("Unused Grant Match")]).toEqual([250, 500, 700]);
   expect(t.summary).toEqual([]);
+  // Teams Awarded Grants is blank unless the page passes the category counts.
+  expect(col("Teams Awarded Grants")).toBeNull();
+  const withAwarded = fundraisingTable(approved, undefined, [], (a) => (a.category === "Veteran Title 1" ? "6 of 12" : null));
+  expect(withAwarded.rows.find((r) => r[0] === 3640)![t.headers.indexOf("Teams Awarded Grants")]).toBe("6 of 12");
 });
 
 test("Ask Period filter: picks limit the rows and the breakdown, and still add up", () => {
